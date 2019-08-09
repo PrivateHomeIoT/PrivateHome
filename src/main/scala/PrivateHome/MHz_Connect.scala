@@ -5,9 +5,14 @@ import com.pi4j.io.gpio._
 
 class MHz_Connect(Repeat: Int = 15, pulseLength: Long = 350) {
 
+  def busyWait(micros:Long): Unit = {
+    val waitUntil:Long = System.nanoTime() + (micros * 1_000)
+    while (waitUntil > System.nanoTime()) {}
+  }
+
   val gpio: GpioController = GpioFactory.getInstance()
 
-  val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_20, "433_Out", PinState.LOW)
+  val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_28, "433_Out", PinState.LOW)
 
 
   def send(systemcode: Array[Char], unitCode: Array[Char], command: Boolean): Unit = {
@@ -45,16 +50,23 @@ class MHz_Connect(Repeat: Int = 15, pulseLength: Long = 350) {
     for (count <- 0 until Repeat) {
       for (i <- length - 1 to 0 by -1) {
         if (((code >> i) & 0x1) == 1) {
-          output.pulse(3 * pulseLength)
-          wait(pulseLength)
+          output.high()
+          busyWait(3*pulseLength)
+          output.low()
+          busyWait(pulseLength)
+
         } else {
-          output.pulse(pulseLength)
-          wait(3 * pulseLength)
+          output.high()
+          busyWait(pulseLength)
+          output.low()
+          busyWait(3*pulseLength)
         }
       }
 
-      output.pulse(pulseLength)
-      wait(31 * pulseLength)
+      output.high()
+      busyWait(pulseLength)
+      output.low()
+      busyWait(31*pulseLength)
 
       println()
     }
