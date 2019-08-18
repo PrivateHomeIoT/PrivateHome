@@ -4,6 +4,8 @@ import scala.util.Try
 
 object main {
   def main(args: Array[String]): Unit = {
+
+    /*
     println("Hello World")
 
     for (x <- args) println(x)
@@ -25,5 +27,6 @@ object main {
 
     Mhz.send(x, y, Command)
 
+     */
   }
 }
