@@ -3,7 +3,7 @@ package PrivateHome
 import com.pi4j.io.gpio._
 
 
-class MHz_Connect(Repeat: Int = 15, pulseLength: Long = 350) {
+class MHz_Connect(Repeat: Int = 10, pulseLength: Long = 350) {
 
   def busyWaitMicro(micros: Long): Unit = {
     val waitUntil: Long = System.nanoTime() + (micros * 1_000)
