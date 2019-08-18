@@ -1,10 +1,9 @@
-<?xml version="1.0" ?>
-<devices>
-    <object id="">
-        <name></name>
-        <room></room>
-        <type></type>
-        <systemCode></systemCode>
-        <unitCode></unitCode>
-    </object>
-</devices>
+<devices>;
+        &lt;object id=&quot;&quot;&gt;
+        &lt;name/&gt;
+        &lt;room/&gt;
+        &lt;type/&gt;
+        &lt;systemCode/&gt;
+        &lt;unitCode/&gt;
+        &lt;/object&gt;
+        &lt;object id=&quot;123&quot;&gt;&lt;/object&gt;&lt;/devices&gt;

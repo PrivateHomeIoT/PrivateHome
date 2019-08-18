@@ -1,7 +1,5 @@
 package PrivateHome
 
-import scala.collection.JavaConverters
-import scala.collection.JavaConverters._
 import scala.xml._
 
 class editXML {
@@ -21,9 +19,17 @@ class editXML {
     //    }
     val systemCode = "object.getSystemCode()"
     val unitCode = "object.getUnitCode()"
+    val test = <object id ={id}><name>+ name +</name><room>+ room +</room><type>+ typE +</type><systemCode>+ systemCode +</systemCode><unitCode>+ unitCode +</unitCode></object>
+    val result = addANode(device, test)
 
 
-    XML.save("src/main/scala/PrivateHome/devices.xml", Text("device"))
+    XML.save("src/main/scala/PrivateHome/devices.xml", result)
     // "<object id='" + id +"'><name>"+ name + "</name><room>"+room+"</room><type>"+typE+"</type><systemCode>"+systemCode+"</systemCode><unitCode>"+unitCode+"</unitCode></object></device>"
-      }
-      }
+  }
+  def addANode (to: Node, newNode: Node) = to match {
+    case Elem (prefix, label, attributes, scope, child@_*) => Elem (prefix, label, attributes, scope, child ++ newNode: _*)
+    case _ => println(" could not find node ");
+  to
+  }
+}
+
