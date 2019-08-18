@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<devices>
+    <object>
+        <id></id>
+        <name></name>
+        <room></room>
+        <type></type>
+        <systemCode></systemCode>
+        <unitCode></unitCode>
+    </object>
+</devices>
