@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <devices>
-    <object>
-        <id></id>
+    <object id="">
         <name></name>
         <room></room>
         <type></type>

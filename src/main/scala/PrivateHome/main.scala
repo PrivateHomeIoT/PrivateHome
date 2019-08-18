@@ -1,10 +1,9 @@
 package PrivateHome
 
-import scala.util.Try
-
 object main {
   def main(args: Array[String]): Unit = {
-
+    val test = new editXML()
+    test.addObject()
     /*
     println("Hello World")
 
