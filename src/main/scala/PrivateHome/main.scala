@@ -1,10 +1,13 @@
 package PrivateHome
 
+import PrivateHome.Devices.MHz.{MHz_Connect, mhzCommand, queue}
+
 import scala.util.Try
 
 object main {
   def main(args: Array[String]): Unit = {
     println("Hello World")
+
 
     for (x <- args) println(x)
     println(args.length)
@@ -21,9 +24,17 @@ object main {
       Command = Try(args(2).toBoolean).getOrElse(false)
     }
 
+    queue.queue.enqueue(mhzCommand(x, y, Command))
 
 
-    Mhz.send(x, y, Command)
+    val mhzThread = new Thread {
+      override def run(): Unit = {
+        Mhz.send()
+      }
+    }
+
+    mhzThread.start()
+
 
   }
 }
