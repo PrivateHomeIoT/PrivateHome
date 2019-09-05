@@ -73,5 +73,3 @@ class MHz_Connect(Repeat: Int = 10, pulseLength: Long = 350) {
 
 
 }
-
-
