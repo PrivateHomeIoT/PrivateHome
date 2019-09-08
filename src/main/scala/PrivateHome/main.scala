@@ -29,7 +29,8 @@ object main {
       y = args(1)
       Command = Try(args(2).toBoolean).getOrElse(false)
     }
-
+    */
+    /*
     val switch: mhzSwitch = new mhzSwitch("abcde",true,"11111","10000")
     println(switch.toXml())
     val test = Switch(data = <switch>
@@ -40,6 +41,7 @@ object main {
       <unitCode>10000</unitCode>
     </switch>)
     println(test.toXml)
+    */
 
     /*
     val mhzThread = new Thread {
@@ -49,9 +51,6 @@ object main {
     }
 
     mhzThread.start()
-
-     */
-
 
      */
   }
