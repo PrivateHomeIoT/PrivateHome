@@ -1,6 +1,7 @@
 package PrivateHome
 
-import PrivateHome.Devices.MHz.{MHz_Connect, mhzCommand, queue}
+import PrivateHome.Devices.MHz.{MHz_Connect, mhzCommand, mhzSwitch, queue}
+import PrivateHome.Devices.Switch
 
 import scala.util.Try
 
@@ -12,7 +13,7 @@ object main {
     for (x <- args) println(x)
     println(args.length)
 
-    val Mhz = new MHz_Connect()
+    //val Mhz = new MHz_Connect()
     var Command: Boolean = true
     var x: String = "11111"
     var y: String = "10000"
@@ -24,9 +25,18 @@ object main {
       Command = Try(args(2).toBoolean).getOrElse(false)
     }
 
-    queue.queue.enqueue(mhzCommand(x, y, Command))
+    val switch: mhzSwitch = new mhzSwitch("abcde",true,"11111","10000")
+    println(switch.toXml())
+    val test = Switch(data = <switch>
+      <type>433MHz</type>
+      <id>abcde</id>
+      <keepStatus>true</keepStatus>
+      <systemCode>11111</systemCode>
+      <unitCode>10000</unitCode>
+    </switch>)
+    println(test.toXml)
 
-
+    /*
     val mhzThread = new Thread {
       override def run(): Unit = {
         Mhz.send()
@@ -34,6 +44,8 @@ object main {
     }
 
     mhzThread.start()
+
+     */
 
 
   }
