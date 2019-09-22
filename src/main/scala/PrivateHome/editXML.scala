@@ -87,7 +87,6 @@ class editXML {
     val devices = XML.load("src/main/scala/PrivateHome/devices.xml")
     val idXml = XML.load("src/main/scala/PrivateHome/id.xml")
 
-    //val delID = """"""" + id + """""""
     val children = devices.child.foldLeft(NodeSeq.Empty)((acc, elem) => if ((elem \ "@id").text == id) acc else acc ++ elem)
     val result = devices.copy(child = children)
 
@@ -95,14 +94,7 @@ class editXML {
       {id}
     </id>
     val id_children = deleteNodes(idXml, elem => elem.text == id_prep.text)
-    //val id_children: NodeSeq = idXml.child.foldLeft(NodeSeq.Empty)(op = (acc_id, elem_id) => if (acc_id.text == id.toString) acc_id else acc_id ++ elem_id)
     val id_result = idXml.copy(child = id_children)
-
-    println(id_result)
-    println(id_prep.text)
-    //println(result)
-    //println(delID)
-    println(id)
 
     XML.save("src/main/scala/PrivateHome/id.xml", id_result)
     XML.save("src/main/scala/PrivateHome/devices.xml", result)
