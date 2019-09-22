@@ -1,6 +1,7 @@
 package PrivateHome
 
 import scala.collection.JavaConverters._
+import scala.collection.Searching
 import scala.xml._
 
 class editXML {
@@ -51,12 +52,10 @@ class editXML {
     XML.save("src/main/scala/PrivateHome/devices.xml", result)
   }
 
-  def loadObject(id: String): collection.Seq[Node] = {
+  def loadObject(id: String): NodeSeq = {
     val bigData = XML.load("src/main/scala/PrivateHome/devices.xml")
-    val children = bigData.child.foldLeft(NodeSeq.Empty)((acc, elem) => if((elem \ "@id").text == id) acc else acc ++ elem)
-    //println(bigData \\ children)
-    val result = bigData.child
-    return result
+    val children = bigData.child.foldLeft(NodeSeq.Empty)((acc, elem) => if ((elem \ "@id").text == id) acc else acc ++ elem)
+    return children
   }
 
   def removeObject(id: String): Unit = {

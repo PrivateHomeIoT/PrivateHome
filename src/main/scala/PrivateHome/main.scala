@@ -15,5 +15,6 @@ object main {
     test.addElem(elem, "hallo")
 
      */
+    println(test.loadObject("object.getId()"))
   }
 }
