@@ -8,13 +8,14 @@ import scala.util.Try
 object main {
   def main(args: Array[String]): Unit = {
     val test = new editXML()
-    /*
-      <editXML>.addElem(Elem, id)
 
-    val elem = <id><gerät>hallo</gerät></id>
-    test.addElem(elem, "hallo")
+      /*
+        val test = new editXML()
+        test.addElem(Elem, id)
+        test.loadObject(id)
+        test.removeObject(id)
+        test.saveObject(Elem, id)
+       */
 
-     */
-    println(test.loadObject("object.getId()"))
   }
 }

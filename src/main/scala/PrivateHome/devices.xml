@@ -11,4 +11,4 @@
         	 <type>object.getType()</type>
         	 <systemCode>object.getSystemCode()</systemCode>
         	 <unitCode>object.getUnitCode()</unitCode>
-      </object></devices>
+      </object><id><gerät>hallo</gerät></id></devices>
