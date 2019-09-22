@@ -1,14 +1,2 @@
 <devices>
-	<object id="object.getId()">
-        	 <name>object.getName()</name>
-        	 <room>object.getRoom()</room>
-        	 <type>object.getType()</type>
-        	 <systemCode>object.getSystemCode()</systemCode>
-        	 <unitCode>object.getUnitCode()</unitCode>
-      </object><object id="object.asd()">
-        	 <name>object.getName()</name>
-        	 <room>object.getRoom()</room>
-        	 <type>object.getType()</type>
-        	 <systemCode>object.getSystemCode()</systemCode>
-        	 <unitCode>object.getUnitCode()</unitCode>
-      </object><id><gerät>hallo</gerät></id></devices>
+	</devices>
