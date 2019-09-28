@@ -8,54 +8,6 @@ import scala.xml._
 
 class editXML {
 
-  /*
-  def addObject(): Unit = {
-
-    val device = XML.load("src/main/scala/PrivateHome/devices.xml")
-    val idXml = XML.load("src/main/scala/PrivateHome/id.xml")
-    println(device)
-    print(idXml)
-
-    val name = "object.getName()"
-    val id = "object.getId()"
-    val room = "object.getRoom()"
-    val typE = "object.getType()"
-    //if(object.getType == MHz){
-    //    val systemCode = object.getSystemCode()
-    //    val unitCode = object.getUnitCode()
-    //    }
-    val systemCode = "object.getSystemCode()"
-    val unitCode = "object.getUnitCode()"
-
-    val id_prep = <id>
-      {id}
-    </id>
-    val id_result = addANode(idXml, id_prep)
-    XML.save("src/main/scala/PrivateHome/id.xml", id_result)
-
-    val prep =
-      <object id={id}>
-        &#9; <name>
-        {name}
-      </name>
-        &#9; <room>
-        {room}
-      </room>
-        &#9; <type>
-        {typE}
-      </type>
-        &#9; <systemCode>
-        {systemCode}
-      </systemCode>
-        &#9; <unitCode>
-        {unitCode}
-      </unitCode>
-      </object>
-    val result = addANode(device, prep)
-    XML.save("src/main/scala/PrivateHome/devices.xml", result)
-  }
-   */
-
   /** This method allows you to load data from the devices.xml file. All you need is a id as a String. This method returns a NodeSeq. */
   def loadObject(id: String) =  {
     val bigData = XML.load("src/main/scala/PrivateHome/devices.xml")
