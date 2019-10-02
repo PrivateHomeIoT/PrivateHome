@@ -34,6 +34,11 @@ object mqttClient {
   }
   client.setCallback(callback)
 
+  /**
+   *
+   * @param topic   Is the topic in which you want to publish your message.
+   * @param message Is the message you want to publish.
+   */
   def publish(topic: String, message: String): Unit = {
     val msgTopic = client.getTopic(topic)
     val msg = new MqttMessage(message.getBytes("utf-8"))
