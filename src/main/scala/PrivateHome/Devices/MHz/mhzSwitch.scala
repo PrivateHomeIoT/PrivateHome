@@ -1,6 +1,7 @@
 package PrivateHome.Devices.MHz
 
 import PrivateHome.Devices.Switch
+import PrivateHome.Devices.MHz.sendMhz
 
 import scala.xml.Node
 
@@ -41,12 +42,12 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
   /**
    * Turns the Switch on
    */
-  override def on(): Unit = queue.queue.enqueue(mhzCommand(_systemCode, _unitCode, command = true))
+  override def on(): Unit = sendMhz(mhzCommand(_systemCode, _unitCode, command = true))
 
   /**
    * Turns the Switch off
    */
-  override def off(): Unit = queue.queue.enqueue(mhzCommand(_systemCode, _unitCode, command = false))
+  override def off(): Unit = sendMhz(mhzCommand(_systemCode, _unitCode, command = false))
 
   /**
    * Generates a XML Node containing all Information to Regenerate the object
