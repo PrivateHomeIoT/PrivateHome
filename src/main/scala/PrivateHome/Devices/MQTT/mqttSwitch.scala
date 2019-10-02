@@ -12,11 +12,7 @@ case class mqttSwitch(ID: String, keepStatus: Boolean) extends Switch(ID, keepSt
 
   override def toXml: Node = <switch id={ID}>
     <type>MQTT</type>
-    <id>
-      {ID}
-    </id>
-    <keepStatus>
-      {keepStatus}
-    </keepStatus>
+    <id>{ID}</id>
+    <keepStatus>{keepStatus}</keepStatus>
   </switch>
 }
