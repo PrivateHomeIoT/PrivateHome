@@ -105,3 +105,9 @@ object mhzCommand {
 }
 
 case class mhzCommand(systemCode: String, unitCode: String, command: Boolean)
+
+object sendMhz {
+  val mhz = new MHz_Connect()
+
+  def apply(pCommand: mhzCommand):Unit = mhz.send(pCommand)
+}
