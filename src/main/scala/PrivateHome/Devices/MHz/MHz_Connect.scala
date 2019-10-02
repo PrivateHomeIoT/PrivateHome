@@ -35,6 +35,9 @@ class MHz_Connect(Repeat: Int = 10, pulseLength: Long = 350) {
 
   }
 
+  /**
+   * Sends all Commands in the Queue
+   */
   private def sendCommand(): Unit = {
 
     sending = true
