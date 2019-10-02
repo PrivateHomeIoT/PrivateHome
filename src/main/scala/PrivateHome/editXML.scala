@@ -8,20 +8,34 @@ import scala.xml._
 
 class editXML {
 
-  /** This method allows you to load data from the devices.xml file. All you need is a id as a String. This method returns a NodeSeq. */
+
+  /**
+   * This method allows you to load data from the devices.xml file.
+   *
+   * @param id String to identify the node
+   * @return The node from the XML-file
+   */
   def loadObject(id: String) =  {
     val bigData = XML.load("src/main/scala/PrivateHome/devices.xml")
     val result = bigData.child.foldLeft(NodeSeq.Empty)((acc, elem) => if (!((elem \ "@id").text == id)) acc else acc ++ elem)
     result
   }
 
-  /** This method allows you to save changes to the devices.xml file. All you need is a Elem (like the output of loadObject) and the id of this Elem. */
+  /** This method allows you to save changes to the devices.xml file.
+   *
+   * @param input The Elem you want to save
+   * @param id    String to identify the node
+   */
   def saveObject(input: Elem, id: String): Unit = {
     removeObject(id)
     addElem(input, id)
   }
 
-  /** This method allows you to add a new device to the devices.xml and id.xml. All you need is a Elem (like the output of loadObject) and a id of this Elem. */
+  /** This method allows you to add a new device to the devices.xml and id.xml.
+   *
+   * @param input The Elem you want to add
+   * @param id    String to identify the node
+   */
   def addElem(input: Elem, id: String): Unit = {
     val device = XML.load("src/main/scala/PrivateHome/devices.xml")
     val idXml = XML.load("src/main/scala/PrivateHome/id.xml")
@@ -36,14 +50,22 @@ class editXML {
     XML.save("src/main/scala/PrivateHome/devices.xml", result)
   }
 
-  /** This method is only for internal usage. */
+  /** This method is only for internal usage.
+   *
+   * @param to      The node to which the other node is getting added
+   * @param newNode The new node, which is added to the main node.
+   * @return The result of adding newNode at the end of to
+   */
   private def addANode(to: Node, newNode: Node): Node = to match {
     case Elem(prefix, label, attributes, scope, child@_*) => Elem(prefix, label, attributes, scope, child ++ newNode: _*)
     case _ => println(" could not find node ")
       to
   }
 
-  /** This method allows you to remove data from the devices.xml and the id.xml. All you need is the id of the data you want to remove finally. */
+  /** This method allows you to remove data from the devices.xml and the id.xml.
+   *
+   * @param id String to identify the node
+   */
   def removeObject(id: String): Unit = {
     val devices = XML.load("src/main/scala/PrivateHome/devices.xml")
     val idXml = XML.load("src/main/scala/PrivateHome/id.xml")
@@ -61,6 +83,11 @@ class editXML {
     XML.save("src/main/scala/PrivateHome/devices.xml", result)
   }
 
-  /** This method is only for internal usage. */
+  /** This method is only for internal usage.
+   *
+   * @param n The long list with all items
+   * @param f The Elem which you wants to delete
+   * @return The result of deleting Node f from Elem n
+   */
   private def deleteNodes(n: Elem, f: Node => Boolean): NodeSeq = n.child.foldLeft(NodeSeq.Empty)((acc, elem) => if (f(elem)) acc else acc ++ elem)
 }
