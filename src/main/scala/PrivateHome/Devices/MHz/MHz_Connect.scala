@@ -16,13 +16,13 @@ class MHz_Connect(Repeat: Int = 10, pulseLength: Long = 350) {
     while (waitUntil > System.nanoTime()) {}
   }
 
-  val queue = new mutable.Queue[mhzCommand]
+  private val queue = new mutable.Queue[mhzCommand]
 
   private var sending = false
 
-  val gpio: GpioController = GpioFactory.getInstance()
+  private val gpio: GpioController = GpioFactory.getInstance()
 
-  val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_28, "433_Out", PinState.LOW)
+  private val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_28, "433_Out", PinState.LOW)
 
 
   def send(pCommand: mhzCommand): Unit = {
