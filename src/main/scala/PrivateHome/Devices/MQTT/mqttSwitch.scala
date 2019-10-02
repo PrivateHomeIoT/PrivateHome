@@ -19,5 +19,4 @@ case class mqttSwitch(ID: String, keepStatus: Boolean) extends Switch(ID, keepSt
       {keepStatus}
     </keepStatus>
   </switch>
-
 }
