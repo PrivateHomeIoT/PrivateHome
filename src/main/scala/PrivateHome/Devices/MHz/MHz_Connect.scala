@@ -24,7 +24,10 @@ class MHz_Connect(Repeat: Int = 10, pulseLength: Long = 350) {
 
   private val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_28, "433_Out", PinState.LOW)
 
-
+  /**
+   * Adds Command to the queue and triggers sending
+   * @param pCommand The Command to send
+   */
   def send(pCommand: mhzCommand): Unit = {
     queue.enqueue(pCommand)
     if (!sending) sendCommand()
