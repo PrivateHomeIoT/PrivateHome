@@ -58,18 +58,10 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
    */
   override def toXml: Node = <switch>
     <type>433MHz</type>
-    <id>
-      {id()}
-    </id>
-    <keepStatus>
-      {_keepStatus}
-    </keepStatus>
-    <systemCode>
-      {systemCode}
-    </systemCode>
-    <unitCode>
-      {unitCode}
-    </unitCode>
+    <id>{id()}</id>
+    <keepStatus>{_keepStatus}</keepStatus>
+    <systemCode>{systemCode}</systemCode>
+    <unitCode>{unitCode}</unitCode>
   </switch>
 
   /**
