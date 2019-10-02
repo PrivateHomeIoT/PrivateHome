@@ -7,10 +7,11 @@ import scala.xml.Node
 
 /**
  * An Switch class that uses 433MHz to communicate to the Switch
- * @param setupID an unique Base64 ID
+ *
+ * @param setupID     an unique Base64 ID
  * @param _keepStatus toggles if the Switch should save State over program restart (failure)
  * @param _systemCode The SystemCode used for the Switch
- * @param _unitCode The UnitCode used for the Switch
+ * @param _unitCode   The UnitCode used for the Switch
  */
 case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemCode: String, private var _unitCode: String) extends Switch(setupID, _keepStatus) {
   if (_systemCode.length != 5) throw new IllegalArgumentException(s"System code ${_systemCode} should be 5 Char long")
@@ -21,6 +22,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
 
   /**
    * Changes the SystemCode
+   *
    * @param newSystemCode The new System Code
    */
   def systemCode_(newSystemCode: String): Unit = {
@@ -31,6 +33,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
 
   /**
    * Changes the Unit Code
+   *
    * @param newUnitCode The new Unit Code
    */
   def unitCode_(newUnitCode: String): Unit = {
@@ -51,6 +54,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
 
   /**
    * Generates a XML Node containing all Information to Regenerate the object
+   *
    * @return The Node Object
    */
   override def toXml: Node = <switch id={id}>
