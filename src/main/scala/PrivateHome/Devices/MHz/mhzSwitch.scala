@@ -53,7 +53,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
    * Generates a XML Node containing all Information to Regenerate the object
    * @return The Node Object
    */
-  override def toXml: Node = <switch>
+  override def toXml: Node = <switch id={id}>
     <type>433MHz</type>
     <keepStatus>{_keepStatus}</keepStatus>
     <systemCode>{systemCode}</systemCode>
