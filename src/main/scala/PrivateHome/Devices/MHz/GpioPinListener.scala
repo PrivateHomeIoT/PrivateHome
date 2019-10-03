@@ -14,8 +14,32 @@ class GpioPinListener extends GpioPinListenerDigital{
 
   private def diffAbs(a:Int, b:Int): Int = math.abs(a-b)
 
-  private def receiveProtocol(pChangeCount:Int): Unit = {
-    println("Recieved Something")
+  private def receiveProtocol(pChangeCount:Int): Boolean = {
+    if (changeCount > 7) {
+      println("Recieved Something")
+      var code: Long = 0
+      val delay = timings(0) / Protocol.sync.low
+      val delayTolerance = delay * nRecieveTolerence / 100
+
+      for (i <- 1 until changeCount by 2) {
+        code <<= 1
+        if (diffAbs(timings(i), delay * Protocol.zero.high) < delayTolerance &&
+          diffAbs(timings(i + 1), delay * Protocol.zero.low) < delayTolerance) {
+          //Zero
+        } else if (diffAbs(timings(i), delay * Protocol.one.high) < delayTolerance &&
+          diffAbs(timings(i + 1), delay * Protocol.one.low) < delayTolerance) {
+          //One
+          code |= 1
+        } else {
+          //Failed
+          false
+        }
+
+      }
+
+    }
+
+
   }
 
 
