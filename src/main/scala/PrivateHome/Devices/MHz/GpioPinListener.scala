@@ -42,6 +42,21 @@ class GpioPinListener extends GpioPinListenerDigital{
 
   }
 
+  private def interpretCode(pcode:Long,bitCount:Int): Boolean ={
+    var code = pcode
+    var command:Boolean = false
+    var commandCode = ""
+    for (i <- 0 until bitCount-4 by 2){
+      if ((code % 4) == codec.code('0')) commandCode += "0"
+      else if ((code % 4) == codec.code('1')) commandCode += "1"
+      else return false
+      code >>= 2
+
+    }
+    command = code == codec.command(true)
+    true
+  }
+
 
 
   override def handleGpioPinDigitalStateChangeEvent(event: GpioPinDigitalStateChangeEvent): Unit = {
