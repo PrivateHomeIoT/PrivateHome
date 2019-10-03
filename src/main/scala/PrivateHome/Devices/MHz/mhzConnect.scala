@@ -59,7 +59,7 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
       var code: Long = 0
       var length: Int = 0
 
-      val commandCode = queuedCommand.systemCode + queuedCommand.unitCode
+      val commandCode: String = queuedCommand.systemCode + queuedCommand.unitCode
 
       for (c: Char <- commandCode) {
         code <<= 2
@@ -67,12 +67,9 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
         length += 2
       }
 
-      code <<= 2
-      if (!queuedCommand.command) code |= 0x01
-      length += 2
-      code <<= 2
-      if (queuedCommand.command) code |= 0x01
-      length += 2
+      code <<= 4
+      codec.command(queuedCommand.command)
+      length += 4
 
 
       for (count <- 0 until Repeat) {
