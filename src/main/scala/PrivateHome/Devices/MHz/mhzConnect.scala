@@ -1,6 +1,7 @@
 package PrivateHome.Devices.MHz
 
 import com.pi4j.io.gpio._
+import PrivateHome.Devices.MHz.Protocol
 
 import scala.collection.mutable
 
@@ -82,22 +83,22 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
         for (i <- length - 1 to 0 by -1) {
           if (((code >> i) & 0x1) == 1) {
             output.high()
-            busyWaitMicro(3 * pulseLength)
+            busyWaitMicro(Protocol.one.high*Protocol.pulseLenght)
             output.low()
-            busyWaitMicro(pulseLength)
+            busyWaitMicro(Protocol.one.low*Protocol.pulseLenght)
 
           } else {
             output.high()
-            busyWaitMicro(pulseLength)
+            busyWaitMicro(Protocol.zero.high*Protocol.pulseLenght)
             output.low()
-            busyWaitMicro(3 * pulseLength)
+            busyWaitMicro(Protocol.zero.low*Protocol.pulseLenght)
           }
         }
 
         output.high()
-        busyWaitMicro(pulseLength)
+        busyWaitMicro(Protocol.sync.high*Protocol.pulseLenght)
         output.low()
-        busyWaitMicro(31 * pulseLength)
+        busyWaitMicro(Protocol.sync.low*Protocol.pulseLenght)
 
         println()
       }
