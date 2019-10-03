@@ -4,7 +4,7 @@ import com.pi4j.io.gpio._
 
 import scala.collection.mutable
 
-class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 26, pOu: Int = 20) {
+class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: Int = 28) {
 
 
   /**
@@ -22,9 +22,12 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 26, pOu: I
 
   private val gpio: GpioController = GpioFactory.getInstance()
 
-  private val output: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.getPinByAddress(pIn), "433_Out", PinState.LOW)
+  private val output:GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.getPinByAddress(pOu), "433_Out", PinState.LOW)
 
-  private val input: GpioPinDigitalInput = gpio.provisionDigitalInputPin(RaspiBcmPin.getPinByAddress(pIn), "433_Input",PinPullResistance.PULL_DOWN)
+  private val input:GpioPinDigitalInput = gpio.provisionDigitalInputPin(RaspiPin.getPinByAddress(pIn), "433_Input")
+
+
+  input.addListener(new GpioPinListener)
 
   /**
    * Adds Command to the queue and triggers sending
@@ -101,6 +104,8 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 26, pOu: I
     }
     sending = false
   }
+
+
 
 
 }
