@@ -7,6 +7,7 @@ object mqttClient {
 
   private val brokerUrl = "tcp://localhost:429"
   private val home = "Home/#"
+  private val stat = "Home/stat/"
   private val persistence = new MemoryPersistence
   private val client = new MqttClient(brokerUrl, MqttClient.generateClientId, persistence)
 
@@ -26,12 +27,11 @@ object mqttClient {
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
       println("Receiving Data, Topic : %s, Message : %s".format(topic, message))
-      if(topic.charAt(topic.length-6) == "/" &&  topic.charAt(topic.length-4) == "s" && topic.charAt(topic.length-7) == "t" && topic.charAt(topic.length-7) == "a" && topic.charAt(topic.length-7) == "t"){
+      if(topic.charAt(topic.length-6) == "/" &&  topic.substring(0,10) == stat){
         lastID = ""
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
         lastMsg = message.toString
-        lastID = ""
       }
       else println("invalid topic")
     }
