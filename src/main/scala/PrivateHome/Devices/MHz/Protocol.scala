@@ -7,6 +7,14 @@ object Protocol {
   val one = Signal(3,1)
 }
 
-case class Signal(high:Int,low:Int) {
+case class Signal(high:Int,low:Int)
 
+object codec {
+  val code: Map[Char,Int] = Map('0'->0x01,'1' -> 0x00)
+
+  def command(comm: Boolean): Int = {
+    if (comm) 0x0001
+    else 0x0100
+  }
 }
+
