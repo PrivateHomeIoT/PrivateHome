@@ -25,7 +25,7 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
 
   private val output:GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.getPinByAddress(pOu), "433_Out", PinState.LOW)
 
-  private val input:GpioPinDigitalInput = gpio.provisionDigitalInputPin(RaspiPin.getPinByAddress(pIn), "433_Input")
+  private val input:GpioPinDigitalInput = gpio.provisionDigitalInputPin(RaspiPin.getPinByAddress(pIn), "433_Input", PinPullResistance.PULL_DOWN)
 
 
   input.addListener(new GpioPinListener)
@@ -63,12 +63,13 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
 
       for (c: Char <- commandCode) {
         code <<= 2
-        codec.code(c)
+        code |= codec.code(c)
         length += 2
       }
 
       code <<= 4
-      codec.command(queuedCommand.command)
+      code |= codec.command(queuedCommand.command)
+      println(code)
       length += 4
 
 
