@@ -26,9 +26,12 @@ object mqttClient {
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
       println("Receiving Data, Topic : %s, Message : %s".format(topic, message))
-      lastMsg = message.toString
-      lastID = ""
-      lastID = topic.substring(topic.length - 5)
+      if(topic.charAt(topic.length-6) == "/"){
+        lastID = topic.substring(topic.length - 5)
+        lastMsg = message.toString
+        lastID = ""
+      }
+      else println("invalid topic")
     }
 
     /**
