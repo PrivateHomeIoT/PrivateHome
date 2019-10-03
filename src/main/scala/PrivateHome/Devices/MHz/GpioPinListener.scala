@@ -35,9 +35,11 @@ class GpioPinListener extends GpioPinListenerDigital{
           false
         }
 
-      }
 
+      }
+      interpretCode(code,(changeCount-1)/2)
     }
+    else false
 
 
   }
