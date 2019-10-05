@@ -1,5 +1,6 @@
 package PrivateHome.Devices.MQTT
 
+import PrivateHome.data
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttMessage, _}
 
@@ -30,8 +31,10 @@ object mqttClient {
       if(topic.charAt(topic.length-6) == "/" &&  topic.substring(0,10) == stat){
         lastID = ""
         lastMsg = ""
-        lastID = topic.substring(topic.length - 5)
+        lastID = topic.substring(topic.length - 5).toString
         lastMsg = message.toString
+        if (lastMsg == "ON") data.devices(lastID).Status(true)
+        else if (lastMsg == "OFF") data.devices(lastID).Status(false)
       }
       else println("invalid topic")
     }
