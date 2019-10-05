@@ -1,6 +1,7 @@
 package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
+import PrivateHome.Devices.MQTT.mqttSwitch
 
 import scala.xml._
 
@@ -44,8 +45,11 @@ object Switch {
       case "433MHz" => val systemCode = (data \ "systemCode").head.text
         val unitCode = (data \ "unitCode").head.text
         val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val ID = (data \ "id").head.text
+        val ID = (data \ "@id").text
         mhzSwitch(ID, KeepStatus, systemCode, unitCode);
+      case "MQTT" => val id = (data \ "@id").text
+        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
+        mqttSwitch(id,KeepStatus)
       case _ => throw new IllegalArgumentException("Wrong Switch Type")
     }
   }
