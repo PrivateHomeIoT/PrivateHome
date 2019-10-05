@@ -73,7 +73,7 @@ class GpioPinListener extends GpioPinListenerDigital{
         // with roughly the same gap between them).
         repeatCount += 1
         if (repeatCount == 2) {
-          receiveProtocol(repeatCount)
+          receiveProtocol(changeCount)
           repeatCount = 0
         }
 
