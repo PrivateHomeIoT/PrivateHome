@@ -6,6 +6,9 @@ import scala.xml._
 
 object data {
 
+  /**
+   * This variable returns a List containing all ids.
+   */
   var IDs: List[String] = {
     val xml = XML.load("src/main/scala/PrivateHome/id.xml")
     val prep: NodeSeq  = xml\\"id"
@@ -13,6 +16,9 @@ object data {
     result.toList
   }
 
+  /**
+   * This variable returns a map which contains the id as the key and the Switch-object for this id.
+   */
   var devices: Map[String, Switch] = {
     val xml: Elem = XML.load("src/main/scala/PrivateHome/devices.xml")
     val prep: NodeSeq = xml\"switch"
@@ -20,6 +26,9 @@ object data {
     data.toMap
   }
 
+  /**
+   * This variable returns an map, which contains the MHz-Code(systemCode+unitCode) as the key and the id for this code.
+   */
   var mhzID: Map[String, String] = {
     val xml: Elem = XML.load("src/main/scala/PrivateHome/devices.xml")
     val prep: NodeSeq = xml\"switch"
