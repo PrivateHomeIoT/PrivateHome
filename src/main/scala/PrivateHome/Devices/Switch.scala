@@ -3,6 +3,7 @@ package PrivateHome.Devices
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.editXML
+import PrivateHome.data
 
 import scala.xml._
 
@@ -16,6 +17,7 @@ abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
 
   if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
   if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
+  if (data.IDs.contains(id)) throw new IllegalArgumentException("""ID is already used""")
   //TODO: Control that the ID isn't used yet
 
   private var _status = false
