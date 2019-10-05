@@ -43,16 +43,38 @@ class GpioPinListener extends GpioPinListenerDigital{
 
   private def interpretCode(pcode:Long,bitCount:Int): Boolean ={
     var code = pcode
-    var command:Boolean = false
     var commandCode = ""
+
+
+    val command = (code & 15) == codec.command(true)
+    code >>= 4
     for (i <- 0 until bitCount-4 by 2){
-      if ((code % 4) == codec.code('0')) commandCode += "0"
-      else if ((code % 4) == codec.code('1')) commandCode += "1"
-      else return false
-      code >>= 2
+
+      if ((code & 3) == codec.code('0')) {
+        commandCode += "0"
+        code >>= 2
+      }
+      else if ((code & 3) == codec.code('1')) {
+        commandCode += "1"
+        code >>= 2
+      }
+      else {
+        println("error" + (code & 3))
+        return false
+
+      }
+
 
     }
-    command = code == codec.command(true)
+
+    commandCode = commandCode.reverse
+
+    val systemCode = commandCode.substring(0,5)
+    val unitCode = commandCode.substring(5)
+    //ToDo: needs to call a change state at the switch
+
+    println(s"""An: $command; SystemCode: $systemCode UnitCode: $unitCode""")
+
     true
   }
 
