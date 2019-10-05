@@ -15,13 +15,12 @@ class GpioPinListener extends GpioPinListenerDigital{
   private def diffAbs(a:Int, b:Int): Int = math.abs(a-b)
 
   private def receiveProtocol(pChangeCount:Int): Boolean = {
-    if (changeCount > 7) {
-      println("Recieved Something")
+    if (pChangeCount > 7) {
       var code: Long = 0
       val delay = timings(0) / Protocol.sync.low
       val delayTolerance = delay * nRecieveTolerence / 100
 
-      for (i <- 1 until changeCount by 2) {
+      for (i <- 1 until pChangeCount-1 by 2) {
         code <<= 1
         if (diffAbs(timings(i), delay * Protocol.zero.high) < delayTolerance &&
           diffAbs(timings(i + 1), delay * Protocol.zero.low) < delayTolerance) {
@@ -32,12 +31,10 @@ class GpioPinListener extends GpioPinListenerDigital{
           code |= 1
         } else {
           //Failed
-          false
+
         }
-
-
       }
-      interpretCode(code,(changeCount-1)/2)
+      interpretCode(code,(pChangeCount-1)/2)
     }
     else false
 
