@@ -23,17 +23,6 @@ class editXML {
   }
 
   /**
-   * This method allows you to get the saved status from an id.
-   * @param id is the id you want the status from.
-   * @return is the status of the id.
-   */
-  def getStatus(id:String):Boolean = {
-    val bigData = XML.load("src/main/scala/PrivateHome/status.xml")
-    val result = bigData.child.foldLeft(NodeSeq.Empty)((acc, elem) => if (!((elem \ "@id").text == id)) acc else acc ++ elem)
-    result.text.toBoolean
-  }
-
-  /**
    * This method allows you to load data from the devices.xml file.
    *
    * @param id String to identify the node
