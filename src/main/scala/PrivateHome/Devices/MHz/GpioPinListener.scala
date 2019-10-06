@@ -1,5 +1,8 @@
 package PrivateHome.Devices.MHz
 
+import java.util.NoSuchElementException
+
+import PrivateHome.data
 import com.pi4j.io.gpio.event.{GpioPinDigitalStateChangeEvent, GpioPinListenerDigital}
 import scala.math
 
@@ -94,6 +97,15 @@ class GpioPinListener extends GpioPinListenerDigital{
     //ToDo: needs to call a change state at the switch
 
     println(s"""An: $command; SystemCode: $systemCode UnitCode: $unitCode""")
+
+    try {
+      val ID = data.mhzID(systemCode + unitCode)
+      data.devices(ID).Status(command)
+    } catch {
+      case no:NoSuchElementException => ;
+      case unknown => throw unknown
+    }
+
 
     true
   }
