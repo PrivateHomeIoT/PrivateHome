@@ -31,7 +31,7 @@ abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
    */
   def Status(boolean: Boolean): Unit = {
     _status = boolean
-    if (setupKeepStatus) xMl.setStatus(boolean)
+    if (setupKeepStatus) xMl.setStatus(id(),boolean)
   }
   def Status_():Boolean = _status
   def id(): String = setupID
