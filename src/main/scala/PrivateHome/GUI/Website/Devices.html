@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>PrivateHome - Home</title>
+        <title>PrivateHome - Devices</title>
         <meta name="author" content="maximiliani & RaHoni">
         <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,7 @@
         <link rel="icon" type="image/x-icon" href="" alt="icon" />
 
         <link rel="stylesheet" href="/CSS/menu.css">
+        <link rel="stylesheet" href="/CSS/button.css">
         
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
@@ -36,7 +37,19 @@
             }
         </script>
     </head>
-    <body>
+    <body class="content">
+        
+        <div class="switch" id="masterID">
+            <form id="masterID">
+                <button id="on" class="button" style="display: none;"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                <button id="off" class="button" style="display: inline-block;"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                <a href="Settings/masterID.html">
+                    <p id="name">Name</p>
+                    <!--Name and Status must be under 13 Characters -->
+                    <p id ="status">Status</p>
+                </a>
+            </form>
+        </div>
         
     </body>
 </html>

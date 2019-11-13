@@ -1,6 +1,9 @@
 body {
     font-family: sans-serif;
     font: "Futura";
+    clear: both;
+    overflow: auto;
+    padding-left: 0%;
 }
 
 .content {
@@ -17,7 +20,7 @@ body {
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #111;
+  background-color: darkslategrey;
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 60px;

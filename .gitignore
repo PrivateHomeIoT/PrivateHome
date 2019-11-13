@@ -3,3 +3,4 @@ target
 build.properties
 /.directory
 /project/target/
+.DS_Store

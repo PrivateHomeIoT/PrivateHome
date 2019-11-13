@@ -1,0 +1,31 @@
+.switch{
+    border-radius: 10px;
+    border-color: green;
+    background-color: green;
+    width: 30%;
+    height: 15%;
+    text-decoration-line: none;
+    text-decoration: none;
+    text-align: right;
+}
+
+.button{
+    float: left;
+    margin: 10px;
+}
+
+img{
+    height: 55px;
+    width: 55px;
+    padding-top: 10px;
+    backface-visibility: hidden;
+    border-radius: 100%;
+}
+
+p{
+    color: white;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    text-overflow: clip;
+}
