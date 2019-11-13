@@ -10,14 +10,13 @@
         <link rel="icon" type="image/x-icon" href="" alt="icon" />
 
         <link rel="stylesheet" href="/CSS/menu.css">
-    </head>
-    <body>
+        
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <a href="HomeEN.html">Home</a>
             <a href="Devices.html">Devices</a>
-            <a href="Rooms.html">Rooms</a>
+            <a href="Rooms.html" style="background-color: green; color: ghostwhite">Rooms</a>
             <a href="Sensors.html">Sensors</a>
             <a href="Settings.html">Settings</a>
             <a href="Setup.html">Setup</a>
@@ -33,8 +32,11 @@
             }
             function closeNav() {
                 document.getElementById("mySidenav").style.width = "0";
-                document.getElementById("content").style.paddingLeft = "0%";
+                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
             }
         </script>
+    </head>
+    <body>
+        
     </body>
 </html>
