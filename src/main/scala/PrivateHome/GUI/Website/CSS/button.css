@@ -1,4 +1,4 @@
-.switch{
+.switch {
     border-radius: 10px;
     border-color: green;
     background-color: green;
@@ -9,20 +9,22 @@
     text-align: right;
 }
 
-.button{
+.button {
     float: left;
     margin: 10px;
+    background: transparent url(pfad/button.gif) 0 0 no-repeat;
+    border-style: none;
 }
 
-img{
+img {
     height: 55px;
     width: 55px;
     padding-top: 10px;
-    backface-visibility: hidden;
-    border-radius: 100%;
+    border-style: none;
+    border-width: 0px;
 }
 
-p{
+p {
     color: white;
     padding-bottom: 10px;
     padding-top: 10px;
