@@ -2,8 +2,10 @@
     border-radius: 10px;
     border-color: green;
     background-color: green;
-    width: 30%;
-    height: 15%;
+    width: 20%;
+    height: 10%;
+    max-height: 15%;
+    max-width: 20%;
     text-decoration-line: none;
     text-decoration: none;
     text-align: right;
@@ -19,15 +21,15 @@
 img {
     height: 55px;
     width: 55px;
-    padding-top: 10px;
+    padding-top: 5%;
     border-style: none;
     border-width: 0px;
 }
 
 p {
     color: white;
-    padding-bottom: 10px;
-    padding-top: 10px;
-    padding-right: 10px;
+    padding-bottom: 5%;
+    padding-top: 5%;
+    padding-right: 5%;
     text-overflow: clip;
 }

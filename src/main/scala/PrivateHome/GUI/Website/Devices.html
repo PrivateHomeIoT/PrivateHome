@@ -41,14 +41,25 @@
         
         <div class="switch" id="masterID">
             <form id="masterID">
-                <button id="on" class="button" style="display: none;"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                <button id="off" class="button" style="display: inline-block;"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                <button id="IDon" class="button" style="display: none;" onclick="turnOff("ID")"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
                 <a href="Settings/masterID.html">
                     <p id="name">Name</p>
                     <!--Name and Status must be under 13 Characters -->
                     <p id ="status">Status</p>
                 </a>
             </form>
+            <script>
+                function turnOn(String id){ 
+                    document.element.getElementById(id+ "on").style.display="block"; 
+                    document.element.getElementById(id+ "off").style.display= "none";
+                }
+                
+                function turnOff(String id){ 
+                    document.element.getElementById(id+ "off").style.display="block"; 
+                    document.element.getElementById(id+ "on").style.display= "none";
+                }
+            </script>
         </div>
         
     </body>
