@@ -22,7 +22,7 @@ object websocket {
     })
   }
 
-  def sendText(text: String): Unit = {
+  def sendMsg(text: String): Unit = {
     for (connection <- browserConnections) connection(TextMessage.Strict(text))
   }
 }
