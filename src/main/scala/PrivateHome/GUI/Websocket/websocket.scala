@@ -9,7 +9,11 @@ object websocket {
   private var browserConnections: List[TextMessage => Unit] = List()
 
   def listen(): Flow[Message, Message, NotUsed] = {
-    val inbound: Sink[Message, Any] = Sink.foreach(_ => ())
+    val inbound: Sink[Message, Any] = Sink.foreach(msg => {
+      val msgText = msg.asTextMessage.getStrictText
+      println(msgText)
+    })
+
     val outbound: Source[Message, SourceQueueWithComplete[Message]] = Source.queue[Message](16, OverflowStrategy.fail)
 
     Flow.fromSinkAndSourceMat(inbound, outbound)((_, outboundMat) => {
