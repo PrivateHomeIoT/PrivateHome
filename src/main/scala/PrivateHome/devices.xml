@@ -1,14 +1,2 @@
 <devices>
-    <switch id="abcde">
-        <type>433MHz</type>
-        <keepStatus>false</keepStatus>
-        <systemCode>11111</systemCode>
-        <unitCode>10000</unitCode>
-    </switch>
-    <switch id="abcdf">
-        <type>433MHz</type>
-        <keepStatus>false</keepStatus>
-        <systemCode>11111</systemCode>
-        <unitCode>11000</unitCode>
-    </switch>
 </devices>
