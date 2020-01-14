@@ -1,4 +1,4 @@
-package PrivateHome.GUI.Websocket
+package PrivateHome.UI.Websocket
 
 import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
