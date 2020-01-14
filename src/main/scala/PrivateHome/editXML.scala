@@ -13,7 +13,7 @@ class editXML {
    * @param id is the id for the status (like the switch) you want to save
    * @param status is the status you want to save
    */
-  def setStatus(id: String, status: Boolean): Unit = {
+  def setStatus(id: String, status: Float): Unit = {
     val data: Elem = XML.load("src/main/scala/PrivateHome/status.xml")
     val prep: Elem = <device id={id}>{status}</device>
     val children: NodeSeq = data.child.foldLeft(NodeSeq.Empty)((acc, elem) => if ((elem \ "@id").text == id) acc else acc ++ elem)

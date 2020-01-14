@@ -19,7 +19,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
     if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
     if (data.IDs.contains(id())) throw new IllegalArgumentException("""ID is already used""")
 
-    private var _status = false
+    private var _status:Float = 0
 
     def on(percent: Float): Unit
 
@@ -28,16 +28,16 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
     /**
      * Sets the Status of the Switch only changes State after receiving a Confirmation
      *
-     * @param boolean The State the Switch should change to
+     * @param state The State the Switch should change to
      */
-    def Status(boolean: Boolean): Unit = {
-        _status = boolean
-        if (setupKeepStatus) xMl.setStatus(id(), boolean)
+    def Status(state: Float): Unit = {
+        _status = state
+        if (setupKeepStatus) xMl.setStatus(id(), state)
     }
 
     def id(): String = setupID
 
-    def Status_(): Boolean = _status
+    def Status_(): Float = _status
 
     def toXml: Node
 
