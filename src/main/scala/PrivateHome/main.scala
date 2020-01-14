@@ -1,9 +1,10 @@
 package PrivateHome
 
+import PrivateHome.GUI.gui
+
 object main {
   def main(args: Array[String]): Unit = {
-      var xml = new editXML
 
-      println(xml.setStatus("abcdr",true))
+    gui
   }
 }

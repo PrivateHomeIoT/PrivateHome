@@ -1,5 +1,6 @@
 package PrivateHome.Devices.MQTT
 
+import PrivateHome.data
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttMessage, _}
 
@@ -11,13 +12,13 @@ object mqttClient {
   private val persistence = new MemoryPersistence
   private val client = new MqttClient(brokerUrl, MqttClient.generateClientId, persistence)
 
-  var lastMsg: String = "" //here you can get the last recieved message
-  var lastID: String = "" //her you can get the last recieved id
+  var lastMsg: String = "" //here you can get the last received message
+  var lastID: String = "" //her you can get the last received id
 
-  client.connect
+  client.connect()
   client.subscribe(home)
 
-  val callback = new MqttCallback {
+  val callback: MqttCallback = new MqttCallback {
 
     /**
      * This method acts after recieving an MQTT-Message
@@ -32,6 +33,8 @@ object mqttClient {
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
         lastMsg = message.toString
+        if (lastMsg == "ON") data.devices(lastID).Status(true)
+        else if (lastMsg == "OFF") data.devices(lastID).Status(false)
       }
       else println("invalid topic")
     }

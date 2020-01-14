@@ -73,26 +73,26 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
       length += 4
 
 
-      for (count <- 0 until Repeat) {
+      for (_ <- 0 until Repeat) {
         for (i <- length - 1 to 0 by -1) {
           if (((code >> i) & 0x1) == 1) {
             output.high()
-            busyWaitMicro(Protocol.one.high*Protocol.pulseLenght)
+            busyWaitMicro(Protocol.one.high*Protocol.pulseLength)
             output.low()
-            busyWaitMicro(Protocol.one.low*Protocol.pulseLenght)
+            busyWaitMicro(Protocol.one.low*Protocol.pulseLength)
 
           } else {
             output.high()
-            busyWaitMicro(Protocol.zero.high*Protocol.pulseLenght)
+            busyWaitMicro(Protocol.zero.high*Protocol.pulseLength)
             output.low()
-            busyWaitMicro(Protocol.zero.low*Protocol.pulseLenght)
+            busyWaitMicro(Protocol.zero.low*Protocol.pulseLength)
           }
         }
 
         output.high()
-        busyWaitMicro(Protocol.sync.high*Protocol.pulseLenght)
+        busyWaitMicro(Protocol.sync.high*Protocol.pulseLength)
         output.low()
-        busyWaitMicro(Protocol.sync.low*Protocol.pulseLenght)
+        busyWaitMicro(Protocol.sync.low*Protocol.pulseLength)
 
         println()
       }
