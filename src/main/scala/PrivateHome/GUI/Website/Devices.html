@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>PrivateHome - Devices</title>
+        <meta name="author" content="maximiliani & RaHoni">
+        <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+
+        <link rel="stylesheet" href="/CSS/menu.css">
+        <link rel="stylesheet" href="/CSS/button.css">
+        
+        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="HomeEN.html">Home</a>
+            <a href="Devices.html" style="background-color: green; color: ghostwhite">Devices</a>
+            <a href="Rooms.html">Rooms</a>
+            <a href="Sensors.html">Sensors</a>
+            <a href="Settings.html">Settings</a>
+            <a href="Setup.html">Setup</a>
+        </div>
+        <div class="content" id="content">
+            <h1>Devices</h1>
+        </div>
+        <script>
+            var sidebar = false;
+            closeNav();
+            function openNav() {
+                if(sidebar == true){
+                    closeNav();
+                }
+                else{
+                    sidebar = true;
+                    document.getElementById("mySidenav").style.width = "30%";
+                    document.getElementById("content").style.paddingLeft = "31%";
+                }
+            }
+            function closeNav() {
+                sidebar=false;
+                document.getElementById("mySidenav").style.width = "0%";
+                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
+                
+            }
+        </script>
+        
+    </head>
+    <body class="content" id="content">
+        <table style="width: 100%">
+            <tr>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+            </tr>
+            <tr>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+                <td> 
+                    <form class="switch" id="masterID">
+                        <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
+                        <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn("ID")"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                        <a href="Settings/masterID.html">
+                            <p id="name">Name</p>
+                            <!--Name and Status must be under 13 Characters -->
+                            <p id ="status">Status</p>
+                        </a>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        
+        <script>
+            function turnOn(String id){ 
+                document.element.getElementById(id+ "on").style.display="block"; 
+                document.element.getElementById(id+ "off").style.display= "none";
+            }
+
+            function turnOff(String id){ 
+                document.element.getElementById(id+ "off").style.display="block"; 
+                document.element.getElementById(id+ "on").style.display= "none";
+            }
+        </script>
+    </body>
+</html>
