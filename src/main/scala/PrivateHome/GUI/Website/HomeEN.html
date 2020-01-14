@@ -11,7 +11,7 @@
 
         <link rel="stylesheet" href="/CSS/menu.css">
         
-        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+        <span style="font-size:30px;float:left;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <a href="HomeEN.html" style="background-color: green; color: ghostwhite">Home</a>
@@ -22,17 +22,26 @@
             <a href="Setup.html">Setup</a>
         </div>
         <div class="content" id="content">
-            <h1>Welcome to your Home!</h1>
+            <h1>PrivateHome</h1>
         </div>
         <script>
+            var sidebar = false;
             closeNav();
             function openNav() {
-                document.getElementById("mySidenav").style.width = "30%";
-                document.getElementById("content").style.paddingLeft = "31%";
+                if(sidebar == true){
+                    closeNav();
+                }
+                else{
+                    sidebar = true;
+                    document.getElementById("mySidenav").style.width = "30%";
+                    document.getElementById("content").style.paddingLeft = "31%";
+                }
             }
             function closeNav() {
-                document.getElementById("mySidenav").style.width = "0";
+                sidebar=false;
+                document.getElementById("mySidenav").style.width = "0%";
                 setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
+                
             }
         </script>
     </head>

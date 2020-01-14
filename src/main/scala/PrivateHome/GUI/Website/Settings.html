@@ -22,17 +22,26 @@
             <a href="Setup.html">Setup</a>
         </div>
         <div class="content" id="content">
-            <h1>Settings</h1>
+            <h1>Devices</h1>
         </div>
         <script>
+            var sidebar = false;
             closeNav();
             function openNav() {
-                document.getElementById("mySidenav").style.width = "30%";
-                document.getElementById("content").style.paddingLeft = "31%";
+                if(sidebar == true){
+                    closeNav();
+                }
+                else{
+                    sidebar = true;
+                    document.getElementById("mySidenav").style.width = "30%";
+                    document.getElementById("content").style.paddingLeft = "31%";
+                }
             }
             function closeNav() {
-                document.getElementById("mySidenav").style.width = "0";
+                sidebar=false;
+                document.getElementById("mySidenav").style.width = "0%";
                 setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
+                
             }
         </script>
     </head>
