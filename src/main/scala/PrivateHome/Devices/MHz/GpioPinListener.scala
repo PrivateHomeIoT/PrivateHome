@@ -130,15 +130,16 @@ class GpioPinListener extends GpioPinListenerDigital {
 
     val systemCode = commandCode.substring(0, 5)
     val unitCode = commandCode.substring(5)
-    //ToDo: needs to call a change state at the switch
+
+
 
     println(s"""An: $command; SystemCode: $systemCode UnitCode: $unitCode""")
 
     try {
-      val ID = data.mhzID(systemCode + unitCode)
-      data.devices(ID).Status(command)
+      val ID = data.mhzID(commandCode)
+      data.devices(ID).Status(if (command) 1 else 0)
     } catch {
-      case no:NoSuchElementException => throw no;
+      case _:NoSuchElementException => ;
       case unknown => throw unknown
     }
 
