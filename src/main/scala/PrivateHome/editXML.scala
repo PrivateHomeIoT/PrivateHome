@@ -28,7 +28,7 @@ class editXML {
    * @param id String to identify the node
    * @return The node from the XML-file
    */
-  def loadObject(id: String) =  {
+  def loadObject(id: String): NodeSeq =  {
     val bigData = XML.load("src/main/scala/PrivateHome/devices.xml")
     val result = bigData.child.foldLeft(NodeSeq.Empty)((acc, elem) => if (!((elem \ "@id").text == id)) acc else acc ++ elem)
     result
@@ -69,6 +69,7 @@ class editXML {
    * @param newNode The new node, which is added to the main node.
    * @return The result of adding newNode at the end of to
    */
+  //noinspection ScalaDeprecation
   private def addANode(to: Node, newNode: Node): Node = to match {
     case Elem(prefix, label, attributes, scope, child@_*) => Elem(prefix, label, attributes, scope, child ++ newNode: _*)
     case _ => println(" could not find node ")
