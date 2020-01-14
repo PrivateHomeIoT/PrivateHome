@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>PrivateHome - Setup</title>
+        <meta name="author" content="maximiliani & RaHoni">
+        <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+
+        <link rel="stylesheet" href="/CSS/menu.css">
+        
+        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="HomeEN.html">Home</a>
+            <a href="Devices.html">Devices</a>
+            <a href="Rooms.html">Rooms</a>
+            <a href="Sensors.html">Sensors</a>
+            <a href="Settings.html">Settings</a>
+            <a href="Setup.html" style="background-color: green; color: ghostwhite">Setup</a>
+        </div>
+        <div class="content" id="content">
+            <h1>Setup</h1>
+        </div>
+        <script>
+            var sidebar = false;
+            closeNav();
+            function openNav() {
+                if(sidebar == true){
+                    closeNav();
+                }
+                else{
+                    sidebar = true;
+                    document.getElementById("mySidenav").style.width = "30%";
+                    document.getElementById("content").style.paddingLeft = "31%";
+                }
+            }
+            function closeNav() {
+                sidebar=false;
+                document.getElementById("mySidenav").style.width = "0%";
+                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
+                
+            }
+        </script>
+    </head>
+    <body class="content">
+        
+    </body>
+</html>

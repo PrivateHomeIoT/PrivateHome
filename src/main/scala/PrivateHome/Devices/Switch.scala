@@ -12,6 +12,7 @@ import scala.xml._
  * @param setupID         an unique Base64 ID
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
+
 abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
     var xMl = new editXML
 
