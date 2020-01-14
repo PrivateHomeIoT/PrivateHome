@@ -41,19 +41,29 @@ abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
 }
 
 object Switch {
-  def apply(data:Node): Switch = {
-    val switchType = (data \ "type").head.text
-    println(switchType)
-    switchType match {
-      case "433MHz" => val systemCode = (data \ "systemCode").head.text
-        val unitCode = (data \ "unitCode").head.text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val ID = (data \ "@id").text
-        mhzSwitch(ID, KeepStatus, systemCode, unitCode);
-      case "MQTT" => val id = (data \ "@id").text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        mqttSwitch(id,KeepStatus)
-      case _ => throw new IllegalArgumentException("Wrong Switch Type")
+    def apply(data: Node): Switch = {
+        val switchType = (data \ "type").head.text
+        println(switchType)
+        switchType match {
+            case "433MHz" => val systemCode = (data \ "systemCode").head.text
+                val unitCode = (data \ "unitCode").head.text
+                val KeepStatus = (data \ "keepStatus").head.text.toBoolean
+                val ID = (data \ "@id").text
+                mhzSwitch(ID, KeepStatus, systemCode, unitCode);
+            case "MQTT" => val id = (data \ "@id").text
+                val KeepStatus = (data \ "keepStatus").head.text.toBoolean
+                mqttSwitch(id, KeepStatus)
+            case _ => throw new IllegalArgumentException("Wrong Switch Type")
+        }
     }
-  }
+
+    def on(percent: Float, id: String): Unit = {
+        val tempSwitch = data.devices(id)
+        tempSwitch.on(percent)
+    }
+
+    def off(id: String): Unit = {
+        val tempSwitch = data.devices(id)
+        tempSwitch.off()
+    }
 }

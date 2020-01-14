@@ -45,7 +45,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
   /**
    * Turns the Switch on
    */
-  override def on(): Unit = sendMhz(mhzCommand(_systemCode, _unitCode, command = true))
+  override def on(percent:  Float): Unit = sendMhz(mhzCommand(_systemCode, _unitCode, command = true))
 
   /**
    * Turns the Switch off
