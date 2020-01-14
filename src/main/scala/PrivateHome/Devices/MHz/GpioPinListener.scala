@@ -107,7 +107,7 @@ class GpioPinListener extends GpioPinListenerDigital {
 
     val command = (code & 15) == codec.command(true)
     code >>= 4
-    for (i <- 0 until bitCount - 4 by 2) {
+    for (_ <- 0 until bitCount - 4 by 2) {
 
       if ((code & 3) == codec.code('0')) {
         commandCode += "0"
@@ -139,7 +139,7 @@ class GpioPinListener extends GpioPinListenerDigital {
       val ID = data.mhzID(commandCode)
       data.devices(ID).Status(command)
     } catch {
-      case no:NoSuchElementException => ;
+      case _:NoSuchElementException => ;
       case unknown => throw unknown
     }
 
