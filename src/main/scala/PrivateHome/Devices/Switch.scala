@@ -13,7 +13,7 @@ import scala.xml._
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
 abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
-  var xMl= new editXML
+  var xMl = new editXML
 
   if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
   if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
@@ -31,7 +31,7 @@ abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
    */
   def Status(boolean: Boolean): Unit = {
     _status = boolean
-    if (setupKeepStatus) xMl.setStatus(boolean)
+    if (setupKeepStatus) xMl.setStatus(id(),boolean)
   }
   def Status_():Boolean = _status
   def id(): String = setupID
