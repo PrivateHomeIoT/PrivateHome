@@ -2,41 +2,44 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
-import PrivateHome.editXML
-import PrivateHome.data
+import PrivateHome.{data, editXML}
 
 import scala.xml._
 
 /**
  * The general Switch class
- * @param setupID an unique Base64 ID
+ *
+ * @param setupID         an unique Base64 ID
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
-abstract class Switch(private val setupID:String, setupKeepStatus:Boolean) {
-  var xMl = new editXML
+abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
+    var xMl = new editXML
 
-  if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
-  if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
-  if (data.IDs.contains(id)) throw new IllegalArgumentException("""ID is already used""")
-  //TODO: Control that the ID isn't used yet
+    if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
+    if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
+    if (data.IDs.contains(id())) throw new IllegalArgumentException("""ID is already used""")
 
-  private var _status = false
+    private var _status = false
 
-  def on():Unit
-  def off():Unit
+    def on(percent: Float): Unit
 
-  /**
-   * Sets the Status of the Switch only changes State after receiving a Confirmation
-   * @param boolean The State the Switch should change to
-   */
-  def Status(boolean: Boolean): Unit = {
-    _status = boolean
-    if (setupKeepStatus) xMl.setStatus(id(),boolean)
-  }
-  def Status_():Boolean = _status
-  def id(): String = setupID
+    def off(): Unit
 
-  def toXml:Node
+    /**
+     * Sets the Status of the Switch only changes State after receiving a Confirmation
+     *
+     * @param boolean The State the Switch should change to
+     */
+    def Status(boolean: Boolean): Unit = {
+        _status = boolean
+        if (setupKeepStatus) xMl.setStatus(id(), boolean)
+    }
+
+    def id(): String = setupID
+
+    def Status_(): Boolean = _status
+
+    def toXml: Node
 
 }
 
