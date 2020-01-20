@@ -3,15 +3,16 @@
     border-color: green;
     background-color: green;
     /*width: 18%;
-    height: 5%;
-    max-height: 15%;
-    max-width: 20%;*/
-    width: 100%;
+    height: 5%;*/
+    min-width: 150px;
+    max-height: 300px;
+    max-width: 400px;
+    width: 95%;
     height: 10%;
     text-decoration-line: none;
     text-decoration: none;
     text-align: right;
-    margin: 10px;
+    margin: 5px;
     float: left;
 }
 
@@ -39,11 +40,23 @@ p {
     text-overflow: clip;
 }
 
-table, td {
+table {
     padding: 10px;
     margin: 10px;
+    margin-right: 0px;
 }
 
 th{
     visibility: hidden;
+}
+
+table, body{
+    padding-right: 0px;
+    margin-right: 0px;
+    padding-right: 10px;
+}
+
+td{
+    margin: 0px;
+    padding: 0px;
 }
