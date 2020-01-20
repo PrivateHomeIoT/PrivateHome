@@ -33,8 +33,8 @@ object mqttClient {
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
         lastMsg = message.toString
-        if (lastMsg == "ON") data.devices(lastID).Status(true)
-        else if (lastMsg == "OFF") data.devices(lastID).Status(false)
+        if (lastMsg == "ON") data.devices(lastID).Status(1)
+        else if (lastMsg == "OFF") data.devices(lastID).Status(0)
       }
       else println("invalid topic")
     }

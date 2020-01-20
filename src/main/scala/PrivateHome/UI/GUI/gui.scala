@@ -1,4 +1,4 @@
-package PrivateHome.GUI
+package PrivateHome.UI.GUI
 
 import PrivateHome.GUI.Websocket.websocket
 import PrivateHome.data
