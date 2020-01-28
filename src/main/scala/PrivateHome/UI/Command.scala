@@ -2,7 +2,7 @@ package PrivateHome.UI
 
 import PrivateHome.data.idTest
 
-case class Command()
+class Command()
 
 case class commandOn(id: String, percent: Float) extends Command {
     idTest(id)

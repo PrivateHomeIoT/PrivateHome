@@ -1,7 +1,6 @@
 package PrivateHome.UI
 
 import PrivateHome.data.devices
-import org.json4s.native.JsonMethods._
 
 object uiControl {
     def receiveCommand(command:Command): Unit = {
