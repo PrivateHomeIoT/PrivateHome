@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
+
+<head>
     <meta charset="UTF-8">
     <title>PrivateHome - Devices</title>
     <meta name="author" content="maximiliani & RaHoni">
@@ -42,30 +43,75 @@
         function closeNav() {
             sidebar = false;
             document.getElementById("mySidenav").style.width = "0%";
-            setTimeout(function() {document.getElementById("content").style.paddingLeft = "0%";}, 500)
-        }
-    </script>
-    <script>
-        var address = window.location.hostname;
-        var ws = new WebSocket(address + ":404/ws");
-
-        function turnOn(String id) {
-            document.element.getElementById(id + "on").style.display = "block";
-            document.element.getElementById(id + "off").style.display = "none";
-            ws.send("{Command:"1",{id:"id "}}");
-            alert(id);
-        }
-
-        function turnOff(String id) {
-            document.element.getElementById(id + "off").style.display = "block";
-            document.element.getElementById(id + "on").style.display = "none";
-            ws.send("{Command:"0 ",{id:"id "}}");
-            alert(id);
+            setTimeout(function() {
+                document.getElementById("content").style.paddingLeft = "0%";
+            }, 500)
         }
     </script>
 </head>
 
 <body class="content" id="content">
+    <!--
+    <script>
+        var address = window.location.hostname;
+        var ws = new WebSocket(address + ":404/ws");
+
+        function turnOn() {
+            var id = turnOff.arguments
+            document.element.getElementById(id + "on").style.display = 'block';
+            document.element.getElementById(id + "off").style.display = 'none';
+            ws.send("{Command:"1",{id:"id "}}");
+            alert(id);
+        }
+
+        function turnOff() {
+            var id = turnOff.arguments;
+            document.element.getElementById(id + "off").style.display = 'block';
+            document.element.getElementById(id + "on").style.display = 'none';
+            ws.send("{Command:"0 ",{id:"id "}}");
+            alert(id);
+        }
+    </script>
+-->
+    <script>
+        function turnOn() {
+            var id = turnOn.arguments[0];
+            //            show_elements(id+"on");
+            //            hide_elements(id+"off");
+//                       alert(id);
+            document.element.getElementById(id + "off").style.display = 'none';
+            document.element.getElementById(id + "on").style.display = 'block';
+            //            ws.send("{Command:"1",{id:"id "}}");
+            alert(id);
+        }
+        
+        function turnOff() {
+            alert("bye");
+            var id = turnOn.arguments[0];
+            //            show_elements(id+"off");
+            //            hide_elements(id+"on");
+                        alert(id);
+            document.element.getElementById(id + "off").style.display = 'block';
+            //            alert(id);
+            document.element.getElementById(id + "on").style.display = 'none';
+            //            ws.send("{Command:"0 ",{id:"id "}}");
+            alert(id);
+        }
+        //        function show_elements() {
+        //            var elementNames = show_elements.arguments;
+        //            for (var i = 0; i < elementNames.length; i++) {
+        //                var elementName = elementNames[i];
+        //                document.getElementById(elementName).style.display = 'block';
+        //            }
+        //        }
+        //        function hide_elements() {
+        //            var elementNames = hide_elements.arguments;
+        //            for (var i = 0; i < elementNames.length; i++) {
+        //                var elementName = elementNames[i];
+        //                document.getElementById(elementName).style.display = 'none';
+        //            }
+        }
+    </script>
     <table style="width: 100%">
         <tr>
             <th>1</th>
@@ -75,10 +121,10 @@
             <th>5</th>
         </tr>
         <tr>
-            <td>
-                <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+            <td class="switch" id="abc">
+                <form class="switch" id="abc">
+                    <button id="abcon" class="button" style="display: none" onclick="turnOff('abc');"><img src="Pictures/on.png" alt="ON" class="pic"></button>
+                    <button id="abcoff" class="button" style="display: block" onclick="turnOn('abc');"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
                     <a href="Settings/masterID.html">
                         <p id="name">Name</p>
                         <!--Name and Status must be under 13 Characters -->
@@ -88,8 +134,8 @@
             </td>
             <td>
                 <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                    <button id="IDon" class="button" style="display: none;" href="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
+                    <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
                     <a href="Settings/masterID.html">
                         <p id="name">Name</p>
                         <!--Name and Status must be under 13 Characters -->
@@ -99,8 +145,8 @@
             </td>
             <td>
                 <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                    <button id="IDon" class="button" style="display: none;" href="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
+                    <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
                     <a href="Settings/masterID.html">
                         <p id="name">Name</p>
                         <!--Name and Status must be under 13 Characters -->
@@ -110,41 +156,8 @@
             </td>
             <td>
                 <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
-                    <a href="Settings/masterID.html">
-                        <p id="name">Name</p>
-                        <!--Name and Status must be under 13 Characters -->
-                        <p id="status">Status</p>
-                    </a>
-                </form>
-            </td>
-            <td>
-                <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
-                    <a href="Settings/masterID.html">
-                        <p id="name">Name</p>
-                        <!--Name and Status must be under 13 Characters -->
-                        <p id="status">Status</p>
-                    </a>
-                </form>
-            </td>
-            <td>
-                <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
-                    <a href="Settings/masterID.html">
-                        <p id="name">Name</p>
-                        <!--Name and Status must be under 13 Characters -->
-                        <p id="status">Status</p>
-                    </a>
-                </form>
-            </td>
-            <td>
-                <form class="switch" id="masterID">
-                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" id="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" id="pic"></button>
+                    <button id="IDon" class="button" style="display: none;" href="javascript:turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
+                    <button id="IDoff" class="button" style="display: inline-block;" onclick="javascript:turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
                     <a href="Settings/masterID.html">
                         <p id="name">Name</p>
                         <!--Name and Status must be under 13 Characters -->
@@ -154,5 +167,4 @@
             </td>
         </tr>
     </table>
-</body>
-</html>
+</body></html>

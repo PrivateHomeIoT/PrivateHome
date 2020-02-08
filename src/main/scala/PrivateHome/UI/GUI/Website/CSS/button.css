@@ -17,19 +17,27 @@
 }
 
 .button {
-    float: left;
     margin: 10px;
+    float: left;
     background: transparent;
     border-style: none;
+    max-height: 10%;
+    max-width: 50%;
 }
 
 img {
-    height: 60px;
-    width: 60px;
+    min-height: 60px;
+    min-width: 60px;
+    max-height: 250px;
+    max-height: 250px;
+    height: 60%;
+    width: 60%;
     padding-top: 5%;
+    float: left;
     border-style: none;
     border-width: 0px;
-    vertical-align: middle; 
+    vertical-align: middle;
+    margin: 10px;
 }
 
 p {
