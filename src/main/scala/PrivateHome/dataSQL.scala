@@ -58,7 +58,7 @@ object dataSQL {
 
 
   def addDevice(device: Switch): Unit = {
-    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has now save definition""".format(device.id, device.getClass))
+    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
       insertInto(Devices).values(device.id(), "", device.switchtype, if (device.KeepStatus) device.Status else 0, device.KeepStatus)
     }.update.apply
