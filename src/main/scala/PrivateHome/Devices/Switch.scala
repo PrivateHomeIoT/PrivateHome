@@ -36,9 +36,11 @@ abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
         if (KeepStatus) xMl.setStatus(id, state)
     }
 
-    def id(): String = setupID
+    def id: String = setupID
 
-    def Status_(): Float = _status
+    def switchtype: String
+
+    def Status: Float = _status
 
     def toXml: Node
 

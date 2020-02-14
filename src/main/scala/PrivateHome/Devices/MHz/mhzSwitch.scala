@@ -70,6 +70,8 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, private var _systemC
    */
   def systemCode: String = _systemCode
 
+  override def switchtype = "433Mhz"
+
   /**
    *
    * @return The Unit Code
