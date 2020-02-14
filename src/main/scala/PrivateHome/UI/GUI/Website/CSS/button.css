@@ -7,12 +7,13 @@
     min-width: 150px;
     max-height: 300px;
     max-width: 400px;
-    width: 95%;
+    width: 19%;
     height: 10%;
     text-decoration-line: none;
     text-decoration: none;
     text-align: right;
     margin: 5px;
+    
     float: left;
 }
 
@@ -25,6 +26,12 @@
     max-width: 50%;
 }
 
+.on{
+    display: none;
+}
+.off{
+    display: block;
+}
 img {
     min-height: 60px;
     min-width: 60px;
