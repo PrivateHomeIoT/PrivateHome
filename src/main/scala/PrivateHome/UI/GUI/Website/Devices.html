@@ -52,15 +52,26 @@
 
 <body class="content" id="content">
     <script>
+        var ws = new WebSocket(location.hostname + ":404");
+        
         function turnOn() {
-            var id = turnOn.arguments[0];
-            document.getElementById(id + "off").style.display = 'none';
-            document.getElementById(id + "on").style.display = 'inline-block';
+            var ID = turnOn.arguments[0]; 
+            document.getElementById(ID + "off").style.display = 'none';
+            document.getElementById(ID + "on").style.display = 'inline-block';
+            ws.send({Command:"ON",Args:{Percent: 1, id: ID}});
         }
+        
+        function slider(){
+            var ID = slider.arguments[0];
+            //ws.send({Command:"OFF",Args:{Percent: document.querySelector('#'+ID+"slider").value/100, id: ID}});
+            document.getElementById(ID+"sliderValue").innerHTML = document.querySelector('#'+ID+"slider").value + " %";
+        }
+        
         function turnOff() {
-            var id = turnOff.arguments[0];
-            document.getElementById(id + "off").style.display = 'inline-block';
-            document.getElementById(id + "on").style.display = 'none';
+            var ID = turnOff.arguments[0];
+            document.getElementById(ID + "off").style.display = 'inline-block';
+            document.getElementById(ID + "on").style.display = 'none';
+            ws.send({Command:"OFF",Args:{Percent: 0, id: ID}});
         }
     </script>
     <table style="width: 100%">
@@ -73,13 +84,21 @@
         </tr>
         <tr>
             <td class="switch" id="ID">
-                    <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
-                    <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
-                    <a href="Settings/masterID.html">
-                        <p id="name">Name</p>
-                        <p id="status">Status</p>
-                    </a>
-            </td>    
+                <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
+                <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
+                <a href="Settings/masterID.html"  class="aButton">
+                    <p id="name">Name</p>
+                    <p id="status">Status</p>
+                </a>
+            </td>
+            <td class="switch" id="ID2">
+                <input class="slider button" id="ID2slider" onchange="slider('ID2')" max="100" min="0" type="range" value="0">       
+                <a href="Settings/masterID.html" class="aButton">
+                    <p id="name" >Name</p>
+                    <p id="status">Status</p>
+                </a>
+                <p class="slidervalue" id="ID2sliderValue">0%</p>
+            </td>
         </tr>
     </table>
 </body></html>
