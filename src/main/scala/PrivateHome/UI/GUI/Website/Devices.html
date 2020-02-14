@@ -53,25 +53,106 @@
 <body class="content" id="content">
     <script>
         var ws = new WebSocket(location.hostname + ":404");
-        
+
+        ws.onmessage = function(event) {
+            var msg = JSON.parse(event.data);
+            switch (msg.type) {
+                case "id":
+                    if (msg.status == 1) {
+                        try turnOn(msg.id);
+                        catch {
+                            document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
+                            document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
+                        } else if (msg.status == 0) {
+                            try turnOff(msg.id);
+                            catch {
+                                document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
+                                document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
+                            } else {
+                                document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
+                                document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
+                            }
+                        }
+                    }
+                case "devices":
+                    var devices = JSON.parse(msg.devices);
+                    var i;
+                    while (i < Object.keys(devices).length) {
+                        var act = devices[i];
+                        var id = act.id;
+                        var name = act.name;
+                        var status = act.status * 100;
+
+                        if (status == 0) {
+                            try {
+                                document.getElementById(id + "off").style = "inline-block";
+                                document.getElementById(id + "on").style = "none";
+                                document.getElementById(id + "status").innerHTML = "OFF";
+                                document.getElementById(id + "name").innerHTML = name;
+                                catch {
+                                    document.getElementById(ID + "sliderValue").innerHTML = "0 %";
+                                    document.querySelector('#' + ID + "slider").value = 0;
+                                }
+                            }
+                        } else if (status == 1) {
+                            try {
+                                document.getElementById(id + "on").style = "inline-block";
+                                document.getElementById(id + "off").style = "none";
+                                document.getElementById(id + "status").innerHTML = "ON";
+                                document.getElementById(id + "name").innerHTML = name;
+                                catch {
+                                    document.getElementById(ID + "sliderValue").innerHTML = "100 %";
+                                    document.querySelector('#' + ID + "slider").value = 100;
+                                }
+                            }
+                        } else {
+                            document.getElementById(ID + "sliderValue").innerHTML = status + " %";
+                            document.querySelector('#' + ID + "slider").value = status;
+                            document.getElementById(id + "status").innerHTML = "ON";
+                            document.getElementById(id + "name").innerHTML = name;
+                        }
+                    }
+                case "error":
+                    alert(msg.error.toString);
+            }
+        }
+
         function turnOn() {
-            var ID = turnOn.arguments[0]; 
+            var ID = turnOn.arguments[0];
             document.getElementById(ID + "off").style.display = 'none';
             document.getElementById(ID + "on").style.display = 'inline-block';
-            ws.send({Command:"ON",Args:{Percent: 1, id: ID}});
+            ws.send(JSON.stringify({
+                Command: "ON",
+                Args: {
+                    Percent: 1,
+                    id: ID
+                }
+            }));
         }
-        
-        function slider(){
+
+        function slider() {
             var ID = slider.arguments[0];
-            //ws.send({Command:"OFF",Args:{Percent: document.querySelector('#'+ID+"slider").value/100, id: ID}});
-            document.getElementById(ID+"sliderValue").innerHTML = document.querySelector('#'+ID+"slider").value + " %";
+            ws.send(JSON.stringify({
+                Command: "OFF",
+                Args: {
+                    Percent: document.querySelector('#' + ID + "slider").value / 100,
+                    id: ID
+                }
+            }));
+            document.getElementById(ID + "sliderValue").innerHTML = document.querySelector('#' + ID + "slider").value + " %";
         }
-        
+
         function turnOff() {
             var ID = turnOff.arguments[0];
             document.getElementById(ID + "off").style.display = 'inline-block';
             document.getElementById(ID + "on").style.display = 'none';
-            ws.send({Command:"OFF",Args:{Percent: 0, id: ID}});
+            ws.send(JSON.stringify({
+                Command: "OFF",
+                Args: {
+                    Percent: 0,
+                    id: ID
+                }
+            }));
         }
     </script>
     <table style="width: 100%">
@@ -86,16 +167,16 @@
             <td class="switch" id="ID">
                 <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
                 <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
-                <a href="Settings/masterID.html"  class="aButton">
+                <a href="Settings/masterID.html" class="aButton">
                     <p id="name">Name</p>
                     <p id="status">Status</p>
                 </a>
             </td>
             <td class="switch" id="ID2">
-                <input class="slider button" id="ID2slider" onchange="slider('ID2')" max="100" min="0" type="range" value="0">       
+                <input class="slider button" id="ID2slider" onchange="slider('ID2')" max="100" min="0" type="range" value="0">
                 <a href="Settings/masterID.html" class="aButton">
-                    <p id="name" >Name</p>
-                    <p id="status">Status</p>
+                    <p id="IDname">Name</p>
+                    <p id="IDstatus">Status</p>
                 </a>
                 <p class="slidervalue" id="ID2sliderValue">0%</p>
             </td>
