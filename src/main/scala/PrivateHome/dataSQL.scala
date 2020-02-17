@@ -27,40 +27,62 @@ object dataSQL {
   implicit val session: AutoSession.type = AutoSession
   // for now, retrieves all data as Map value
 
+
+  /**
+   * Generates the Table strucktures for the Database
+   * @return a Boolean defining the succes of the Creation
+   */
   def create(): Boolean = {
-    sql"""
-          create table devices (
-          id varchar(10) not null primary key,
-          name varchar(64),
-          type varchar(16) not null,
-          state decimal(1,4) not null default false,
-          keepState boolean not null default false
-          )
+
+    // Drops old Tables to Delet Data and make it possible to regenerate them
+    sql"""DROP TABLE IF EXISTS `Mhz`;
+         DROP TABLE IF EXISTS `Devices`;""".execute().apply()
+
+
+    val devices = sql"""
+                    CREATE TABLE `Devices` (
+                    `id` varchar(5) NOT NULL,
+                    `name` varchar(64) NOT NULL,
+                    `type` varchar(16) NOT NULL,
+                    `state` decimal(5,4) NOT NULL,
+                    `keepState` boolean NOT NULL,
+                    PRIMARY KEY (`id`))
          """.execute.apply()
+
+
+
+    sql"""
+           CREATE TABLE `Mhz` (
+           `id` varchar(5) NOT NULL,
+           `unitcode` varchar(5) NOT NULL,
+           `devicecode` varchar(5) NOT NULL,
+           PRIMARY KEY (`id`),
+           CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
+         """.execute().apply() && devices
+
+
     // insert initial data
 
-    sql"""
-           create table 433Mhz (
-           "id" varchar(10) not null primary key,
-           "systemcode" int(5) not null,
-           "unitcode" int(5) not null,
-           constraint primary foreign key ('id') references 'devices' ('id')
-           )
-         """.execute().apply()
+
   }
 
-  def getDevices: Option[Devices] = {
-    val m = Devices.syntax("m")
+
+  /**
+   *
+   * @return
+   */
+  def getDevices: Seq[Device] = {
+    val m = Device.syntax("m")
     withSQL {
-      select.from(Devices as m)
-    }.map(rs => Devices(rs)).single().apply()
+      select.from(Device as m)
+    }.map(rs => Device(rs)).list().apply()
   }
 
 
   def addDevice(device: Switch): Unit = {
     var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
-      insertInto(Devices).values(device.id(), "", device.switchtype, if (device.KeepStatus) device.Status else 0, device.KeepStatus)
+      insertInto(Device).values(device.id, "", device.switchtype, if (device.KeepStatus) device.Status else 0, device.KeepStatus)
     }.update.apply
     device match {
       case device: mhzSwitch => withSQL {
@@ -71,19 +93,19 @@ object dataSQL {
     }
   }
 
-  case class Devices(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
 
   case class Mhz(id: String, systemcode: Int, unitcode: Int)
 
-  object Devices extends SQLSyntaxSupport[Devices] {
+  object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
 
-    def apply(rs: WrappedResultSet) = new Devices(
+    def apply(rs: WrappedResultSet) = new Device(
       rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"))
   }
 
   object Mhz extends SQLSyntaxSupport[Mhz] {
-    override val tableName = "433Mhz"
+    override val tableName = "Mhz"
 
     def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.int("systemcode"), rs.int("unitcode"))
   }
