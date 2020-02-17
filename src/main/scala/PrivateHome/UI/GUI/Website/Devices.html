@@ -8,7 +8,7 @@
     <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/x-icon" href="" alt="icon" />
+    <!--    <link rel="icon" type="image/x-icon" href="" alt="icon" />-->
 
     <link rel="stylesheet" href="/CSS/menu.css">
     <link rel="stylesheet" href="/CSS/button.css">
@@ -29,7 +29,10 @@
     <script>
         var sidebar = false;
         closeNav();
-
+        
+        /*
+            This function opens the sidebar.
+        */
         function openNav() {
             if (sidebar == true) {
                 closeNav();
@@ -40,6 +43,9 @@
             }
         }
 
+        /*
+            This function closes the sidebar.
+        */
         function closeNav() {
             sidebar = false;
             document.getElementById("mySidenav").style.width = "0%";
@@ -47,6 +53,7 @@
                 document.getElementById("content").style.paddingLeft = "0%";
             }, 500)
         }
+
     </script>
 </head>
 
@@ -59,20 +66,12 @@
             switch (msg.type) {
                 case "id":
                     if (msg.status == 1) {
-                        try turnOn(msg.id);
-                        catch {
-                            document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
-                            document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
-                        } else if (msg.status == 0) {
-                            try turnOff(msg.id);
-                            catch {
-                                document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
-                                document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
-                            } else {
-                                document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger();
-                                document.querySelector('#' + ID + "slider").value = msg.status.toInteger();
-                            }
-                        }
+                        onGraph(msg.id);
+                    } else if (msg.status == 0) {
+                        offGraph(msg.id);
+                    } else {
+                        document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger() * 100;
+                        document.querySelector('#' + ID + "slider").value = msg.status.toInteger() * 100;
                     }
                 case "devices":
                     var devices = JSON.parse(msg.devices);
@@ -84,27 +83,12 @@
                         var status = act.status * 100;
 
                         if (status == 0) {
-                            try {
-                                document.getElementById(id + "off").style = "inline-block";
-                                document.getElementById(id + "on").style = "none";
-                                document.getElementById(id + "status").innerHTML = "OFF";
-                                document.getElementById(id + "name").innerHTML = name;
-                                catch {
-                                    document.getElementById(ID + "sliderValue").innerHTML = "0 %";
-                                    document.querySelector('#' + ID + "slider").value = 0;
-                                }
-                            }
+                            offGraph(id);
+                            document.getElementById(id + "name").innerHTML = name;
                         } else if (status == 1) {
-                            try {
-                                document.getElementById(id + "on").style = "inline-block";
-                                document.getElementById(id + "off").style = "none";
-                                document.getElementById(id + "status").innerHTML = "ON";
-                                document.getElementById(id + "name").innerHTML = name;
-                                catch {
-                                    document.getElementById(ID + "sliderValue").innerHTML = "100 %";
-                                    document.querySelector('#' + ID + "slider").value = 100;
-                                }
-                            }
+                            onGraph(id);
+                            document.getElementById(id + "name").innerHTML = name;
+
                         } else {
                             document.getElementById(ID + "sliderValue").innerHTML = status + " %";
                             document.querySelector('#' + ID + "slider").value = status;
@@ -114,13 +98,50 @@
                     }
                 case "error":
                     alert(msg.error.toString);
+
+                case :console.log("Illegal Argument");
             }
         }
 
+        /*
+            This function turns on the graphic interface of a switch or slider.
+            Usage: onGraph(String id);
+        */
+
+        function onGraph() {
+            var ID = turnOn.arguments[0];
+            try {
+                document.getElementById(ID + "off").style.display = 'none';
+                document.getElementById(ID + "on").style.display = 'inline-block';
+            } catch {
+                document.getElementById(ID + "sliderValue").innerHTML = "100 %";
+                document.querySelector('#' + ID + "slider").value = 100;
+            }
+            document.getElementById(id + "status").innerHTML = "ON";
+        }
+
+        /*
+            This function turns off the graphic interface of a switch or slider.
+            Usage: offGraph(String id);
+        */
+        function offGraph() {
+            var ID = turnOn.arguments[0];
+            try {
+                document.getElementById(ID + "on").style.display = 'none';
+                document.getElementById(ID + "off").style.display = 'inline-block';
+            } catch {
+                document.getElementById(ID + "sliderValue").innerHTML = "0 %";
+                document.querySelector('#' + ID + "slider").value = 0;
+            }
+            document.getElementById(id + "status").innerHTML = "OFF";
+        }
+
+        /*
+            This function send an on signal to the websocket.
+            Usage: turnOn(String id);
+        */
         function turnOn() {
             var ID = turnOn.arguments[0];
-            document.getElementById(ID + "off").style.display = 'none';
-            document.getElementById(ID + "on").style.display = 'inline-block';
             ws.send(JSON.stringify({
                 Command: "ON",
                 Args: {
@@ -130,8 +151,13 @@
             }));
         }
 
+        /*
+            This function sends the value of a slider to the websocket.
+            Usage: slider(String id);
+        */
         function slider() {
             var ID = slider.arguments[0];
+//            document.getElementById(ID + "sliderValue").innerHTML = document.querySelector('#' + ID + "slider").value + " %";
             ws.send(JSON.stringify({
                 Command: "OFF",
                 Args: {
@@ -139,13 +165,14 @@
                     id: ID
                 }
             }));
-            document.getElementById(ID + "sliderValue").innerHTML = document.querySelector('#' + ID + "slider").value + " %";
         }
 
+        /*
+            This function send an off signal to the websocket.
+            Usage: turnOff(String id);
+        */
         function turnOff() {
             var ID = turnOff.arguments[0];
-            document.getElementById(ID + "off").style.display = 'inline-block';
-            document.getElementById(ID + "on").style.display = 'none';
             ws.send(JSON.stringify({
                 Command: "OFF",
                 Args: {
@@ -154,6 +181,7 @@
                 }
             }));
         }
+
     </script>
     <table style="width: 100%">
         <tr>
@@ -182,4 +210,6 @@
             </td>
         </tr>
     </table>
-</body></html>
+</body>
+
+</html>
