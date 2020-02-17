@@ -18,7 +18,7 @@ abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
 
     if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
-    if (data.IDs.contains(id())) throw new IllegalArgumentException("""ID is already used""")
+    if (data.IDs.contains(id)) throw new IllegalArgumentException("""ID is already used""")
 
     private var _status:Float = 0
 

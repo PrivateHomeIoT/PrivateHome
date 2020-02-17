@@ -26,4 +26,5 @@ case class mqttSwitch(ID: String, keepStatus: Boolean) extends Switch(ID, keepSt
     <keepStatus>{keepStatus}</keepStatus>
   </switch>
 
+  def switchtype: String = "mqtt"
 }
