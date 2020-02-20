@@ -8,6 +8,8 @@ import scalikejdbc._
 
 object dataSQL {
 
+  var devices:Map[String, Switch] = Map()
+
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
     enabled = false,
@@ -54,8 +56,8 @@ object dataSQL {
     sql"""
            CREATE TABLE `Mhz` (
            `id` varchar(5) NOT NULL,
+           `systemcode` varchar(5) NOT NULL,
            `unitcode` varchar(5) NOT NULL,
-           `devicecode` varchar(5) NOT NULL,
            PRIMARY KEY (`id`),
            CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
          """.execute().apply() && devices
@@ -71,16 +73,25 @@ object dataSQL {
    *
    * @return
    */
-  def getDevices(): Seq[Device] = {
+  def getDevices(): Unit = {
     val m = Device.syntax("m")
     withSQL {
       select.from(Device as m)
-    }.map(rs => Device(rs)).list().apply()
+    }.map(rs => Device(rs)).list().apply().foreach(d => {
+      d.switchtype match {
+        case "MQTT" => devices.+((d.id, mqttSwitch(d.id, keepStatus = d.keepState)))
+          devices(d.id).on(d.state)
+        case "433Mhz" =>
+          val m = Mhz.syntax("m")
+          val data = withSQL{ select.from(Mhz as m).where.eq(m.id,d.id)}.map(rs => Mhz(rs)).single().apply().get
+          devices + ((d.id,mhzSwitch(d.id,d.keepState,data.systemcode,data.unitcode)))
+          devices(d.id).on(d.state)
+      }
+
+    })
+
   }
 
-  def devices: Seq[Device] ={
-    getDevices()
-  }
 
 
   def addDevice(device: Switch): Unit = {
@@ -99,7 +110,7 @@ object dataSQL {
 
   case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
 
-  case class Mhz(id: String, systemcode: Int, unitcode: Int)
+  case class Mhz(id: String, systemcode: String, unitcode: String)
 
   object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
@@ -111,7 +122,7 @@ object dataSQL {
   object Mhz extends SQLSyntaxSupport[Mhz] {
     override val tableName = "Mhz"
 
-    def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.int("systemcode"), rs.int("unitcode"))
+    def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.string("systemcode"), rs.string("unitcode"))
   }
 
 }
