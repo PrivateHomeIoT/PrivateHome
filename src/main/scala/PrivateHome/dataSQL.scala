@@ -71,11 +71,15 @@ object dataSQL {
    *
    * @return
    */
-  def getDevices: Seq[Device] = {
+  def getDevices(): Seq[Device] = {
     val m = Device.syntax("m")
     withSQL {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply()
+  }
+
+  def devices: Seq[Device] ={
+    getDevices()
   }
 
 
