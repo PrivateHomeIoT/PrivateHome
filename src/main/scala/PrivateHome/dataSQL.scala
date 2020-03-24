@@ -34,7 +34,7 @@ object dataSQL {
    * Generates the Table strucktures for the Database
    * @return a Boolean defining the succes of the Creation
    */
-  def create(): Boolean = {
+  def create(): Unit = {
 
     // Drops old Tables to Delet Data and make it possible to regenerate them
     sql"""DROP TABLE IF EXISTS `Mhz`;
@@ -60,7 +60,7 @@ object dataSQL {
            `unitcode` varchar(5) NOT NULL,
            PRIMARY KEY (`id`),
            CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
-         """.execute().apply() && devices
+         """.execute().apply()
 
 
     // insert initial data
