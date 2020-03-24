@@ -81,28 +81,51 @@
                         var id = act.id;
                         var name = act.name;
                         var status = act.status * 100;
+                        var type = act.type;
 
                         if (status == 0) {
-                            offGraph(id);
-                            document.getElementById(id + "name").innerHTML = name;
+                            try {
+                                offGraph(id);
+                                document.getElementById(id + "name").innerHTML = name;
+                            } catch {
+                                if (type == "button") generateButton(id, name, status);
+                                else if (type == "slider") generateSlider (id, name, status);
+                            }
                         } else if (status == 1) {
-                            onGraph(id);
-                            document.getElementById(id + "name").innerHTML = name;
-
+                            try {
+                                onGraph(id);
+                                document.getElementById(id + "name").innerHTML = name;
+                            } catch {
+                                if (type == "button") generateButton(id, name, status);
+                                else if (type == "slider") generateSlider (id, name, status);
+                            }
                         } else {
-                            document.getElementById(ID + "sliderValue").innerHTML = status + " %";
-                            document.querySelector('#' + ID + "slider").value = status;
-                            document.getElementById(id + "status").innerHTML = "ON";
-                            document.getElementById(id + "name").innerHTML = name;
+                            try{
+                                document.getElementById(ID + "sliderValue").innerHTML = status + " %";
+                                document.querySelector('#' + ID + "slider").value = status;
+                                document.getElementById(id + "status").innerHTML = "ON";
+                                document.getElementById(id + "name").innerHTML = name;
+                            } catch {
+                                if (type == "button") generateButton(id, name, status);
+                                else if (type == "slider") generateSlider (id, name, status);
+                            }
                         }
                     }
-                case "error":
-                    alert(msg.error.toString);
+                case "error": console.log(msg.error.toString);
 
-                case :console.log("Illegal Argument");
+                case: console.log("Illegal Argument");
             }
         }
 
+        function generateButton(String id, String name, float status){
+            var text, parser, xmlDoc;
+            text="<td class=\"switch\" id="+id+"\><button id="id + "on\" class=\"button\" style=\"display: none;\" onclick=\"turnOff('"+id+"')\"><img src=\"Pictures/on.png\" alt=\"ON\" class=\"pic\"></button><button id="+id+"off\" class=\"button\" style=\"display: inline-block;\" onclick=\"turnOn('"id"')\"><img src=\"Pictures/off.png\" alt=\"OFF\" class=\"pic\"></button><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\"name\">Name</p><p id=\"status\">Status</p></a></td>"
+        }
+        
+        function generateSlider(String id, String name, float status){
+        
+        }
+        
         /*
             This function turns on the graphic interface of a switch or slider.
             Usage: onGraph(String id);
