@@ -92,7 +92,7 @@ object dataSQL {
 
 
   /**
-   * Adds an Switch to the DB witch all needed under Tabels
+   * Adds an Switch to the DB witch all needed under Tables
    * @param device The device that should be added
    */
   def addDevice(device: Switch): Unit = {
@@ -107,6 +107,7 @@ object dataSQL {
       case _: mqttSwitch =>
       case _ => throw wrongclass
     }
+    devices = devices.concat(Map((device.id,device)))
   }
 
   /**
