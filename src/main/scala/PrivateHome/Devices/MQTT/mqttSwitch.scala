@@ -9,7 +9,7 @@ case class mqttSwitch(ID: String, keepStatus: Boolean) extends Switch(ID, keepSt
   /**
    * This method turns on the MQTT-Device.
    */
-  def on(percent: Float): Unit = mqttClient.publish("Home/switch/cmnd/" + id, "ON")
+  def on(percent: Float): Unit = mqttClient.publish("Home/switch/cmnd/" + id, percent.toString)
 
   /**
    * This method turns off the MQTT-Device.
