@@ -70,22 +70,21 @@ object dataSQL {
 
 
   /**
-   *
-   * @return
+   * Fills the devices Map with all Devices from the DB and turns all Switches with keepState on
    */
-  def getDevices(): Unit = {
+  def fillDevices(): Unit = {
     val m = Device.syntax("m")
     withSQL {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices.+((d.id, mqttSwitch(d.id, keepStatus = d.keepState)))
-          devices(d.id).on(d.state)
+        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, keepStatus = d.keepState)))
+          if (d.keepState) {devices(d.id).on(d.state)}
         case "433Mhz" =>
           val m = Mhz.syntax("m")
           val data = withSQL{ select.from(Mhz as m).where.eq(m.id,d.id)}.map(rs => Mhz(rs)).single().apply().get
-          devices + ((d.id,mhzSwitch(d.id,d.keepState,data.systemcode,data.unitcode)))
-          devices(d.id).on(d.state)
+          devices += ((d.id,mhzSwitch(d.id,d.keepState,data.systemcode,data.unitcode)))
+          if (d.keepState) {devices(d.id).on(d.state)}
       }
 
     })
