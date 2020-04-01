@@ -118,12 +118,17 @@
         }
 
         function generateButton(String id, String name, float status){
-            var text, parser, xmlDoc;
-            text="<td class=\"switch\" id="+id+"\><button id="id + "on\" class=\"button\" style=\"display: none;\" onclick=\"turnOff('"+id+"')\"><img src=\"Pictures/on.png\" alt=\"ON\" class=\"pic\"></button><button id="+id+"off\" class=\"button\" style=\"display: inline-block;\" onclick=\"turnOn('"id"')\"><img src=\"Pictures/off.png\" alt=\"OFF\" class=\"pic\"></button><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\"name\">Name</p><p id=\"status\">Status</p></a></td>"
+            var text, html;
+            text="<td class=\"switch\" id="+id+"\><button id="id + "on\" class=\"button\" style=\"display: none;\" onclick=\"turnOff('"+id+"')\"><img src=\"Pictures/on.png\" alt=\"ON\" class=\"pic\"></button><button id="+id+"off\" class=\"button\" style=\"display: inline-block;\" onclick=\"turnOn('"id"')\"><img src=\"Pictures/off.png\" alt=\"OFF\" class=\"pic\"></button><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\"name\">Name</p><p id=\"status\">Status</p></a></td>";
+            html = document.getElementById('actions');
+            html.innerHTML(text);
         }
         
         function generateSlider(String id, String name, float status){
-        
+            var text, html;
+            text="<td class=\"switch\" id=\""+id+"\"><input class=\"slider button\" id=\""+id+"slider\" onchange=\"slider('"id"')\" max=\"100\" min=\"0\" type=\"range\" value=\""+status*100+"\"><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\""+id+"\">"+name+"</p><p id=\""+id+"status\">Status</p></a><p class=\"slidervalue\" id=\""+id+"sliderValue\">"+value*100+"%</p></td>";
+            html = document.getElementById('actions');
+            html.innerHTML(text);
         }
         
         /*
@@ -214,7 +219,7 @@
             <th>4</th>
             <th>5</th>
         </tr>
-        <tr>
+        <tr id="actions">
             <td class="switch" id="ID">
                 <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
                 <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
