@@ -5,9 +5,11 @@ import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
+import com.fasterxml.jackson.core.JsonParseException
+import org.json4s
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-
+import org.json4s.JsonDSL._
 
 
 
@@ -19,15 +21,18 @@ object websocket {
 
   def listen(): Flow[Message, Message, NotUsed] = {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
+      try {
       val msgText = msg.asTextMessage.getStrictText
       val json = parse(msgText)
-      println(msgText)
       val commandtype = json \ "Command"
       val args = json \ "Args"
-      commandtype.toString.toLowerCase match {
+      commandtype.extract[String].toLowerCase match {
         case "on" => uiControl.receiveCommand(args.extract[commandOn])
         case "off" => uiControl.receiveCommand(args.extract[commandOff])
-        case _ => sendMsg(s""""error":"Unknown Command","Command","$msgText"""")
+        case e => val json: json4s.JObject = ("error"-> "Unknow Command")~("command"-> e)~("msg"->msgText); sendMsg(json)
+      }}
+      catch {
+        case e:JsonParseException => sendMsg(("error"->"JsonParseExeption")~("exeption"-> e.toString ))
       }
 
 
@@ -43,6 +48,10 @@ object websocket {
 
   def sendMsg(text: String): Unit = {
     for (connection <- browserConnections) connection(TextMessage.Strict(text))
+  }
+
+  def sendMsg(msg: json4s.JObject) {
+    for (connection <- browserConnections) connection(TextMessage.Strict(compact(render(msg))))
   }
 }
 
