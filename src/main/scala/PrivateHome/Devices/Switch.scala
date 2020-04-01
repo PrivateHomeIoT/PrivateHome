@@ -3,6 +3,7 @@ package PrivateHome.Devices
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.{data, editXML}
+import PrivateHome.data.idTest
 
 import scala.xml._
 
@@ -10,15 +11,12 @@ import scala.xml._
  * The general Switch class
  *
  * @param setupID         an unique Base64 ID
- * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
+ * @param KeepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
+abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
     var xMl = new editXML
-
-    if (setupID.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
-    if (!setupID.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
-    if (data.IDs.contains(id())) throw new IllegalArgumentException("""ID is already used""")
+    idTest(setupID)
 
     private var _status:Float = 0
 
@@ -33,12 +31,14 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
      */
     def Status(state: Float): Unit = {
         _status = state
-        if (setupKeepStatus) xMl.setStatus(id(), state)
+        if (KeepStatus) xMl.setStatus(id, state)
     }
 
-    def id(): String = setupID
+    def id: String = setupID
 
-    def Status_(): Float = _status
+    def switchtype: String
+
+    def Status: Float = _status
 
     def toXml: Node
 

@@ -38,4 +38,10 @@ object data {
 
   val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
 
+  def idTest(id:String):Unit ={
+    if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
+    if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
+    if (data.IDs.contains(id))throw new IllegalArgumentException("""ID is already used""")
+  }
+
 }
