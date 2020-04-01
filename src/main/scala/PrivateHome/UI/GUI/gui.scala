@@ -1,6 +1,6 @@
 package PrivateHome.UI.GUI
 
-import PrivateHome.GUI.Websocket.websocket
+import PrivateHome.UI.Websocket.websocket
 import PrivateHome.data
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
