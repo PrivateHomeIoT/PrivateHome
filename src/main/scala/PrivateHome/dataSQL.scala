@@ -110,6 +110,16 @@ object dataSQL {
     devices = devices.concat(Map((device.id,device)))
   }
 
+
+  /**
+   * An better access to the devices Map
+   * @param deviceID The ID of the switch you want
+   * @return the Switch object the you requested
+   */
+  def getDevice(deviceID:String): Switch = {
+    devices(deviceID)
+  }
+
   /**
    * Message class for devices Table
    * @param id ID of the Device in the Format [0-9a-Z] five character long

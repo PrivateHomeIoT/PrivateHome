@@ -5,7 +5,6 @@ import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.Switch
 import org.scalatest.FunSuite
 
-import scala.collection.mutable
 
 class dataSQLTest extends FunSuite {
 
@@ -52,6 +51,13 @@ class dataSQLTest extends FunSuite {
     var expected: Map[String, Switch] = Map()
     expected = expected + (("abcde", mqttSwitch("abcde", keepStatus = false)))
     dataSQL.fillDevices()
+  }
+
+  test("Test: getDevice") {
+    dataSQL.create()
+    var switch = mqttSwitch("abcde", keepStatus = false)
+    dataSQL.addDevice(switch)
+    assertResult(dataSQL.getDevice("abcde"))(switch)
   }
 
 
