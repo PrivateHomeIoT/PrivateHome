@@ -32,7 +32,6 @@ object dataSQL {
 
   /**
    * Generates the Table strucktures for the Database
-   * @return a Boolean defining the succes of the Creation
    */
   def create(): Unit = {
 
@@ -92,7 +91,10 @@ object dataSQL {
   }
 
 
-
+  /**
+   * Adds an Switch to the DB witch all needed under Tabels
+   * @param device The device that should be added
+   */
   def addDevice(device: Switch): Unit = {
     var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
@@ -107,17 +109,36 @@ object dataSQL {
     }
   }
 
+  /**
+   * Message class for devices Table
+   * @param id ID of the Device in the Format [0-9a-Z] five character long
+   * @param name The name of the Device any String lenght in the Table 64 character
+   * @param switchtype A String identification of the Switch type max length 16 character
+   * @param state an foatingpoint representation of the State when keepState is true 4 decimalpoints long
+   * @param keepState Boolean that indicates if the State should be restored at turn on
+   */
   case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
 
+  /**
+   * Message class for Mhz Table only needed when Switchtype is MQTT
+   * @param id ID of the Device in the Format [0-9a-Z] five character long
+   * @param systemcode Systemcode for the Mhzreciever
+   * @param unitcode Unitcode for the Mhzreciever
+   */
   case class Mhz(id: String, systemcode: String, unitcode: String)
 
+  /**
+   * Syntaxsupport Object for devices table
+   */
   object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
       rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"))
   }
-
+/**
+   * Syntaxsupport Object for Mhz table
+   */
   object Mhz extends SQLSyntaxSupport[Mhz] {
     override val tableName = "Mhz"
 
