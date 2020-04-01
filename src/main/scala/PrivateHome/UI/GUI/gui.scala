@@ -20,7 +20,7 @@ object gui {
     handleWebSocketMessages(websocket.listen())
   }
 
-  Http().bindAndHandle(route, "192.168.2.100", data.settings("port")).onComplete {
+  Http().bindAndHandle(route, "0.0.0.0", data.settings("port")).onComplete {
 
     case Success(binding) => println(s"Listening on ${binding.localAddress.getHostString}:${binding.localAddress.getPort}.")
     case Failure(exception) => throw exception
