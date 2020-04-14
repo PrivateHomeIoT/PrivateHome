@@ -7,7 +7,7 @@ object uiControl {
         command match {
             case c:commandOn => devices(c.id).on(c.percent)
             case c:commandOff => devices(c.id).off()
-            case c:commandGetDevice =>
+            case c:commandGetDevices =>
         }
 
     }

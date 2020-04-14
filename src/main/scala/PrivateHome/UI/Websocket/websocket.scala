@@ -1,6 +1,6 @@
 package PrivateHome.UI.Websocket
 
-import PrivateHome.UI.{commandOff, commandOn, uiControl}
+import PrivateHome.UI.{commandGetDevices, commandOff, commandOn, commandSettingsDevice, commandSettingsMain, uiControl}
 import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.OverflowStrategy
@@ -26,13 +26,17 @@ object websocket {
       val json = parse(msgText)
       val commandtype = json \ "Command"
       val args = json \ "Args"
-      commandtype.extract[String].toLowerCase match {
+      commandtype.extract[String] match {
         case "on" => uiControl.receiveCommand(args.extract[commandOn])
         case "off" => uiControl.receiveCommand(args.extract[commandOff])
+        case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
+        case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
+        case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
         case e => val json: json4s.JObject = ("error"-> "Unknow Command")~("command"-> e)~("msg"->msgText); sendMsg(json)
       }}
       catch {
         case e:JsonParseException => sendMsg(("error"->"JsonParseExeption")~("exeption"-> e.toString ))
+        case e => sendMsg(("error"->e.getCause.toString)~("exeption"-> e.toString ))
       }
 
 

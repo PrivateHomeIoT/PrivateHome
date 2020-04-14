@@ -13,5 +13,12 @@ case class commandOff(id: String) extends Command {
     idTest(id)
 }
 
-case class commandGetDevice() extends Command
+case class commandGetDevices() extends Command
+
+case class commandSettingsMain(setting: String, value: AnyVal) extends Command
+
+case class commandSettingsDevice(id: String, setting: String, value: AnyVal) extends Command {
+    idTest(id)
+
+}
 
