@@ -43,6 +43,8 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
 
     def toXml: Node
 
+    def keepStatus: Boolean = setupKeepStatus
+
 }
 
 object Switch {
