@@ -3,6 +3,7 @@ package PrivateHome.Devices
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.{data, editXML}
+import PrivateHome.data.idTest
 
 import scala.xml._
 
@@ -31,7 +32,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
      */
     def Status(state: Float): Unit = {
         _status = state
-        if (setupKeepStatus) xMl.setStatus(id(), state)
+        if (setupKeepStatus) xMl.setStatus(id, state)
     }
 
     def id: String = setupID
