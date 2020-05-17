@@ -110,6 +110,18 @@ object dataSQL {
     devices = devices.concat(Map((device.id,device)))
   }
 
+  /**
+   * An map containing all settings
+   */
+  val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
+  //ToDo: add an settings XML
+  //ToDo: add support for Settingschanges
+
+  def idTest(id:String):Unit ={
+    if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
+    if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
+    if (data.IDs.contains(id))throw new IllegalArgumentException("""ID is already used""")
+  }
 
   /**
    * An better access to the devices Map
