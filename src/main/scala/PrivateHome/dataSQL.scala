@@ -27,7 +27,6 @@ object dataSQL {
   ConnectionPool.singleton("jdbc:h2:./daten/hello", "user", "pass")
 
   implicit val session: AutoSession.type = AutoSession
-  // for now, retrieves all data as Map value
 
 
   /**
