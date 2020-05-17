@@ -7,8 +7,10 @@ import scalikejdbc._
 
 
 object dataSQL {
-
-  var devices:Map[String, Switch] = Map()
+  /**
+   * An map containing all settings
+   */
+  val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
 
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
@@ -27,7 +29,7 @@ object dataSQL {
   ConnectionPool.singleton("jdbc:h2:./daten/hello", "user", "pass")
 
   implicit val session: AutoSession.type = AutoSession
-
+  var devices: Map[String, Switch] = Map()
 
   /**
    * Generates the Table strucktures for the Database
@@ -39,7 +41,8 @@ object dataSQL {
          DROP TABLE IF EXISTS `Devices`;""".execute().apply()
 
 
-    val devices = sql"""
+    val devices =
+      sql"""
                     CREATE TABLE `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
@@ -48,7 +51,6 @@ object dataSQL {
                     `keepState` boolean NOT NULL,
                     PRIMARY KEY (`id`))
          """.execute.apply()
-
 
 
     sql"""
@@ -66,7 +68,6 @@ object dataSQL {
 
   }
 
-
   /**
    * Fills the devices Map with all Devices from the DB and turns all Switches with keepState on
    */
@@ -77,21 +78,27 @@ object dataSQL {
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
         case "MQTT" => devices += ((d.id, mqttSwitch(d.id, keepStatus = d.keepState)))
-          if (d.keepState) {devices(d.id).on(d.state)}
+          if (d.keepState) {
+            devices(d.id).on(d.state)
+          }
         case "433Mhz" =>
           val m = Mhz.syntax("m")
-          val data = withSQL{ select.from(Mhz as m).where.eq(m.id,d.id)}.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id,mhzSwitch(d.id,d.keepState,data.systemcode,data.unitcode)))
-          if (d.keepState) {devices(d.id).on(d.state)}
+          val data = withSQL {
+            select.from(Mhz as m).where.eq(m.id, d.id)
+          }.map(rs => Mhz(rs)).single().apply().get
+          devices += ((d.id, mhzSwitch(d.id, d.keepState, data.systemcode, data.unitcode)))
+          if (d.keepState) {
+            devices(d.id).on(d.state)
+          }
       }
 
     })
 
   }
 
-
   /**
    * Adds an Switch to the DB witch all needed under Tables
+   *
    * @param device The device that should be added
    */
   def addDevice(device: Switch): Unit = {
@@ -106,46 +113,44 @@ object dataSQL {
       case _: mqttSwitch =>
       case _ => throw wrongclass
     }
-    devices = devices.concat(Map((device.id,device)))
+    devices = devices.concat(Map((device.id, device)))
   }
-
-  /**
-   * An map containing all settings
-   */
-  val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
   //ToDo: add an settings XML
   //ToDo: add support for Settingschanges
 
-  def idTest(id:String):Unit ={
+  def idTest(id: String): Unit = {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
-    if (data.IDs.contains(id))throw new IllegalArgumentException("""ID is already used""")
+    if (data.IDs.contains(id)) throw new IllegalArgumentException("""ID is already used""")
   }
 
   /**
    * An better access to the devices Map
+   *
    * @param deviceID The ID of the switch you want
    * @return the Switch object the you requested
    */
-  def getDevice(deviceID:String): Switch = {
+  def getDevice(deviceID: String): Switch = {
     devices(deviceID)
   }
 
   /**
    * Message class for devices Table
-   * @param id ID of the Device in the Format [0-9a-Z] five character long
-   * @param name The name of the Device any String lenght in the Table 64 character
+   *
+   * @param id         ID of the Device in the Format [0-9a-Z] five character long
+   * @param name       The name of the Device any String lenght in the Table 64 character
    * @param switchtype A String identification of the Switch type max length 16 character
-   * @param state an foatingpoint representation of the State when keepState is true 4 decimalpoints long
-   * @param keepState Boolean that indicates if the State should be restored at turn on
+   * @param state      an foatingpoint representation of the State when keepState is true 4 decimalpoints long
+   * @param keepState  Boolean that indicates if the State should be restored at turn on
    */
   case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
-   * @param id ID of the Device in the Format [0-9a-Z] five character long
+   *
+   * @param id         ID of the Device in the Format [0-9a-Z] five character long
    * @param systemcode Systemcode for the Mhzreciever
-   * @param unitcode Unitcode for the Mhzreciever
+   * @param unitcode   Unitcode for the Mhzreciever
    */
   case class Mhz(id: String, systemcode: String, unitcode: String)
 
@@ -158,7 +163,8 @@ object dataSQL {
     def apply(rs: WrappedResultSet) = new Device(
       rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"))
   }
-/**
+
+  /**
    * Syntaxsupport Object for Mhz table
    */
   object Mhz extends SQLSyntaxSupport[Mhz] {
