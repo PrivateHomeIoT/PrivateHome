@@ -1,16 +1,15 @@
 package PrivateHome.UI.Websocket
 
-import PrivateHome.UI.{commandGetDevices, commandOff, commandOn, commandSettingsDevice, commandSettingsMain, uiControl}
+import PrivateHome.UI._
 import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
 import com.fasterxml.jackson.core.JsonParseException
 import org.json4s
+import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.json4s.JsonDSL._
-
 
 
 object websocket {
@@ -22,21 +21,22 @@ object websocket {
   def listen(): Flow[Message, Message, NotUsed] = {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
-      val msgText = msg.asTextMessage.getStrictText
-      val json = parse(msgText)
-      val commandtype = json \ "Command"
-      val args = json \ "Args"
-      commandtype.extract[String] match {
-        case "on" => uiControl.receiveCommand(args.extract[commandOn])
-        case "off" => uiControl.receiveCommand(args.extract[commandOff])
-        case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
-        case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
-        case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
-        case e => val json: json4s.JObject = ("error"-> "Unknow Command")~("command"-> e)~("msg"->msgText); sendMsg(json)
-      }}
+        val msgText = msg.asTextMessage.getStrictText
+        val json = parse(msgText)
+        val commandtype = json \ "Command"
+        val args = json \ "Args"
+        commandtype.extract[String] match {
+          case "on" => uiControl.receiveCommand(args.extract[commandOn])
+          case "off" => uiControl.receiveCommand(args.extract[commandOff])
+          case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
+          case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
+          case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
+          case e => val json: json4s.JObject = ("error" -> "Unknow Command") ~ ("command" -> e) ~ ("msg" -> msgText); sendMsg(json)
+        }
+      }
       catch {
-        case e:JsonParseException => sendMsg(("error"->"JsonParseExeption")~("exeption"-> e.toString ))
-        case e => sendMsg(("error"->e.getCause.toString)~("exeption"-> e.toString ))
+        case e: JsonParseException => sendMsg(("error" -> "JsonParseExeption") ~ ("exeption" -> e.toString))
+        case e => sendMsg(("error" -> e.getCause.toString) ~ ("exeption" -> e.toString))
       }
 
 
@@ -50,12 +50,12 @@ object websocket {
     })
   }
 
-  def sendMsg(text: String): Unit = {
-    for (connection <- browserConnections) connection(TextMessage.Strict(text))
-  }
-
   def sendMsg(msg: json4s.JObject) {
     for (connection <- browserConnections) connection(TextMessage.Strict(compact(render(msg))))
+  }
+
+  def sendMsg(text: String): Unit = {
+    for (connection <- browserConnections) connection(TextMessage.Strict(text))
   }
 }
 

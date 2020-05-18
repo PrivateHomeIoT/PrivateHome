@@ -22,3 +22,5 @@ case class commandSettingsDevice(id: String, setting: String, value: AnyVal) ext
 
 }
 
+case class commandAddDevice(id: String, switchtype: String)
+
