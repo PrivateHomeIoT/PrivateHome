@@ -26,7 +26,7 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:./daten/hello", "user", "pass")
+  ConnectionPool.singleton("jdbc:h2:./daten/Devices", "user", "pass")
 
   implicit val session: AutoSession.type = AutoSession
   var devices: Map[String, Switch] = Map()
