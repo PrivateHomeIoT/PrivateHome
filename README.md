@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a SmartHome project focused on design, security and expandability. It is programmed in Scale.
+This is a SmartHome project focused on design, security and expandability. It is programmed in Scala.
 
 ## Status
 
