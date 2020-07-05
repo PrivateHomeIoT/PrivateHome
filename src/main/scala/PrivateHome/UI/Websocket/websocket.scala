@@ -14,7 +14,7 @@ import org.json4s.jackson.JsonMethods._
 
 object websocket {
 
-  implicit val formats = DefaultFormats
+  implicit val formats: DefaultFormats.type = DefaultFormats
 
   private var browserConnections: List[TextMessage => Unit] = List()
 
@@ -23,20 +23,20 @@ object websocket {
       try {
         val msgText = msg.asTextMessage.getStrictText
         val json = parse(msgText)
-        val commandtype = json \ "Command"
+        val commandType = json \ "Command"
         val args = json \ "Args"
-        commandtype.extract[String] match {
+        commandType.extract[String] match {
           case "on" => uiControl.receiveCommand(args.extract[commandOn])
           case "off" => uiControl.receiveCommand(args.extract[commandOff])
           case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
           case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
           case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
-          case e => val json: json4s.JObject = ("error" -> "Unknow Command") ~ ("command" -> e) ~ ("msg" -> msgText); sendMsg(json)
+          case e => val json: json4s.JObject = ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText); sendMsg(json)
         }
       }
       catch {
-        case e: JsonParseException => sendMsg(("error" -> "JsonParseExeption") ~ ("exeption" -> e.toString))
-        case e => sendMsg(("error" -> e.getCause.toString) ~ ("exeption" -> e.toString))
+        case e: JsonParseException => sendMsg(("error" -> "JsonParseException") ~ ("exception" -> e.toString))
+        case e => sendMsg(("error" -> e.getCause.toString) ~ ("exception" -> e.toString))
       }
 
 
