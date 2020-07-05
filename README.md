@@ -1,22 +1,22 @@
 # PrivateHome
 
-## Beschreibung
+## Description
 
-Dies ist ein SmartHome-Projekt, welches auf Design, Sicherheit und Erweiterbarkeit ausgelegt ist. Es wird in Scala programmiert.
+This is a SmartHome project focused on design, security and expandability. It is programmed in Scale.
 
 ## Status
 
-Wir sind noch in der Entwicklungsphase. Hier ist ein Status von dem, was geplant ist und was schon umgesetzt wurde.
+This is still a work in progress. The following list represents our current status and planned goals.
 
 - [ ] Web-GUI
 - [ ] Android-App
 - [ ] iOS-App
 - [ ] MQTT
 - [ ] 443 MHz 
-- [ ] Infrarot
+- [ ] Infrared
 - [ ] ZigBee
 - [ ] Alexa 
 - [ ] Apple Home
 - [ ] Google Assistant
-- [ ] Setupassistent
-- [ ] Einrichtungsassistent für Geräte
+- [ ] Setup assistent
+- [ ] Setup assistent for devices
