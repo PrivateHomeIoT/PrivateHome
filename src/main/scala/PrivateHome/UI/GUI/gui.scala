@@ -13,15 +13,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 object gui {
-
-  var run = true
-
   implicit val actorSystem: ActorSystem = ActorSystem("system")
   val defaultSettings: ServerSettings = ServerSettings(actorSystem)
   val customSettings: WebSocketSettings = defaultSettings.websocketSettings.withPeriodicKeepAliveMaxIdle(1.second)
   val customServerSettings: ServerSettings = defaultSettings.withWebsocketSettings(customSettings)
-
-
   val route: Route = path("ws") {
     handleWebSocketMessages(websocket.listen())
   }
