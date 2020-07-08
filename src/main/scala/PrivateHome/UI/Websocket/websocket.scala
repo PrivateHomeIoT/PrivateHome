@@ -11,14 +11,14 @@ import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-
 object websocket {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
-  private var browserConnections: List[TextMessage => Unit] = List()
 
-  def listen(): Flow[Message, Message, NotUsed] = {
+  private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
+
+  def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
         val msgText = msg.asTextMessage.getStrictText
@@ -45,17 +45,22 @@ object websocket {
     val outbound: Source[Message, SourceQueueWithComplete[Message]] = Source.queue[Message](16, OverflowStrategy.fail)
 
     Flow.fromSinkAndSourceMat(inbound, outbound)((_, outboundMat) => {
-      browserConnections ::= outboundMat.offer
+      //outboundMat.offer is an access to the outbound Source of the Flow (returning to the Client)
+      ConnectionMap += websocketId -> outboundMat.offer
       NotUsed
     })
   }
 
-  def sendMsg(msg: json4s.JObject) {
-    for (connection <- browserConnections) connection(TextMessage.Strict(compact(render(msg))))
+  def broadcastMsg(msg: json4s.JObject) {
+    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
   }
 
-  def sendMsg(text: String): Unit = {
-    for (connection <- browserConnections) connection(TextMessage.Strict(text))
+  def broadcastMsg(text: String): Unit = {
+    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(text))
+  }
+
+  def sendMsg(id: String, msg: json4s.JObject): Unit = {
+    ConnectionMap(id).apply(TextMessage.Strict(compact(render(msg))))
   }
 }
 

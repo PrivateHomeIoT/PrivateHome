@@ -4,12 +4,12 @@ import PrivateHome.UI.Websocket.websocket
 import PrivateHome.data
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives.{handleWebSocketMessages, path}
+import akka.http.scaladsl.server.Directives.{extractRequest, handleWebSocketMessages, path}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.{ServerSettings, WebSocketSettings}
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 object gui {
@@ -18,7 +18,9 @@ object gui {
   val customSettings: WebSocketSettings = defaultSettings.websocketSettings.withPeriodicKeepAliveMaxIdle(1.second)
   val customServerSettings: ServerSettings = defaultSettings.withWebsocketSettings(customSettings)
   val route: Route = path("ws") {
-    handleWebSocketMessages(websocket.listen())
+    extractRequest { request =>
+      handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
+    }
   }
 
   Http().bindAndHandle(route, "0.0.0.0", data.settings("port"), settings = customServerSettings).onComplete {
