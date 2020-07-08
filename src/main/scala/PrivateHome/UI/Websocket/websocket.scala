@@ -25,18 +25,19 @@ object websocket {
         val json = parse(msgText)
         val commandType = json \ "Command"
         val args = json \ "Args"
-        commandType.extract[String] match {
+        val answer = commandType.extract[String] match {
           case "on" => uiControl.receiveCommand(args.extract[commandOn])
           case "off" => uiControl.receiveCommand(args.extract[commandOff])
           case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
           case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
           case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
-          case e => val json: json4s.JObject = ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText); sendMsg(json)
+          case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
         }
+        sendMsg(websocketId, answer.asInstanceOf[JObject])
       }
       catch {
-        case e: JsonParseException => sendMsg(("error" -> "JsonParseException") ~ ("exception" -> e.toString))
-        case e => sendMsg(("error" -> e.getCause.toString) ~ ("exception" -> e.toString))
+        case exception: JsonParseException => sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+        case exception => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
 
 
@@ -55,12 +56,12 @@ object websocket {
     for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
   }
 
-  def broadcastMsg(text: String): Unit = {
-    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(text))
-  }
-
   def sendMsg(id: String, msg: json4s.JObject): Unit = {
     ConnectionMap(id).apply(TextMessage.Strict(compact(render(msg))))
+  }
+
+  def broadcastMsg(text: String): Unit = {
+    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(text))
   }
 }
 
