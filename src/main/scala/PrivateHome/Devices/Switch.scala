@@ -15,8 +15,6 @@ import scala.xml._
  */
 
 abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
-    var xMl = new editXML
-
     idTest(setupID)
 
     private var _status:Float = 0
@@ -32,7 +30,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
      */
     def Status(state: Float): Unit = {
         _status = state
-        if (setupKeepStatus) xMl.setStatus(id, state)
+        if (setupKeepStatus) data.saveStatus(id,state)
     }
 
     def id: String = setupID

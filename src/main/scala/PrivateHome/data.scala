@@ -7,6 +7,13 @@ import scalikejdbc._
 
 
 object data {
+  def saveStatus(id:String,state: Float):Unit = {
+    val d = Device.syntax("d")
+    withSQL{
+      update(Device).set(Device.column.state->state).where.eq(Device.column.id,id)
+    }.update().apply()
+  }
+
   /**
    * An map containing all settings
    */
