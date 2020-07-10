@@ -6,58 +6,58 @@ import PrivateHome.Devices.Switch
 import org.scalatest.FunSuite
 
 
-class dataSQLTest extends FunSuite {
+class dataTest extends FunSuite {
 
 
   test("testCreate") {
-    dataSQL.create()
+    data.create()
   }
 
   test("At Create empty") {
     val expected: Map[String, Switch] = Map()
-    dataSQL.create()
-    dataSQL.fillDevices()
-    assertResult(expected)(dataSQL.devices)
+    data.create()
+    data.fillDevices()
+    assertResult(expected)(data.devices)
   }
 
   test("Test: Add one Device") {
-    dataSQL.create()
-    dataSQL.addDevice(mqttSwitch("abcde", keepStatus = false))
+    data.create()
+    data.addDevice(mqttSwitch("abcde", keepStatus = false))
     var expected: Map[String, Switch] = Map()
     expected = expected + (("abcde", mqttSwitch("abcde", keepStatus = false)))
-    dataSQL.fillDevices()
-    assertResult(expected)(dataSQL.devices)
+    data.fillDevices()
+    assertResult(expected)(data.devices)
 
   }
 
   test("Test: Add more Devices") {
-    dataSQL.create()
+    data.create()
     var expected: Map[String, Switch] = Map(("abcde", mqttSwitch("abcde", keepStatus = true)),("hkIKH",mhzSwitch("hkIKH",_keepStatus = false,"10101","01010")))
     val expected2: Map[String, Switch] = Map(("kijhe",mhzSwitch("kijhe",_keepStatus = false,"11111","00000")),("testd",mqttSwitch("testd",keepStatus = false)))
-    expected.foreach(d => dataSQL.addDevice(d._2))
+    expected.foreach(d => data.addDevice(d._2))
 
-    dataSQL.fillDevices()
-    assertResult(expected)(dataSQL.devices)
-    expected2.foreach(d => dataSQL.addDevice(d._2))
+    data.fillDevices()
+    assertResult(expected)(data.devices)
+    expected2.foreach(d => data.addDevice(d._2))
     expected = expected.concat(expected2)
-    dataSQL.fillDevices()
-    assertResult(expected)(dataSQL.devices)
+    data.fillDevices()
+    assertResult(expected)(data.devices)
 
   }
 
   test("Save State") {
-    dataSQL.create()
-    dataSQL.addDevice(mqttSwitch("abcde", keepStatus = false))
+    data.create()
+    data.addDevice(mqttSwitch("abcde", keepStatus = false))
     var expected: Map[String, Switch] = Map()
     expected = expected + (("abcde", mqttSwitch("abcde", keepStatus = false)))
-    dataSQL.fillDevices()
+    data.fillDevices()
   }
 
   test("Test: getDevice") {
-    dataSQL.create()
+    data.create()
     var switch = mqttSwitch("abcde", keepStatus = false)
-    dataSQL.addDevice(switch)
-    assertResult(dataSQL.getDevice("abcde"))(switch)
+    data.addDevice(switch)
+    assertResult(data.getDevice("abcde"))(switch)
   }
 
 
