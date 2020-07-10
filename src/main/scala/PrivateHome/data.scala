@@ -61,6 +61,7 @@ object data {
          """.execute.apply()
 
 
+
     sql"""
            CREATE TABLE `Mhz` (
            `id` varchar(5) NOT NULL,
@@ -85,7 +86,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, keepStatus = d.keepState)))
+        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
