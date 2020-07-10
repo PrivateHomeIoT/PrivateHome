@@ -7,17 +7,11 @@ import scalikejdbc._
 
 
 object data {
-  def saveStatus(id:String,state: Float):Unit = {
-    val d = Device.syntax("d")
-    withSQL{
-      update(Device).set(Device.column.state->state).where.eq(Device.column.id,id)
-    }.update().apply()
-  }
-
   /**
    * An map containing all settings
    */
   val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
+  var devices: Map[String, Switch] = Map()
 
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
@@ -36,7 +30,6 @@ object data {
   ConnectionPool.singleton("jdbc:h2:./daten/Devices", "user", "pass")
 
   implicit val session: AutoSession.type = AutoSession
-  var devices: Map[String, Switch] = Map()
   var mhzId: Map[String, String] = Map()
 
   /**
@@ -59,7 +52,6 @@ object data {
                     `keepState` boolean NOT NULL,
                     PRIMARY KEY (`id`))
          """.execute.apply()
-
 
 
     sql"""
@@ -96,7 +88,7 @@ object data {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
           devices += ((d.id, mhzSwitch(d.id, d.keepState, data.systemcode, data.unitcode)))
-          mhzId += ((data.systemcode + data.unitcode,d.id))
+          mhzId += ((data.systemcode + data.unitcode, d.id))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
@@ -126,6 +118,19 @@ object data {
     }
     devices = devices.concat(Map((device.id, device)))
   }
+
+  /**
+   * Saves the Status of an switch for the keepStatus function
+   * @param id the ID of the switch to change
+   * @param state the new state
+   */
+  def saveStatus(id: String, state: Float): Unit = {
+    val d = Device.syntax("d")
+    withSQL {
+      update(Device).set(Device.column.state -> state).where.eq(Device.column.id, id)
+    }.update().apply()
+  }
+
   //ToDo: add an settings XML
   //ToDo: add support for Settingschanges
 
