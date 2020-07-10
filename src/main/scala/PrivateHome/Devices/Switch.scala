@@ -11,11 +11,10 @@ import scala.xml._
  * The general Switch class
  *
  * @param setupID         an unique Base64 ID
- * @param KeepStatus toggles if the Switch should save State over program restart (failure)
+ * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
-    var xMl = new editXML
+abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
     idTest(setupID)
 
     private var _status:Float = 0
@@ -31,7 +30,7 @@ abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
      */
     def Status(state: Float): Unit = {
         _status = state
-        if (KeepStatus) xMl.setStatus(id, state)
+        if (setupKeepStatus) data.saveStatus(id,state)
     }
 
     def id: String = setupID
@@ -41,6 +40,8 @@ abstract class Switch(private val setupID: String, val KeepStatus: Boolean) {
     def Status: Float = _status
 
     def toXml: Node
+
+    def keepStatus: Boolean = setupKeepStatus
 
 }
 

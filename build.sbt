@@ -28,4 +28,5 @@ libraryDependencies ++= Seq(
   "com.h2database"  %  "h2"                % "1.4.200",
   "org.scalikejdbc" %% "scalikejdbc-config"  % "3.4.0",
   "ch.qos.logback"  %  "logback-classic"   % "1.2.3")
+
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"

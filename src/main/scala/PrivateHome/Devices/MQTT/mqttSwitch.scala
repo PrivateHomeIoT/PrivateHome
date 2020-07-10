@@ -4,7 +4,7 @@ import PrivateHome.Devices.Switch
 
 import scala.xml.Node
 
-case class mqttSwitch(ID: String, keepStatus: Boolean) extends Switch(ID, keepStatus) {
+case class mqttSwitch(ID: String, setupKeepStatus: Boolean) extends Switch(ID, setupKeepStatus) {
 
   /**
    * This method turns on the MQTT-Device.

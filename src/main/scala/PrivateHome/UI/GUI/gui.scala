@@ -1,7 +1,7 @@
 package PrivateHome.UI.GUI
 
 import PrivateHome.UI.Websocket.websocket
-import PrivateHome.data
+import PrivateHome.{data, settings}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.{extractRequest, handleWebSocketMessages, path}
@@ -24,6 +24,7 @@ object gui {
   }
 
   Http().bindAndHandle(route, "0.0.0.0", data.settings("port"), settings = customServerSettings).onComplete {
+
 
     case Success(binding) => println(s"Listening on ${binding.localAddress.getHostString}:${binding.localAddress.getPort}/ws")
     case Failure(exception) => throw exception
