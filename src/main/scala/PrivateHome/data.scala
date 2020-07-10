@@ -10,7 +10,6 @@ object data {
   /**
    * An map containing all settings
    */
-  val settings: Map[String, Int] = Map(("port", 2888), ("ip", 565))
   var devices: Map[String, Switch] = Map()
 
 
@@ -27,7 +26,7 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:./daten/Devices", "user", "pass")
+  ConnectionPool.singleton("jdbc:h2:./daten/Devices", settings.database.userName, settings.database.password)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
@@ -131,7 +130,6 @@ object data {
     }.update().apply()
   }
 
-  //ToDo: add an settings XML
   //ToDo: add support for Settingschanges
 
   def idTest(id: String): Unit = {
