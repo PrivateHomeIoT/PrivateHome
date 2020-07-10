@@ -32,11 +32,11 @@ object data {
   var mhzId: Map[String, String] = Map()
 
   /**
-   * Generates the Table strucktures for the Database
+   * Generates the table structures for the Database
    */
   def create(): Unit = {
 
-    // Drops old Tables to Delet Data and make it possible to regenerate them
+    // Drops old Tables to Delete Data and make it possible to regenerate them
     sql"""DROP TABLE IF EXISTS `Mhz`;
          DROP TABLE IF EXISTS `Devices`;""".execute().apply()
 
