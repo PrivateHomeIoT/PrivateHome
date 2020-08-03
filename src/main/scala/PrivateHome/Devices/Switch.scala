@@ -47,17 +47,20 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, nam
 
 object Switch {
     def apply(data: Node): Switch = {
+
         val switchType = (data \ "type").head.text
         println(switchType)
         switchType match {
             case "433MHz" => val systemCode = (data \ "systemCode").head.text
                 val unitCode = (data \ "unitCode").head.text
+                val name = (data \ "name").head.text
                 val KeepStatus = (data \ "keepStatus").head.text.toBoolean
                 val ID = (data \ "@id").text
-                mhzSwitch(ID, KeepStatus, systemCode, unitCode);
+                mhzSwitch(ID, KeepStatus,name, systemCode, unitCode);
             case "MQTT" => val id = (data \ "@id").text
                 val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-                mqttSwitch(id, KeepStatus)
+                val name = (data \ "name").head.text
+                mqttSwitch(id, KeepStatus,name)
             case _ => throw new IllegalArgumentException("Wrong Switch Type")
         }
     }
