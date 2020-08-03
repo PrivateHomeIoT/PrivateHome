@@ -77,7 +77,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState)))
+        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState,d.name)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
@@ -86,7 +86,7 @@ object data {
           val data = withSQL {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id, mhzSwitch(d.id, d.keepState, data.systemcode, data.unitcode)))
+          devices += ((d.id, mhzSwitch(d.id, d.keepState, data.systemcode, data.unitcode,d.name)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
           if (d.keepState) {
             devices(d.id).on(d.state)
@@ -132,10 +132,10 @@ object data {
 
   //ToDo: add support for Settingschanges
 
-  def idTest(id: String): Unit = {
+  def idTest(id: String,create:Boolean=false): Unit = {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
-    if (devices.contains(id)) throw new IllegalArgumentException("""ID is already used""")
+    if (create && devices.contains(id)) throw new IllegalArgumentException("""ID is already used""")
   }
 
   /**
