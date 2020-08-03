@@ -13,5 +13,24 @@ case class commandOff(id: String) extends Command {
     idTest(id)
 }
 
-case class commandGetDevice() extends Command
+case class commandGetDevices() extends Command
+
+case class commandSettingsMain(setting: String, value: AnyVal) extends Command
+
+case class commandSettingsDevice(id: String, setting: String, value: AnyVal) extends Command {
+    idTest(id)
+
+}
+
+case class commandAddDevice(id: String, switchType: String,name: String,systemCode: String,unitCode: String, controlType: String, keepState: Boolean) extends Command {
+    idTest(id,create = true)
+    switchType match {
+        case "mqtt" =>
+        case "433Mhz" =>
+            if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+            if (systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+            if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+            if (systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+    }
+}
 

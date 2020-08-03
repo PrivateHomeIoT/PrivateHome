@@ -2,6 +2,7 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
+import PrivateHome.UI.commandAddDevice
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
 
@@ -14,7 +15,7 @@ import scala.xml._
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
+abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, name:String) {
     idTest(setupID)
 
     private var _status:Float = 0
@@ -47,18 +48,28 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean) {
 
 object Switch {
     def apply(data: Node): Switch = {
+
         val switchType = (data \ "type").head.text
         println(switchType)
         switchType match {
             case "433MHz" => val systemCode = (data \ "systemCode").head.text
                 val unitCode = (data \ "unitCode").head.text
+                val name = (data \ "name").head.text
                 val KeepStatus = (data \ "keepStatus").head.text.toBoolean
                 val ID = (data \ "@id").text
-                mhzSwitch(ID, KeepStatus, systemCode, unitCode);
+                mhzSwitch(ID, KeepStatus,name, systemCode, unitCode);
             case "MQTT" => val id = (data \ "@id").text
                 val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-                mqttSwitch(id, KeepStatus)
+                val name = (data \ "name").head.text
+                mqttSwitch(id, KeepStatus,name)
             case _ => throw new IllegalArgumentException("Wrong Switch Type")
+        }
+    }
+
+    def apply(data: commandAddDevice): Switch = {
+        data.switchType match {
+            case "433Mhz" => mhzSwitch(data.id,data.keepState,data.name,data.systemCode,data.unitCode)
+            case "mqtt" => mqttSwitch(data.id,data.keepState,data.name)
         }
     }
 
