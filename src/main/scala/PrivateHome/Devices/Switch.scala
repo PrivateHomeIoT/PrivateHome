@@ -2,6 +2,7 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
+import PrivateHome.UI.commandAddDevice
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
 
@@ -62,6 +63,13 @@ object Switch {
                 val name = (data \ "name").head.text
                 mqttSwitch(id, KeepStatus,name)
             case _ => throw new IllegalArgumentException("Wrong Switch Type")
+        }
+    }
+
+    def apply(data: commandAddDevice): Switch = {
+        data.switchType match {
+            case "433Mhz" => mhzSwitch(data.id,data.keepState,data.name,data.systemCode,data.unitCode)
+            case "mqtt" => mqttSwitch(data.id,data.keepState,data.name)
         }
     }
 

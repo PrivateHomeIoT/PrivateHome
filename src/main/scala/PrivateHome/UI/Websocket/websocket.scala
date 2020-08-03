@@ -31,6 +31,7 @@ object websocket {
           case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
           case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
           case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
+          case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
           case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
         }
         sendMsg(websocketId, answer.asInstanceOf[JObject])
