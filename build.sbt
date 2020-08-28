@@ -6,7 +6,7 @@ version := "0.1"
 
 scalaVersion := "2.13.0"
 
-lazy val akkaVersion = "2.6.0-RC1"
+lazy val akkaVersion = "2.6.8"
 
 libraryDependencies ++= Seq(
   "com.pi4j" % "pi4j-core" % "1.2",
