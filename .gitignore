@@ -6,3 +6,4 @@ build.properties
 .DS_Store
 /daten
 *.db
+*~
