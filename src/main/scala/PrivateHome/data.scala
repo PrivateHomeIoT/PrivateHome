@@ -86,7 +86,7 @@ object data {
           val data = withSQL {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id, mhzSwitch(d.id, d.keepState, data.systemcode, data.unitcode,d.name)))
+          devices += ((d.id, mhzSwitch(d.id, d.keepState,d.name, data.systemcode, data.unitcode)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
           if (d.keepState) {
             devices(d.id).on(d.state)
