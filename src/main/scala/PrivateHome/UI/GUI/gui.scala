@@ -14,14 +14,13 @@ import scala.util.{Failure, Success}
 
 object gui {
   implicit val actorSystem: ActorSystem = ActorSystem("system")
-  val route: Route = path("ws") {
+  val websocketRoute: Route = path("ws") {
     extractRequest { request =>
       handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
     }
   }
-
-
-  Http().newServerAt("0.0.0.0",settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).bind(route)
+  
+  Http().newServerAt("0.0.0.0",settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).bind(websocketRoute)
 
 
 }
