@@ -7,3 +7,4 @@ case object settings {
 }
 case class http(port:Int)
 case class database(userName:String,password: String)
+
