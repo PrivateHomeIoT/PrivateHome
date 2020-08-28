@@ -6,7 +6,7 @@ case object settings {
   var database = new database(userName = "user", password = "pass")
 }
 
-private case class http(port:Int)
-private case class database(userName:String,password: String)
+case class http(port:Int)
+case class database(userName:String,password: String)
 
 
