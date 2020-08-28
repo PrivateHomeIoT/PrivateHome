@@ -23,7 +23,7 @@ object gui {
     }
   }
 
-  Http().bindAndHandle(route, "0.0.0.0", data.settings("port"), settings = customServerSettings).onComplete {
+  Http().bindAndHandle(route, "0.0.0.0", settings.http.port, settings = customServerSettings).onComplete {
 
 
     case Success(binding) => println(s"Listening on ${binding.localAddress.getHostString}:${binding.localAddress.getPort}/ws")
