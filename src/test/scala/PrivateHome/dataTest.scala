@@ -58,6 +58,7 @@ class dataTest extends AnyFunSuite {
   test("Test: getDevice") {
     data.create()
     val switch = mqttSwitch("abcde", false, "Test","slider")
+    val switch = mqttSwitch("abcde", false,"Test")
     data.addDevice(switch)
     assertResult(data.getDevice("abcde"))(switch)
   }
