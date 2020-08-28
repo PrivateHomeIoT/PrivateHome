@@ -1,10 +1,10 @@
 package PrivateHome.UI
 
 import PrivateHome.Devices.Switch
-import PrivateHome.data.devices
 import PrivateHome.data
+import PrivateHome.data.devices
 import org.json4s.JsonAST
-import org.json4s.JsonAST.{JField, JObject, JValue}
+import org.json4s.JsonAST.{JField, JObject}
 import org.json4s.JsonDSL._
 
 object uiControl {
