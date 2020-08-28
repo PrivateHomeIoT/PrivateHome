@@ -12,7 +12,7 @@ object uiControl {
     command match {
       case c: commandOn => devices(c.id).on(c.percent)
       case c: commandOff => devices(c.id).off()
-      case c: commandGetDevices =>
+      case _: commandGetDevices =>
         val devicesJson: List[JsonAST.JObject] = List()
         for (device <- devices) {
           devicesJson.concat(List(("id" -> device._2.id) ~ ("status" -> device._2.Status)))
