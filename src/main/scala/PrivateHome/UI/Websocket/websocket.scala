@@ -15,13 +15,13 @@ object websocket {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
-
   private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
 
   def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
         val msgText = msg.asTextMessage.getStrictText
+        print(msgText) //TODO: Remove in production
         val json = parse(msgText)
         val commandType = json \ "Command"
         val args = json \ "Args"
@@ -40,8 +40,6 @@ object websocket {
         case exception: JsonParseException => sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
         case exception => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
-
-
     })
 
     val outbound: Source[Message, SourceQueueWithComplete[Message]] = Source.queue[Message](16, OverflowStrategy.fail)
