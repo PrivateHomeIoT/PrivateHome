@@ -15,7 +15,6 @@ object websocket {
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
-
   private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
 
   def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
