@@ -14,22 +14,15 @@ import scala.util.{Failure, Success}
 
 object gui {
   implicit val actorSystem: ActorSystem = ActorSystem("system")
-  val defaultSettings: ServerSettings = ServerSettings(actorSystem)
-  val customSettings: WebSocketSettings = defaultSettings.websocketSettings.withPeriodicKeepAliveMaxIdle(1.second)
-  val customServerSettings: ServerSettings = defaultSettings.withWebsocketSettings(customSettings)
   val route: Route = path("ws") {
     extractRequest { request =>
       handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
     }
   }
 
-  Http().bindAndHandle(route, "0.0.0.0", settings.http.port, settings = customServerSettings).onComplete {
 
+  Http().newServerAt("0.0.0.0",settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).bind(route)
 
-    case Success(binding) => println(s"Listening on ${binding.localAddress.getHostString}:${binding.localAddress.getPort}/ws")
-    case Failure(exception) => throw exception
-
-  }
 
 }
 
