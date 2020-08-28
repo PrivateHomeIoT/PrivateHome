@@ -24,7 +24,7 @@ case class commandSettingsDevice(id: String, setting: String, value: AnyVal) ext
 
 }
 
-case class commandAddDevice(id: String, switchType: String,name: String,systemCode: String,unitCode: String, controlType: String, keepState: Boolean) extends Command {
+case class commandAddDevice(id: String, switchType: String,name: String,systemCode: String="",unitCode: String="", controlType: String, keepState: Boolean) extends Command {
     idTest(id,create = true)
     switchType match {
         case "mqtt" =>
