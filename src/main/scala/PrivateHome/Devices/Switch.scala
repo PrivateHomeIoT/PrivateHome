@@ -15,7 +15,7 @@ import scala.xml._
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, name:String) {
+abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var name:String) {
     idTest(setupID)
 
     private var _status:Float = 0
