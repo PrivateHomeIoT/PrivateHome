@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % "10.2.0",
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "ch.qos.logback" % "logback-classic" % "1.2.3",
-  "org.scalatest" %% "scalatest" % "3.0.8" % Test
+  "org.scalatest" %% "scalatest" % "3.2.2" % Test
 )
 libraryDependencies += "com.pi4j" % "pi4j-parent" % "1.2"
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
