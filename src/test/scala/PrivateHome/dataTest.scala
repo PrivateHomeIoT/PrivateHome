@@ -7,11 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 
 class dataTest extends AnyFunSuite {
-<<<<<<< HEAD
-
   settings.database.path = "mem:devices"
-=======
->>>>>>> Upgraded scalatest
 
   settings.database.path = "mem:devices"
 
