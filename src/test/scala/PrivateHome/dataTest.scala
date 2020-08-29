@@ -13,6 +13,8 @@ class dataTest extends AnyFunSuite {
 =======
 >>>>>>> Upgraded scalatest
 
+  settings.database.path = "mem:devices"
+
 
   test("testCreate") {
     data.create()
