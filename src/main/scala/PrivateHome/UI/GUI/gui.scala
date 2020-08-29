@@ -18,12 +18,10 @@ object gui {
 
   Http().newServerAt("0.0.0.0",settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).bind(websocketRoute)
 
-
-  val httpRoute: Route =  {
+ val httpRoute: Route =  {
     getFromBrowseableDirectory(settings.http.path)
   }
   Http().newServerAt("0.0.0.0",settings.http.port).bind(httpRoute)
-
 
 }
 
