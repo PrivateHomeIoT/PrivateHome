@@ -8,6 +8,8 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class dataTest extends AnyFunSuite {
 
+  settings.database.path = "mem:devices"
+
 
   test("testCreate") {
     data.create()
