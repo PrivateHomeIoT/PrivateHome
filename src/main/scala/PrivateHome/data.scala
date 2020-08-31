@@ -49,6 +49,7 @@ object data {
                     `type` varchar(16) NOT NULL,
                     `state` decimal(5,4) NOT NULL,
                     `keepState` boolean NOT NULL,
+                    `controltype` varchar(16),
                     PRIMARY KEY (`id`))
          """.execute.apply()
 
@@ -77,7 +78,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState,d.name)))
+        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState,d.name,d.controlType)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
@@ -105,7 +106,7 @@ object data {
   def addDevice(device: Switch): Unit = {
     var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
-      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus)
+      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus,device.controlType)
     }.update.apply
     device match {
       case device: mhzSwitch => withSQL {
@@ -157,7 +158,7 @@ object data {
    * @param state      an foatingpoint representation of the State when keepState is true 4 decimalpoints long
    * @param keepState  Boolean that indicates if the State should be restored at turn on
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean,controlType: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -175,7 +176,7 @@ object data {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"))
+      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"),rs.string("controlType"))
   }
 
   /**
