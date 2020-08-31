@@ -1,10 +1,13 @@
 package PrivateHome.Devices.MQTT
 
 import PrivateHome.Devices.Switch
+import org.json4s.JsonDSL._
+import org.json4s.CustomSerializer
+import org.json4s.JsonAST.JObject
 
 import scala.xml.Node
 
-case class mqttSwitch(ID: String, setupKeepStatus: Boolean, _name: String) extends Switch(ID, setupKeepStatus, _name) {
+case class mqttSwitch(ID: String, setupKeepStatus: Boolean, _name: String, setupControlType:String) extends Switch(ID, setupKeepStatus, _name,setupControlType) {
 
   /**
    * This method turns on the MQTT-Device.
