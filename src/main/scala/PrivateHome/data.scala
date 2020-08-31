@@ -30,6 +30,9 @@ object data {
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
+  if(sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
+  fillDevices()
+
 
   /**
    * Generates the table structures for the Database
