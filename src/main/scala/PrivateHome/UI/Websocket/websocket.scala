@@ -46,7 +46,7 @@ object websocket {
           case exception: MappingException =>
             val rootException = exception.getCause
             sendMsg(websocketId, ("error" -> rootException.getCause.toString) ~ ("exception" -> rootException.toString))
-          case exception => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
+          case exception:Throwable => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
         }
 
 
