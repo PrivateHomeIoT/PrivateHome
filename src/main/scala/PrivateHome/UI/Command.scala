@@ -4,10 +4,10 @@ import PrivateHome.data.idTest
 
 class Command()
 
-case class commandOn(id: String, percent: Float) extends Command {
+case class commandOn(id: String, private var percent: String) extends Command {
     idTest(id)
-    print(id + "on")
-    if (0 > percent || percent > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
+    var percentint = percent.toFloat
+    if (0 > percentint || percentint > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
 }
 
 case class commandOff(id: String) extends Command {
