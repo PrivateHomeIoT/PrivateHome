@@ -5,6 +5,9 @@ import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.UI.commandAddDevice
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
+import org.json4s.JsonAST.JObject
+import org.json4s.{CustomSerializer, JsonAST}
+import org.json4s.JsonDSL._
 
 import scala.xml._
 
@@ -52,6 +55,12 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var
 
     def keepStatus: Boolean = setupKeepStatus
 
+
+
+    def serializer: JsonAST.JObject = {
+        ("id" -> id) ~ ("keepState"->keepStatus) ~ ("name"->name) ~ ("switchType"->switchtype) ~ ("controlType"->controlType) ~ ("status"-> Status)
+    }
+
 }
 
 object Switch {
@@ -91,3 +100,10 @@ object Switch {
         tempSwitch.off()
     }
 }
+
+class switchSerializer extends CustomSerializer[Switch](format => ({
+  case jsonObj: JObject => mqttSwitch("",false,"This Switch should never be used","")
+},{
+  case switch:mqttSwitch => switch.serializer
+  case switch: mhzSwitch => switch.serializer ~ ("systemCode"->switch.systemCode) ~("unitCode"->switch.unitCode)
+}))
