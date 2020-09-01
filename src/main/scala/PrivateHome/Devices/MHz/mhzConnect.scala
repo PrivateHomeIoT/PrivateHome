@@ -106,8 +106,15 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
 }
 
 object sendMhz {
-  val mhz = new mhzConnect()
-
-  def apply(pCommand: mhzCommand):Unit = mhz.send(pCommand)
+  private var mhz:mhzConnect = _
+  private var send = true
+  try {
+    mhz = new mhzConnect()
+  }
+  catch {
+    case e:UnsatisfiedLinkError => println("Because not all dependencies are installed GPIO is deactivated and the commands get only printed to the Console")
+      send=false
+  }
+  def apply(pCommand: mhzCommand):Unit = if(send) mhz.send(pCommand) else println(pCommand)
 }
 
