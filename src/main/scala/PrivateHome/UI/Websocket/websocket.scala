@@ -21,7 +21,7 @@ object websocket {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
         val msgText = msg.asTextMessage.getStrictText
-        if (msgText.trim != "") { //Incase some one sends an empty message only containing whitespaces because otherwise the execution fails without exception
+        if (msgText.trim != "") { //In case some one sends an empty message only containing whitespaces because otherwise the execution fails without exception
           val json = parse(msgText)
           val commandType = json \ "Command"
           val args = json \ "Args"
