@@ -28,9 +28,9 @@ case class commandAddDevice(id: String, switchType: String,name: String,systemCo
         case "mqtt" =>
         case "433Mhz" =>
             if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-            if (systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+            if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
             if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-            if (systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+            if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
     }
 }
 
