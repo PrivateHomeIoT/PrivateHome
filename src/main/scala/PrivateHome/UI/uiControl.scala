@@ -23,7 +23,7 @@ object uiControl {
           devicesJson = devicesJson.concat(List(JsonMethods.parse(write(device._2))))
         }
         JObject(JField("devices", devicesJson)) // because we don't use the "~" we must lift it to JSON that is why we use JObject(JField()) instead an simple "devices" -> devicesJSon.
-      case c: commandAddDevice => data.addDevice(Switch(c)); JObject(JField("Success",true))
+      case c: commandAddDevice => data.addDevice(Switch(c)); JObject(JField("Success", true))
 
     }
   }
