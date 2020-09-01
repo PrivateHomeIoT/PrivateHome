@@ -34,8 +34,11 @@ object websocket {
             case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
             case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
           }
+          answer match {
+            case jObject: JObject => sendMsg(websocketId, jObject)
+            case _ => //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+          }
 
-          sendMsg(websocketId, answer.asInstanceOf[JObject])
         }
 
         }
