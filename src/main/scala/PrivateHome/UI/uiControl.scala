@@ -14,7 +14,7 @@ object uiControl {
 
   def receiveCommand(command: Command): Any = {
     command match {
-      case c: commandOn => devices(c.id).on(c.percent)
+      case c: commandOn => devices(c.id).on(c.percentint)
       case c: commandOff => devices(c.id).off()
       case _: commandGetDevices =>
         var devicesJson: List[JValue] = List()
