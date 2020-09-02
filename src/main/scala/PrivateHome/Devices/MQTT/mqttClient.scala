@@ -28,7 +28,7 @@ object mqttClient {
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
       println("Receiving Data, Topic : %s, Message : %s".format(topic, message))
-      if(topic.charAt(topic.length-6) == '/' &&  topic.substring(0,10) == stat){
+      if(topic.startsWith(stat)){
         lastID = ""
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
