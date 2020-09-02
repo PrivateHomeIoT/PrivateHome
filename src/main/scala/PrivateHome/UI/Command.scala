@@ -6,8 +6,8 @@ class Command()
 
 case class commandOn(id: String, private var percent: String) extends Command {
     idTest(id)
-    var percentint = percent.toFloat
-    if (0 > percentint || percentint > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
+    var percentFloat = percent.toFloat
+    if (0 > percentFloat || percentFloat > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
 }
 
 case class commandOff(id: String) extends Command {
