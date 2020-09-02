@@ -9,6 +9,7 @@ object mqttClient {
   private val brokerUrl = "tcp://" + settings.mqtt.url + ":" + settings.mqtt.port
   private val home = "Home/#"
   private val stat = "Home/stat/"
+  private val cmnd = "Home/switch/cmnd/"
   private val persistence = new MemoryPersistence
   private val client = new MqttClient(brokerUrl, MqttClient.generateClientId, persistence)
 
@@ -36,7 +37,8 @@ object mqttClient {
         if (lastMsg == "ON") data.devices(lastID).Status(1)
         else if (lastMsg == "OFF") data.devices(lastID).Status(0)
       }
-      else println("invalid topic")
+      else if (topic.startsWith(cmnd)) println("Simple Command")
+      else println("Unknown Topic")
     }
 
     /**
