@@ -140,7 +140,7 @@ class GpioPinListener extends GpioPinListenerDigital {
       data.devices(ID).Status(if (command) 1 else 0)
     } catch {
       case _:NoSuchElementException => ;
-      case unknown => throw unknown
+      case unknown:Throwable => throw unknown
     }
 
 
