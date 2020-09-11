@@ -5,6 +5,9 @@ import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.UI.commandAddDevice
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
+import org.json4s.JsonAST.JObject
+import org.json4s.{CustomSerializer, JsonAST}
+import org.json4s.JsonDSL._
 
 import scala.xml._
 
@@ -15,8 +18,9 @@ import scala.xml._
  * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, name:String) {
+abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var name:String, private var _controlType:String) {
     idTest(setupID)
+    if (_controlType != "button"&&_controlType != "slider") throw new IllegalArgumentException("controlType isn't Button/slider")
 
     private var _status:Float = 0
 
@@ -35,6 +39,13 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, nam
     }
 
     def id: String = setupID
+    
+    def controlType:String = _controlType
+    
+    def controlType(newType:String):Unit = {
+        if (newType != "button"||newType != "slider") throw new IllegalArgumentException("controlType isn't Button/slider")
+        _controlType = newType
+    }
 
     def switchtype: String
 
@@ -43,6 +54,12 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, nam
     def toXml: Node
 
     def keepStatus: Boolean = setupKeepStatus
+
+
+
+    def serializer: JsonAST.JObject = {
+        ("id" -> id) ~ ("keepState"->keepStatus) ~ ("name"->name) ~ ("switchType"->switchtype) ~ ("controlType"->controlType) ~ ("status"-> Status)
+    }
 
 }
 
@@ -61,7 +78,7 @@ object Switch {
             case "MQTT" => val id = (data \ "@id").text
                 val KeepStatus = (data \ "keepStatus").head.text.toBoolean
                 val name = (data \ "name").head.text
-                mqttSwitch(id, KeepStatus,name)
+                mqttSwitch(id, KeepStatus,name,"button")
             case _ => throw new IllegalArgumentException("Wrong Switch Type")
         }
     }
@@ -69,7 +86,7 @@ object Switch {
     def apply(data: commandAddDevice): Switch = {
         data.switchType match {
             case "433Mhz" => mhzSwitch(data.id,data.keepState,data.name,data.systemCode,data.unitCode)
-            case "mqtt" => mqttSwitch(data.id,data.keepState,data.name)
+            case "mqtt" => mqttSwitch(data.id,data.keepState,data.name,data.controlType)
         }
     }
 
@@ -83,3 +100,10 @@ object Switch {
         tempSwitch.off()
     }
 }
+
+class switchSerializer extends CustomSerializer[Switch](format => ({
+  case jsonObj: JObject => mqttSwitch("",false,"This Switch should never be used","")
+},{
+  case switch:mqttSwitch => switch.serializer
+  case switch: mhzSwitch => switch.serializer ~ ("systemCode"->switch.systemCode) ~("unitCode"->switch.unitCode)
+}))

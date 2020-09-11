@@ -22,24 +22,36 @@ object websocket {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
         val msgText = msg.asTextMessage.getStrictText
-        val json = parse(msgText)
-        val commandType = json \ "Command"
-        val args = json \ "Args"
-        val answer = commandType.extract[String] match {
-          case "on" => uiControl.receiveCommand(args.extract[commandOn])
-          case "off" => uiControl.receiveCommand(args.extract[commandOff])
-          case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
-          case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
-          case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
-          case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
-          case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
+        if (msgText.trim != "") { //In case some one sends an empty message only containing whitespaces because otherwise the execution fails without exception
+          val json = parse(msgText)
+          val commandType = json \ "Command"
+          val args = json \ "Args"
+          val answer = commandType.extract[String] match {
+            case "on" => uiControl.receiveCommand(args.extract[commandOn])
+            case "off" => uiControl.receiveCommand(args.extract[commandOff])
+            case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
+            case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
+            case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
+            case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
+            case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
+          }
+          answer match {
+            case jObject: JObject => sendMsg(websocketId, jObject)
+            case _ => //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+          }
+
         }
-        sendMsg(websocketId, answer.asInstanceOf[JObject])
-      }
-      catch {
-        case exception: JsonParseException => sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
-        case exception => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
-      }
+
+        }
+        catch
+        {
+          case exception: JsonParseException => sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+          case exception: MappingException =>
+            val rootException = exception.getCause
+            sendMsg(websocketId, ("error" -> rootException.getCause.toString) ~ ("exception" -> rootException.toString))
+          case exception:Throwable => sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
+        }
+
 
 
     })

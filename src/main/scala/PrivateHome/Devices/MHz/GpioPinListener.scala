@@ -136,11 +136,11 @@ class GpioPinListener extends GpioPinListenerDigital {
     println(s"""An: $command; SystemCode: $systemCode UnitCode: $unitCode""")
 
     try {
-      val ID = data.mhzID(commandCode)
+      val ID = data.mhzId(commandCode)
       data.devices(ID).Status(if (command) 1 else 0)
     } catch {
       case _:NoSuchElementException => ;
-      case unknown => throw unknown
+      case unknown:Throwable => throw unknown
     }
 
 

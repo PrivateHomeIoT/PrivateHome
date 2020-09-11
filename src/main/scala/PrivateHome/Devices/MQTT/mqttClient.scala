@@ -1,14 +1,15 @@
 package PrivateHome.Devices.MQTT
 
-import PrivateHome.data
+import PrivateHome.{data,settings}
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttMessage, _}
 
 object mqttClient {
 
-  private val brokerUrl = "tcp://localhost:429"
+  private val brokerUrl = "tcp://" + settings.mqtt.url + ":" + settings.mqtt.port
   private val home = "Home/#"
   private val stat = "Home/stat/"
+  private val cmnd = "Home/switch/cmnd/"
   private val persistence = new MemoryPersistence
   private val client = new MqttClient(brokerUrl, MqttClient.generateClientId, persistence)
 
@@ -28,7 +29,7 @@ object mqttClient {
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
       println("Receiving Data, Topic : %s, Message : %s".format(topic, message))
-      if(topic.charAt(topic.length-6) == "/" &&  topic.substring(0,10) == stat){
+      if(topic.startsWith(stat)){
         lastID = ""
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
@@ -36,7 +37,8 @@ object mqttClient {
         if (lastMsg == "ON") data.devices(lastID).Status(1)
         else if (lastMsg == "OFF") data.devices(lastID).Status(0)
       }
-      else println("invalid topic")
+      else if (topic.startsWith(cmnd)) println("Simple Command")
+      else println("Unknown Topic")
     }
 
     /**
