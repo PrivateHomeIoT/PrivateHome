@@ -6,4 +6,5 @@ build.properties
 .DS_Store
 /daten
 *.db
-*~
+*.html~
+*.js~
