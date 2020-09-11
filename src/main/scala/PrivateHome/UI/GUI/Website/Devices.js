@@ -1,5 +1,5 @@
-
-        var ws = new WebSocket(location.hostname + ":2888");
+Consol.log(location.hostname)
+        var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
 
         ws.onmessage = function(event) {
             var msg = JSON.parse(event.data);
@@ -53,20 +53,20 @@
                     }
                 case "error": console.log(msg.error.toString);
 
-                case: console.log("Illegal Argument");
+                default: console.log("Illegal Argument");
             }
         }
 
-        function generateButton(String id, String name, float status){
+        function generateButton(id, name, status){
             var text, html;
-            text="<td class=\"switch\" id="+id+"\><button id="id + "on\" class=\"button\" style=\"display: none;\" onclick=\"turnOff('"+id+"')\"><img src=\"Pictures/on.png\" alt=\"ON\" class=\"pic\"></button><button id="+id+"off\" class=\"button\" style=\"display: inline-block;\" onclick=\"turnOn('"id"')\"><img src=\"Pictures/off.png\" alt=\"OFF\" class=\"pic\"></button><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\"name\">Name</p><p id=\"status\">Status</p></a></td>";
+            text="<td class=\"switch\" id=" + id + "\><button id=" + id + "on\" class=\"button\" style=\"display: none;\" onclick=\"turnOff('" + id + "')\"><img src=\"Pictures/on.png\" alt=\"ON\" class=\"pic\"></button><button id=" + id + "off\" class=\"button\" style=\"display: inline-block;\" onclick=\"turnOn('" + id + "')\"><img src=\"Pictures/off.png\" alt=\"OFF\" class=\"pic\"></button><a href=\"Settings/" + id + ".html\" class=\"aButton\"><p id=\"name\">Name</p><p id=\"status\">Status</p></a></td>";
             html = document.getElementById('actions');
             html.innerHTML(text);
         }
         
-        function generateSlider(String id, String name, float status){
+        function generateSlider(id, name, status){
             var text, html;
-            text="<td class=\"switch\" id=\""+id+"\"><input class=\"slider button\" id=\""+id+"slider\" onchange=\"slider('"id"')\" max=\"100\" min=\"0\" type=\"range\" value=\""+status*100+"\"><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\""+id+"\">"+name+"</p><p id=\""+id+"status\">Status</p></a><p class=\"slidervalue\" id=\""+id+"sliderValue\">"+value*100+"%</p></td>";
+            text="<td class=\"switch\" id=\""+id+"\"><input class=\"slider button\" id=\""+id+"slider\" onchange=\"slider('" + id + "')\" max=\"100\" min=\"0\" type=\"range\" value=\""+status*100+"\"><a href=\"Settings/"+id+".html\" class=\"aButton\"><p id=\""+id+"\">"+name+"</p><p id=\""+id+"status\">Status</p></a><p class=\"slidervalue\" id=\""+id+"sliderValue\">"+value*100+"%</p></td>";
             html = document.getElementById('actions');
             html.innerHTML(text);
         }
@@ -110,6 +110,7 @@
         */
         function turnOn() {
             var ID = turnOn.arguments[0];
+            console.log(ID);
             ws.send(JSON.stringify({
                 Command: "ON",
                 Args: {
