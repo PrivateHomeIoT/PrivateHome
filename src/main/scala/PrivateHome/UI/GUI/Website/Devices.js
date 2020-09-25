@@ -64,6 +64,8 @@ This function adds a Button
 **/
 function generateButton(id, name, status){
   var html;
+  if (status) {status = "ON"}
+  else {status = "OFF"}
   var Button =
   `<td class="switch" id="${id}">
   <button id="${id}on" class="button" style="display: none" onclick="turnOff('${id}'')">
@@ -107,12 +109,12 @@ function onGraph(ID) {
   try {
     document.getElementById(ID + "off").style.display = 'none';
     document.getElementById(ID + "on").style.display = 'inline-block';
+    document.getElementById(ID + "status").innerHTML = "ON";
   } catch {
     document.getElementById(ID + "sliderValue").innerHTML = "100 %";
     document.getElementById(ID + "slider").value = 100;
   }
   console.log()
-  document.getElementById(ID + "status").innerHTML = "ON";
 }
 
 /*
@@ -124,12 +126,12 @@ function offGraph(ID) {
   try {
     document.getElementById(ID + "on").style.display = 'none';
     document.getElementById(ID + "off").style.display = 'inline-block';
+    document.getElementById(ID + "Status").innerHTML = "OFF";
   } catch (error) {
     console.log(error)
     document.getElementById(ID + "sliderValue").innerHTML = "0 %";
     document.getElementById(ID + "slider").value = 0;
   }
-  document.getElementById(ID + "status").innerHTML = "OFF";
 }
 
 /*
