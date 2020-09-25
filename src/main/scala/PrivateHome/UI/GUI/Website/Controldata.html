@@ -1,0 +1,22 @@
+//Button object/String
+<td class="switch" id="${id}">
+  <button id="${id}on" class="button" style="display: none" onclick="turnOff('${id}'')">
+    <img src="Pictures/on.png" alt="ON" class="pic">
+  </button>
+  <button id="${id}off" class="button" style="display: inline-block" onclick="turnOn('${id}')">
+    <img src="Pictures/off.png" alt="OFF" class="pic">
+  </button>
+  <a href="Settings/${id}.html" class="aButton">
+    <p id="${id}Name">${name}</p>
+    <p id="${id}Status">${status}</p>
+  </a>
+</td>
+
+//slider Objekt/String
+<td class="switch" id="${id}">
+  <input id="${id}slider" class="slider" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
+  <a href="Settings/${id}.html" class="aButton">
+    <p id="${id}Name">${name}</p>
+    <p id="${id}Status">${status}</p>
+  </a>
+</td>
