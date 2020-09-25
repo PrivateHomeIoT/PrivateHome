@@ -88,7 +88,7 @@ function generateSlider(id, name, status){
   var text, html;
   text =
   `<td class="switch" id="${id}">
-  <input id="${id}slider" class="slider" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
+  <input id="${id}slider" class="slider button" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
   <a href="Settings/${id}.html" class="aButton">
     <p id="${id}Name">${name}</p>
     <p id="${id}Status">${status} %</p>
