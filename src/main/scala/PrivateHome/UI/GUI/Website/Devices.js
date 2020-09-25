@@ -114,7 +114,6 @@ function onGraph(ID) {
     document.getElementById(ID + "status").innerHTML = "100 %";
     document.getElementById(ID + "slider").value = 100;
   }
-  console.log()
 }
 
 /*
@@ -128,7 +127,6 @@ function offGraph(ID) {
     document.getElementById(ID + "off").style.display = 'inline-block';
     document.getElementById(ID + "Status").innerHTML = "OFF";
   } catch (error) {
-    console.log(error)
     document.getElementById(ID + "slider").value = 0;
     document.getElementById(ID + "Status").innerHTML = "0 %";
   }
