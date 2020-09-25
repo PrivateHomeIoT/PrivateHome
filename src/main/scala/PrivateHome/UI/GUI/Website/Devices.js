@@ -27,15 +27,15 @@ ws.onmessage = function(event) {
         if (status == 0) {
           try {
             offGraph(id);
-            document.getElementById(id + "name").innerHTML = name;
-          } catch (error){
+            document.getElementById(id + "Name").innerHTML = name;
+          } catch {
             if (type == "button") generateButton(id, name, status);
             else if (type == "slider") generateSlider (id, name, status);
           }
         } else if (status == 1) {
           try {
             onGraph(id);
-            document.getElementById(id + "name").innerHTML = name;
+            document.getElementById(id + "Name").innerHTML = name;
           } catch {
             if (type == "button") generateButton(id, name, status);
             else if (type == "slider") generateSlider (id, name, status);
