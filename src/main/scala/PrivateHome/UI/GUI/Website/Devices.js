@@ -175,3 +175,7 @@ function turnOff(ID) {
     }
   }));
 }
+
+ws.onopen = function (event) {
+  fill();
+}
