@@ -36,3 +36,7 @@ case class commandAddDevice(id: String, switchType: String,name: String,systemCo
     }
 }
 
+case class commandGetDevice(id: String) extends Command {
+    idTest(id)
+}
+
