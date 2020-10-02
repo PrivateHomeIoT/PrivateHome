@@ -2,7 +2,12 @@ package PrivateHome
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
-import PrivateHome.Devices.Switch
+import PrivateHome.Devices.{Switch, switchSerializer}
+import PrivateHome.UI.Websocket.websocket
+import org.json4s.{Formats, NoTypeHints}
+import org.json4s.JsonDSL._
+import org.json4s.jackson.Serialization.write
+import org.json4s.jackson.{JsonMethods, Serialization}
 import scalikejdbc._
 
 
@@ -120,6 +125,8 @@ object data {
       case _ => throw wrongclass
     }
     devices = devices.concat(Map((device.id, device)))
+    implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
+    websocket.broadcastMsg(("Command" -> "newSwitch") ~ ("Answer" -> JsonMethods.parse(write(device))))
   }
 
   /**
