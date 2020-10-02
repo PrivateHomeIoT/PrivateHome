@@ -3,7 +3,7 @@ package PrivateHome
 //ToDo: make settings for an config file
 case object settings {
   var websocket: http = new http(port = 2888,"ws")
-  var http:http = new http(2000,"./src/main/scala/PrivateHome/UI/GUI/Website") //ToDo: change to 80 in produktion
+  var http:http = new http(2000,"Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", password = "pass","./daten/Devices")
   var mqtt = mqttBroker("localhost",1500)
 }
