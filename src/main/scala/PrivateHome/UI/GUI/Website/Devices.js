@@ -2,21 +2,19 @@ var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
 
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
-  switch (msg.type) {
-    case "id":
     if (msg.status == 1) {
       onGraph(msg.id);
     } else if (msg.status == 0) {
       offGraph(msg.id);
+  switch (msg.Command) {
+    case "statusChange":
     } else {
       document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger() * 100;
       document.querySelector('#' + ID + "slider").value = msg.status.toInteger() * 100;
     }
-    case "devices":
-
-    default:
-    if (msg.devices) {
-      var devices = msg.devices
+    break;
+    case "getDevices":
+      var devices = msg.answer.devices
 
       for (act of devices) {
         var id = act.id;
