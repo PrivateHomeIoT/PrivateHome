@@ -35,7 +35,7 @@ object websocket {
             case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
           }
           answer match {
-            case jObject: JObject => sendMsg(websocketId, jObject)
+            case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
             case _ => //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
           }
 
