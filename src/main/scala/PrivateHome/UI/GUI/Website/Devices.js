@@ -2,15 +2,17 @@ var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
 
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
-    if (msg.status == 1) {
-      onGraph(msg.id);
-    } else if (msg.status == 0) {
-      offGraph(msg.id);
   switch (msg.Command) {
     case "statusChange":
+    
+    if (msg.answer.type == "Button") {
+      if (msg.status == 1) {
+        onGraph(msg.id);
+      } else if (msg.status == 0) {
+        offGraph(msg.id);
+      }
     } else {
-      document.getElementById(ID + "sliderValue").innerHTML = msg.status.toInteger() * 100;
-      document.querySelector('#' + ID + "slider").value = msg.status.toInteger() * 100;
+      setSlider(id,msg.answer.status*100)
     }
     break;
     case "getDevices":
@@ -128,6 +130,9 @@ function offGraph(ID) {
     document.getElementById(ID + "slider").value = 0;
     document.getElementById(ID + "Status").innerHTML = "0 %";
   }
+function setSlider(ID,Status) {
+  document.getElementById(id+"slider").value  = Status;
+  document.getElementById(id+"Status").innerHTML = status + " %";
 }
 
 /*
