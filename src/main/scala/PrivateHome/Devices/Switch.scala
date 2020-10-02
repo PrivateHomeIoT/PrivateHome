@@ -5,6 +5,7 @@ import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.UI.commandAddDevice
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
+import PrivateHome.UI.Websocket.websocket
 import org.json4s.JsonAST.JObject
 import org.json4s.{CustomSerializer, JsonAST}
 import org.json4s.JsonDSL._
@@ -36,6 +37,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var
     def Status(state: Float): Unit = {
         _status = state
         if (setupKeepStatus) data.saveStatus(id,state)
+        websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> switchtype))))
     }
 
     def id: String = setupID
