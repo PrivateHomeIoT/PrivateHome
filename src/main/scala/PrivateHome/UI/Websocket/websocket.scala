@@ -32,7 +32,7 @@ object websocket {
             case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
             case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
             case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
-            case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
+            case e => sendMsg(websocketId,("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
           }
           answer match {
             case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
