@@ -88,35 +88,26 @@ function generateSlider(id, name, status){
 }
 
 /*
-This function turns on the graphic interface of a switch or slider.
+This function turns on the graphic interface of a switch.
 Usage: onGraph(String id);
 */
 
 function onGraph(ID) {
-  try {
-    document.getElementById(ID + "off").style.display = 'none';
-    document.getElementById(ID + "on").style.display = 'inline-block';
-    document.getElementById(ID + "status").innerHTML = "ON";
-  } catch {
-    document.getElementById(ID + "status").innerHTML = "100 %";
-    document.getElementById(ID + "slider").value = 100;
-  }
+  document.getElementById(ID + "off").style.display = 'none';
+  document.getElementById(ID + "on").style.display = 'inline-block';
+  document.getElementById(ID + "status").innerHTML = "ON";
 }
 
 /*
-This function turns off the graphic interface of a switch or slider.
+This function turns off the graphic interface of a switch.
 Usage: offGraph(String id);
 */
 function offGraph(ID) {
-  console.log(ID)
-  try {
-    document.getElementById(ID + "on").style.display = 'none';
-    document.getElementById(ID + "off").style.display = 'inline-block';
-    document.getElementById(ID + "Status").innerHTML = "OFF";
-  } catch (error) {
-    document.getElementById(ID + "slider").value = 0;
-    document.getElementById(ID + "Status").innerHTML = "0 %";
-  }
+  document.getElementById(ID + "on").style.display = 'none';
+  document.getElementById(ID + "off").style.display = 'inline-block';
+  document.getElementById(ID + "Status").innerHTML = "OFF";
+}
+
 function setSlider(ID,Status) {
   document.getElementById(id+"slider").value  = Status;
   document.getElementById(id+"Status").innerHTML = status + " %";
