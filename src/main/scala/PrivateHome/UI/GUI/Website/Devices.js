@@ -158,5 +158,5 @@ function turnOff(ID) {
 }
 
 ws.onopen = function (event) {
-  fill();
+  ws.send(JSON.stringify({Command:"getDevices"}));
 }
