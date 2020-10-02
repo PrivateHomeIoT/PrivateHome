@@ -4,7 +4,6 @@ ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
   switch (msg.Command) {
     case "statusChange":
-    
     if (msg.answer.type == "Button") {
       if (msg.status == 1) {
         onGraph(msg.id);
@@ -15,7 +14,7 @@ ws.onmessage = function(event) {
       setSlider(id,msg.answer.status*100)
     }
     break;
-    case "getDevices":
+    case "getDevices": {
       var devices = msg.answer.devices
 
       for (act of devices) {
@@ -23,26 +22,42 @@ ws.onmessage = function(event) {
         var name = act.name;
         var status = act.status * 100;
         var type = act.controlType;
+        switchGenerator(id,name,status,type);
 
-        if (document.getElementById(id)) {
-          if (type=="button") {
-            if (status == 0) {
-              offGraph(id);
-            } else {
-              onGraph(id);
-            }
-          } else {
-            setSlider(id,status);
-          }
-        } else {
-          if (type == "button") {generateButton(id,name,status)}
-          else {
-            generateSlider(id,name,status)
-          }
-        }
       }
       break;
+    }
+    case "getDevice":{
+      let answer = msg.answer
+      switchGenerator(answer.id,answer.name,answer.status*100,answer.type);
+      break;
+    }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
+  }
+}
+
+
+/**
+This function test if a switch with this id exist and than changes the status of it or if not it generates it.
+*/
+
+//TODO: should rename this function
+function switchGenerator(id,name,status,type) {
+  if (document.getElementById(id)) {
+    if (type=="button") {
+      if (status == 0) {
+        offGraph(id);
+      } else {
+        onGraph(id);
+      }
+    } else {
+      setSlider(id,status);
+    }
+  } else {
+    if (type == "button") {generateButton(id,name,status)}
+    else {
+      generateSlider(id,name,status)
+    }
   }
 }
 
