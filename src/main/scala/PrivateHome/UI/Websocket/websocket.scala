@@ -23,9 +23,9 @@ object websocket {
         val msgText = msg.asTextMessage.getStrictText
         if (msgText.trim != "") { //In case some one sends an empty message only containing whitespaces because otherwise the execution fails without exception
           val json = parse(msgText)
-          val commandType = json \ "Command"
+          val commandType = (json \ "Command").extract[String]
           val args = json \ "Args"
-          val answer = commandType.extract[String] match {
+          val answer = commandType match {
             case "on" => uiControl.receiveCommand(args.extract[commandOn])
             case "off" => uiControl.receiveCommand(args.extract[commandOff])
             case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
