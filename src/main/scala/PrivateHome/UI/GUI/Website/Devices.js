@@ -109,8 +109,8 @@ function offGraph(ID) {
 }
 
 function setSlider(ID,Status) {
-  document.getElementById(id+"slider").value  = Status;
-  document.getElementById(id+"Status").innerHTML = status + " %";
+  document.getElementById(ID+"slider").value  = Status;
+  document.getElementById(ID+"Status").innerHTML = status + " %";
 }
 
 /*
