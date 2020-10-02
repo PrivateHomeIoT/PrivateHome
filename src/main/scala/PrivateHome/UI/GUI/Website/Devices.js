@@ -24,38 +24,25 @@ ws.onmessage = function(event) {
         var status = act.status * 100;
         var type = act.controlType;
 
-        if (status == 0) {
-          try {
-            offGraph(id);
-            document.getElementById(id + "Name").innerHTML = name;
-          } catch {
-            if (type == "button") generateButton(id, name, status);
-            else if (type == "slider") generateSlider (id, name, status);
-          }
-        } else if (status == 1) {
-          try {
-            onGraph(id);
-            document.getElementById(id + "Name").innerHTML = name;
-          } catch {
-            if (type == "button") generateButton(id, name, status);
-            else if (type == "slider") generateSlider (id, name, status);
+        if (document.getElementById(id)) {
+          if (type=="button") {
+            if (status == 0) {
+              offGraph(id);
+            } else {
+              onGraph(id);
+            }
+          } else {
+            setSlider(id,status);
           }
         } else {
-          try{
-            document.getElementById(ID + "sliderValue").innerHTML = status + " %";
-            document.querySelector('#' + ID + "slider").value = status;
-            document.getElementById(id + "status").innerHTML = "ON";
-            document.getElementById(id + "name").innerHTML = name;
-          } catch {
-            if (type == "button") generateButton(id, name, status);
-            else if (type == "slider") generateSlider (id, name, status);
+          if (type == "button") {generateButton(id,name,status)}
+          else {
+            generateSlider(id,name,status)
           }
         }
       }
-    }
-    else if (msg.error) { console.log(msg.error.toString() + ": " + msg.exception);}
-
-
+      break;
+    default: { console.log(msg.error.toString() + ": " + msg.exception);}
   }
 }
 
