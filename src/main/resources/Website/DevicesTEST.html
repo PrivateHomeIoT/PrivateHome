@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>PrivateHome - Devices</title>
@@ -41,7 +42,7 @@
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <a href="HomeEN.html">Home</a>
-        <a href="Devices.html" style="background-color: green; color: ghostwhite">Devices</a>
+        <a href="Devices.html" style="background-color: #228b22; color: ghostwhite">Devices</a>
         <a href="Rooms.html">Rooms</a>
         <a href="Sensors.html">Sensors</a>
         <a href="Settings.html">Settings</a>
@@ -92,7 +93,25 @@
             <th>5</th>
         </tr>
         <tr id="actions">
-
+            <td class="switch" id="${id}">
+                <button id="${id}on" class="button" style="display: none" onclick="turnOff('${id}'')">
+                    <img src="Pictures/on.png" alt="ON" class="pic">
+                </button>
+                <button id="${id}off" class="button" style="display: inline-block" onclick="turnOn('${id}')">
+                    <img src="Pictures/off.png" alt="OFF" class="pic">
+                </button>
+                <a href="Settings/${id}.html" class="aButton">
+                    <p id="${id}Name">${name}</p>
+                    <p id="${id}Status">${status}</p>
+                </a>
+            </td>
+            <td class="switch" id="${id}">
+                <input id="${id}slider" class="slider button" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
+                    <a href="Settings/${id}.html" class="aButton">
+                        <p id="${id}Name">${name}</p>
+                        <p id="${id}Status">${status} %</p>
+                    </a>
+            </td>
         </tr>
     </table>
 </body>
