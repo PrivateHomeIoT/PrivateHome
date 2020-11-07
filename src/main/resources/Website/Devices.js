@@ -4,7 +4,7 @@ ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
   switch (msg.Command) {
     case "statusChange":
-    if (msg.answer.type == "Button") {
+    if (msg.answer.type == "button") {
       if (msg.status == 1) {
         onGraph(msg.id);
       } else if (msg.status == 0) {
