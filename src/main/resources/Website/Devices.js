@@ -129,7 +129,7 @@ function offGraph(ID) {
 
 function setSlider(ID,Status) {
   document.getElementById(ID+"slider").value  = Status;
-  document.getElementById(ID+"Status").innerHTML = status + " %";
+  document.getElementById(ID+"Status").innerHTML = Status + " %";
 }
 
 /*
