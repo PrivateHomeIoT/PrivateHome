@@ -37,7 +37,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var
     def Status(state: Float): Unit = {
         _status = state
         if (setupKeepStatus) data.saveStatus(id,state)
-        websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> switchtype))))
+        websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType))))
     }
 
     def id: String = setupID
