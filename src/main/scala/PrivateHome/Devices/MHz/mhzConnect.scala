@@ -93,8 +93,6 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
         busyWaitMicro(Protocol.sync.high*Protocol.pulseLength)
         output.low()
         busyWaitMicro(Protocol.sync.low*Protocol.pulseLength)
-
-        println()
       }
     }
     sending = false
