@@ -5,13 +5,13 @@ ws.onmessage = function(event) {
   switch (msg.Command) {
     case "statusChange":
     if (msg.answer.type == "button") {
-      if (msg.status == 1) {
-        onGraph(msg.id);
-      } else if (msg.status == 0) {
-        offGraph(msg.id);
+      if (msg.answer.status == 1) {
+        onGraph(msg.answer.id);
+      } else if (msg.answer.status == 0) {
+        offGraph(msg.answer.id);
       }
     } else {
-      setSlider(id,msg.answer.status*100)
+      setSlider(msg.answer.id,msg.answer.status*100)
     }
     break;
     case "getDevices": {
