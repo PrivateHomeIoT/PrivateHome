@@ -23,19 +23,20 @@ object websocket {
         val msgText = msg.asTextMessage.getStrictText
         if (msgText.trim != "") { //In case some one sends an empty message only containing whitespaces because otherwise the execution fails without exception
           val json = parse(msgText)
-          val commandType = json \ "Command"
+          val commandType = (json \ "Command").extract[String]
           val args = json \ "Args"
-          val answer = commandType.extract[String] match {
+          val answer = commandType match {
             case "on" => uiControl.receiveCommand(args.extract[commandOn])
             case "off" => uiControl.receiveCommand(args.extract[commandOff])
             case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
             case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
             case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
             case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
-            case e => ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText)
+            case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
+            case e => sendMsg(websocketId,("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
           }
           answer match {
-            case jObject: JObject => sendMsg(websocketId, jObject)
+            case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
             case _ => //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
           }
 

@@ -2,7 +2,12 @@ package PrivateHome
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
-import PrivateHome.Devices.Switch
+import PrivateHome.Devices.{Switch, switchSerializer}
+import PrivateHome.UI.Websocket.websocket
+import org.json4s.{Formats, NoTypeHints}
+import org.json4s.JsonDSL._
+import org.json4s.jackson.Serialization.write
+import org.json4s.jackson.{JsonMethods, Serialization}
 import scalikejdbc._
 
 
@@ -26,11 +31,11 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:"+settings.database.path, settings.database.userName, settings.database.password)
+  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.password)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
-  if(sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
+  if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
   fillDevices()
 
 
@@ -81,7 +86,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState,d.name,d.controlType)))
+        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
@@ -90,7 +95,7 @@ object data {
           val data = withSQL {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id, mhzSwitch(d.id, d.keepState,d.name, data.systemcode, data.unitcode)))
+          devices += ((d.id, mhzSwitch(d.id, d.keepState, d.name, data.systemcode, data.unitcode)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
           if (d.keepState) {
             devices(d.id).on(d.state)
@@ -109,7 +114,7 @@ object data {
   def addDevice(device: Switch): Unit = {
     var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
-      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus,device.controlType)
+      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus, device.controlType)
     }.update.apply
     device match {
       case device: mhzSwitch => withSQL {
@@ -120,11 +125,14 @@ object data {
       case _ => throw wrongclass
     }
     devices = devices.concat(Map((device.id, device)))
+    implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
+    websocket.broadcastMsg(("Command" -> "newSwitch") ~ ("Answer" -> JsonMethods.parse(write(device))))
   }
 
   /**
    * Saves the Status of an switch for the keepStatus function
-   * @param id the ID of the switch to change
+   *
+   * @param id    the ID of the switch to change
    * @param state the new state
    */
   def saveStatus(id: String, state: Float): Unit = {
@@ -136,7 +144,7 @@ object data {
 
   //ToDo: add support for Settingschanges
 
-  def idTest(id: String,create:Boolean=false): Unit = {
+  def idTest(id: String, create: Boolean = false): Unit = {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
     if (create && devices.contains(id)) throw new IllegalArgumentException("""ID is already used""")
@@ -161,7 +169,7 @@ object data {
    * @param state      an foatingpoint representation of the State when keepState is true 4 decimalpoints long
    * @param keepState  Boolean that indicates if the State should be restored at turn on
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean,controlType: String)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean, controlType: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -179,7 +187,7 @@ object data {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"),rs.string("controlType"))
+      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
   }
 
   /**

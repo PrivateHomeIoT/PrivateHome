@@ -10,6 +10,30 @@
 
     <!--    <link rel="icon" type="image/x-icon" href="" alt="icon" />-->
 
+    <!-- generics -->
+    <link rel="icon" href="Pictures/favicon-32.png" sizes="32x32">
+    <link rel="icon" href="Pictures/favicon-57.png" sizes="57x57">
+    <link rel="icon" href="Pictures/favicon-76.png" sizes="76x76">
+    <link rel="icon" href="Pictures/favicon-96.png" sizes="96x96">
+    <link rel="icon" href="Pictures/favicon-128.png" sizes="128x128">
+    <link rel="icon" href="Pictures/favicon-192.png" sizes="192x192">
+    <link rel="icon" href="Pictures/favicon-228.png" sizes="228x228">
+
+    <!-- Android -->
+    <link rel="shortcut icon" sizes="196x196" href=“Pictures/favicon-196.png">
+
+    <!-- iOS -->
+    <link rel="apple-touch-icon" href="Pictures/favicon-120.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="path/to/favicon-152.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="path/to/favicon-180.png" sizes="180x180">
+
+    <!-- Windows 8 IE 10-->
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="Pictures/favicon-144.png">
+
+    <!— Windows 8.1 + IE11 and above —>
+    <meta name="msapplication-config" content="Pictures/browserconfig.xml" />
+
     <link rel="stylesheet" href="CSS/menu.css">
     <link rel="stylesheet" href="CSS/button.css">
     <script src="Devices.js"></script>
@@ -24,13 +48,13 @@
         <a href="Settings.html">Settings</a>
         <a href="Setup.html">Setup</a>
     </div>
-    <div class="content" id="content">
+    <div class="content" id="contentHeading">
         <h1>Devices</h1>
     </div>
     <script>
         var sidebar = false;
         closeNav();
-        
+
         /*
             This function opens the sidebar.
         */
@@ -59,7 +83,7 @@
 </head>
 
 <body class="content" id="content">
-    
+
     <table style="width: 100%">
         <tr>
             <th>1</th>
@@ -69,22 +93,7 @@
             <th>5</th>
         </tr>
         <tr id="actions">
-            <td class="switch" id="ID">
-                <button id="IDon" class="button" style="display: none;" onclick="turnOff('ID')"><img src="Pictures/on.png" alt="ON" class="pic"></button>
-                <button id="IDoff" class="button" style="display: inline-block;" onclick="turnOn('ID')"><img src="Pictures/off.png" alt="OFF" class="pic"></button>
-                <a href="Settings/masterID.html" class="aButton">
-                    <p id="name">Name</p>
-                    <p id="status">Status</p>
-                </a>
-            </td>
-            <td class="switch" id="ID2">
-                <input class="slider button" id="ID2slider" onchange="slider('ID2')" max="100" min="0" type="range" value="0">
-                <a href="Settings/masterID.html" class="aButton">
-                    <p id="IDname">Name</p>
-                    <p id="IDstatus">Status</p>
-                </a>
-                <p class="slidervalue" id="ID2sliderValue">0%</p>
-            </td>
+
         </tr>
     </table>
 </body>
