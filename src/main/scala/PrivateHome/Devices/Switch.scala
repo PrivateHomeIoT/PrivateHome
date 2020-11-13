@@ -21,7 +21,7 @@ import scala.xml._
 
 abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var name:String, private var _controlType:String) {
     idTest(setupID)
-    if (_controlType != "button"&&_controlType != "slider") throw new IllegalArgumentException("controlType isn't Button/slider")
+    if (_controlType != "button"&&_controlType != "slider") throw new IllegalArgumentException("controlType isn't button/slider")
 
     private var _status:Float = 0
 
