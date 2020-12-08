@@ -11,6 +11,7 @@ packageSummary := "This is a SmartHome system"
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
+debianPackageRecommends := Seq("wiringPi")
 
 lazy val akkaVersion = "2.6.8"
 
