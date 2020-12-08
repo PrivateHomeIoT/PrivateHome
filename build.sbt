@@ -4,6 +4,14 @@ version := "0.1"
 
 scalaVersion := "2.13.0"
 
+maintainer := "RaHoni <honi2002suess@gmail.com>"
+
+packageSummary := "This is a SmartHome system"
+
+packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
+
+debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
+
 lazy val akkaVersion = "2.6.8"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
@@ -41,3 +49,7 @@ libraryDependencies ++= Seq(
 
 //JSON library
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
+
+//sbt-native-packaging Plugins for compiling to deb
+enablePlugins(DebianPlugin)
+enablePlugins(JavaServerAppPackaging)
