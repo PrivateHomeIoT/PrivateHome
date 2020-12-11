@@ -1,3 +1,5 @@
+import DebianConstants._
+
 name := "PrivateHome"
 
 version := "0.1"
@@ -11,7 +13,18 @@ packageSummary := "This is a SmartHome system"
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
-debianPackageRecommends := Seq("wiringPi")
+debianPackageRecommends := Seq("wiringpi")
+linuxPackageMappings ++= Seq(
+  packageMapping(file(s"settings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
+  packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
+)
+
+
+version in Debian := "0.1-20201211-8"
+
+maintainerScripts in Debian := maintainerScriptsAppendFromFile((maintainerScripts in Debian).value)(
+  Postinst ->  sourceDirectory.value / "debian" / "postinst"
+)
 
 lazy val akkaVersion = "2.6.8"
 
@@ -54,3 +67,4 @@ libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)
+enablePlugins(SystemdPlugin)

@@ -17,12 +17,13 @@ case object settings {
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", password = "pass", "./daten/Devices")
   var mqtt = mqttBroker("localhost", 1500)
+  var settingspath = "/etc/privatehome/settings.json"
 
   load()
 
   def load(): Unit = {
     try {
-      val fSource = Source.fromFile("settings.json")
+      val fSource = Source.fromFile(settingspath)
     }
     catch {
       case e: FileNotFoundException => println("settings.json doesn't exist. Saving standard to create a new one.")
@@ -30,7 +31,7 @@ case object settings {
       case e: Throwable => throw e
     }
 
-    val fSource = Source.fromFile("settings.json")
+    val fSource = Source.fromFile(settingspath)
     var ftext: String = ""
     for (line <- fSource.getLines())
       ftext = ftext + line
@@ -51,7 +52,7 @@ case object settings {
   }
 
   def save(): Unit = {
-    val writer = new PrintWriter(new File("settings.json"))
+    val writer = new PrintWriter(new File(settingspath))
     writer.write(pretty(render(("websocket" -> websocket.serialized) ~ ("http" -> http.serialized) ~ ("database" -> database.serialized) ~ ("mqtt" -> mqtt.serialized))))
     writer.close()
   }
