@@ -1,8 +1,9 @@
 import DebianConstants._
+import ReleaseTransformations._
 
 name := "PrivateHome"
 
-version := "0.1"
+//version := "0.1"
 
 scalaVersion := "2.13.0"
 
@@ -18,9 +19,19 @@ linuxPackageMappings ++= Seq(
   packageMapping(file(s"settings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
+releaseIgnoreUntrackedFiles := true
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
+releaseProcess := Seq[ReleaseStep](
+  inquireVersions,
+  setReleaseVersion,
+  runClean,
+  runTest,
+  releaseStepCommand("debian:packageBin"),
+  setNextVersion
+)
 
-version in Debian := "0.1-20201211-8"
+//version in Debian := "0.1-20201211-8"
 
 maintainerScripts in Debian := maintainerScriptsAppendFromFile((maintainerScripts in Debian).value)(
   Postinst ->  sourceDirectory.value / "debian" / "postinst"
