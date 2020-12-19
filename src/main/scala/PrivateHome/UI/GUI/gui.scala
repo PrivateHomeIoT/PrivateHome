@@ -20,7 +20,7 @@ object gui {
   val ks: KeyStore = KeyStore.getInstance("PKCS12")
   val keystore = getClass.getClassLoader.getResourceAsStream("keystore.pkcs12") //ToDo: Reads from filesystem with Settings config
 
-  require(keystore != null, "Keystore required!")
+  require(keystore != null, "Keystore required! No Keystore in resources.")
   ks.load(keystore, password)
 
   val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")

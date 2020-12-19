@@ -1,0 +1,1 @@
+usermod privatehome -aG gpio || echo "Because you probably do not have wiringPi you do not have the group gpio so no need to add privatehome to it"
