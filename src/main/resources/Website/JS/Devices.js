@@ -1,4 +1,4 @@
-var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
+
 
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
@@ -114,7 +114,7 @@ Usage: onGraph(String id);
 function onGraph(ID) {
   document.getElementById(ID + "off").style.display = 'none';
   document.getElementById(ID + "on").style.display = 'inline-block';
-  document.getElementById(ID + "status").innerHTML = "ON";
+  document.getElementById(ID + "Status").innerHTML = "ON";
 }
 
 /*
@@ -168,9 +168,9 @@ Usage: turnOff(String id);
 */
 function turnOff(ID) {
   ws.send(JSON.stringify({
-    Command: "OFF",
+    Command: "off",
     Args: {
-      Percent: 0,
+      percent: 0,
       id: ID
     }
   }));
