@@ -12,7 +12,6 @@ case class commandOn(id: String, private var percent: String) extends Command {
 
 case class commandOff(id: String) extends Command {
     idTest(id)
-    print(id + "off")
 }
 
 case class commandGetDevices() extends Command
