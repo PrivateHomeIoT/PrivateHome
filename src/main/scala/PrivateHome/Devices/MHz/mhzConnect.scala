@@ -70,7 +70,6 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
 
       code <<= 4
       code |= codec.command(queuedCommand.command)
-      println(code)
       length += 4
 
 
