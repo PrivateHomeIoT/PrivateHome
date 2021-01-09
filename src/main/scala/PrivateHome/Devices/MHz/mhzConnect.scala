@@ -2,6 +2,7 @@ package PrivateHome.Devices.MHz
 
 import com.pi4j.io.gpio._
 import PrivateHome.Devices.MHz.Protocol
+import PrivateHome.data
 
 import scala.collection.mutable
 
@@ -113,6 +114,10 @@ object sendMhz {
     case e:UnsatisfiedLinkError => println("Because not all dependencies are installed GPIO is deactivated and the commands get only printed to the Console")
       send=false
   }
-  def apply(pCommand: mhzCommand):Unit = if(send) mhz.send(pCommand) else println(pCommand)
+  def apply(pCommand: mhzCommand):Unit = if(send) mhz.send(pCommand) else {
+    println(pCommand)
+    val device = data.devices(data.mhzId(pCommand.systemCode + pCommand.unitCode))
+    if (pCommand.command) device.Status(1) else device.Status(0)
+  }
 }
 
