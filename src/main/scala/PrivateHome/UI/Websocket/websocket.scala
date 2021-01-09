@@ -17,6 +17,11 @@ object websocket {
 
   private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
 
+  /**
+   * Main message and connection handler
+   * @param websocketId should be a unique ID for this websocket connection
+   * @return A Flow for the akka system based on this logic
+   */
   def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
@@ -62,14 +67,27 @@ object websocket {
     })
   }
 
-  def broadcastMsg(msg: json4s.JObject) {
-    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
-  }
-
+  /**
+   * Send a message to a specific websocket client
+   * @param id the ID of the websocket connection the one passed to listen
+   * @param msg the message that should be send to the Client as a JSON object
+   */
   def sendMsg(id: String, msg: json4s.JObject): Unit = {
     ConnectionMap(id).apply(TextMessage.Strict(compact(render(msg))))
   }
 
+  /**
+   * Sends a message to all connections
+   * @param msg The message that should be send to all connections as a JSON object
+   */
+  def broadcastMsg(msg: json4s.JObject) {
+    for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
+  }
+
+  /**
+   * Sends a message to all connections
+   * @param text The message that should be send to all connections as a string
+   */
   def broadcastMsg(text: String): Unit = {
     for (connection <- ConnectionMap.values) connection(TextMessage.Strict(text))
   }
