@@ -86,7 +86,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }

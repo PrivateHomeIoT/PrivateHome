@@ -29,5 +29,5 @@ case class mqttSwitch(ID: String, setupKeepStatus: Boolean, _name: String, setup
     <keepStatus>{keepStatus}</keepStatus>
   </switch>
 
-  def switchtype: String = "MQTT"
+  def switchtype: String = "mqtt"
 }
