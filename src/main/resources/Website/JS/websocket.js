@@ -40,7 +40,7 @@ class WebSocketControll {
         if (msg.auth ==="ID") {
           window.sessionStorage.removeItem("sessionId");
           this.authenticate();
-        } else if (msg.auth === "password") {
+        } else if (msg.auth === "pass") {
           alert("Username or password wrong!");
           this.authenticate();
         }
