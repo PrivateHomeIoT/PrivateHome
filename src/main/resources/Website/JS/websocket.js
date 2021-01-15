@@ -34,7 +34,7 @@ class WebSocketControll {
       console.log("Test")
       if (msg.authenticated) {
         window.sessionStorage.setItem("sessionId", msg.sessionID);
-        this.connection.onmessage = function (event) {ws.onmessage(event)};
+        ws.connection.onmessage = function (event) {ws.onmessage(event)};
         ws.onopen();
       } else {
         if (msg.auth ==="ID") {

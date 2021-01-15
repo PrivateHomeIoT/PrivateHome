@@ -24,11 +24,12 @@ object websocket {
 
   /**
    * Main message and connection handler
+   *
    * @param websocketId should be a unique ID for this websocket connection
    * @return A Flow for the akka system based on this logic
    */
   def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
-    var currentSession: session = session("","",startInvalid = true)
+    var currentSession: session = session("", "", startInvalid = true)
 
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
       try {
@@ -53,12 +54,13 @@ object websocket {
               case _ => //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
             }
 
+
           } else {
             val authType = (json \ "auth").extract[String]
             authType match {
               case "ID" =>
                 val sessionId = (json \ "sessionID").extract[String]
-                currentSession = sessionMap.getOrElse(sessionId,currentSession) //replaces currentSession only wen a sessionObject exists
+                currentSession = sessionMap.getOrElse(sessionId, currentSession) //replaces currentSession only wen a sessionObject exists
               case "pass" =>
                 val username = (json \ "username").extract[String]
                 val pass = (json \ "pass").extract[String]
@@ -74,11 +76,13 @@ object websocket {
             else sendMsg(websocketId, ("auth" -> authType) ~ ("authenticated" -> false))
 
           }
+
         }
+
 
       }
       catch {
-        case exception: JsonParseException =>println(exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+        case exception: JsonParseException => println(exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
         case exception: Throwable => println(exception); sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
     })
@@ -94,7 +98,8 @@ object websocket {
 
   /**
    * Send a message to a specific websocket client
-   * @param id the ID of the websocket connection the one passed to listen
+   *
+   * @param id  the ID of the websocket connection the one passed to listen
    * @param msg the message that should be send to the Client as a JSON object
    */
   def sendMsg(id: String, msg: json4s.JObject): Unit = {
@@ -103,6 +108,7 @@ object websocket {
 
   /**
    * Sends a message to all connections
+   *
    * @param msg The message that should be send to all connections as a JSON object
    */
   def broadcastMsg(msg: json4s.JObject) {
@@ -111,6 +117,7 @@ object websocket {
 
   /**
    * Sends a message to all connections
+   *
    * @param text The message that should be send to all connections as a string
    */
   def broadcastMsg(text: String): Unit = {
@@ -122,9 +129,9 @@ object websocket {
    * A case class that stores all information about an session and handels the session timeout
    *
    * @param sessionID the sessionID to use
-   * @param username the username used for authentication
+   * @param username  the username used for authentication
    */
-  private case class session(sessionID: String, username: String, private val startInvalid:Boolean = false) {
+  private case class session(sessionID: String, username: String, private val startInvalid: Boolean = false) {
     private var validUntil: Calendar = nowPlus15
     if (startInvalid) validUntil = Calendar.getInstance()
 

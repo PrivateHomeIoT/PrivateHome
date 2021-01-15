@@ -69,7 +69,6 @@ object Switch {
     def apply(data: Node): Switch = {
 
         val switchType = (data \ "type").head.text
-        println(switchType)
         switchType match {
             case "433MHz" => val systemCode = (data \ "systemCode").head.text
                 val unitCode = (data \ "unitCode").head.text

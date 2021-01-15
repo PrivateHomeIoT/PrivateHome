@@ -4,10 +4,10 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
-import org.json4s.{Formats, NoTypeHints}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.{Formats, NoTypeHints}
 import scalikejdbc._
 
 
@@ -144,33 +144,37 @@ object data {
 
   /**
    * Adds a user to the database
+   *
    * @param username The username to Store
    * @param passHash The argon2 hash of the password (encoded
    */
   def addUser(username: String, passHash: String): Unit = {
     withSQL {
-      insertInto(user).values(username,passHash)
+      insertInto(user).values(username, passHash)
     }.update().apply()
   }
 
 
   /**
    * Gets the argon2 hash for the Username
+   *
    * @param username the username for which to get the hash
    * @return the hash of the User of there is no User with this name returns "no_Username"
    */
   def getUserHash(username: String): String = {
     val m = user.syntax("m")
-    var value:String = null
+    var value: String = null
     withSQL {
-      select.from(user as m).where.eq(user.column.username,username)
+      select.from(user as m).where.eq(user.column.username, username)
     }.map(rs => user(rs)).single().apply().foreach(u => {
       if (u == null) {
         value = "no_Username"
       } else
-      value = u.passhash
+        value = u.passhash
     })
-    if (value == null) {"no_Username"} else value
+    if (value == null) {
+      "no_Username"
+    } else value
   }
 
   /**
@@ -226,6 +230,7 @@ object data {
 
   /**
    * Message class for user Table
+   *
    * @param username the username
    * @param passhash the argon2id hash
    */
