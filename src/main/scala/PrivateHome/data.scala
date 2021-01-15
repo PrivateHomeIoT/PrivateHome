@@ -46,7 +46,8 @@ object data {
 
     // Drops old Tables to Delete Data and make it possible to regenerate them
     sql"""DROP TABLE IF EXISTS `Mhz`;
-         DROP TABLE IF EXISTS `Devices`;""".execute().apply()
+         DROP TABLE IF EXISTS `Devices`;
+         DROP TABLE IF EXISTS `User`""".execute().apply()
 
 
     val devices =
@@ -70,6 +71,17 @@ object data {
            PRIMARY KEY (`id`),
            CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
          """.execute().apply()
+
+    sql"""
+         CREATE TABLE `User` (
+         `username` varchar(30) NOT NULL,
+         `passhash` varchar(100) NOT NULL,
+         PRIMARY KEY (`username`))
+       """.execute().apply()
+
+    sql"""
+         SHOW Tables;
+       """.execute().apply().toString
 
 
     // insert initial data
@@ -129,6 +141,38 @@ object data {
     websocket.broadcastMsg(("Command" -> "newSwitch") ~ ("Answer" -> JsonMethods.parse(write(device))))
   }
 
+
+  /**
+   * Adds a user to the database
+   * @param username The username to Store
+   * @param passHash The argon2 hash of the password (encoded
+   */
+  def addUser(username: String, passHash: String): Unit = {
+    withSQL {
+      insertInto(user).values(username,passHash)
+    }.update().apply()
+  }
+
+
+  /**
+   * Gets the argon2 hash for the Username
+   * @param username the username for which to get the hash
+   * @return the hash of the User of there is no User with this name returns "no_Username"
+   */
+  def getUserHash(username: String): String = {
+    val m = user.syntax("m")
+    var value:String = null
+    withSQL {
+      select.from(user as m).where.eq(user.column.username,username)
+    }.map(rs => user(rs)).single().apply().foreach(u => {
+      if (u == null) {
+        value = "no_Username"
+      } else
+      value = u.passhash
+    })
+    if (value == null) {"no_Username"} else value
+  }
+
   /**
    * Saves the Status of an switch for the keepStatus function
    *
@@ -181,6 +225,13 @@ object data {
   case class Mhz(id: String, systemcode: String, unitcode: String)
 
   /**
+   * Message class for user Table
+   * @param username the username
+   * @param passhash the argon2id hash
+   */
+  case class user(username: String, passhash: String)
+
+  /**
    * Syntaxsupport Object for devices table
    */
   object Device extends SQLSyntaxSupport[Device] {
@@ -197,6 +248,15 @@ object data {
     override val tableName = "Mhz"
 
     def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.string("systemcode"), rs.string("unitcode"))
+  }
+
+  /**
+   * Syntax support Object for user table
+   */
+  object user extends SQLSyntaxSupport[user] {
+    override val tableName = "User"
+
+    def apply(rs: WrappedResultSet): user = new user(rs.string("username"), rs.string("passhash"))
   }
 
 }
