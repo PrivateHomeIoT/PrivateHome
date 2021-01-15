@@ -28,3 +28,5 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3")
 
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
+
+libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.5"

@@ -1,11 +1,14 @@
 package PrivateHome.UI.Websocket
 
 import PrivateHome.UI._
+import PrivateHome.data
 import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
 import com.fasterxml.jackson.core.JsonParseException
+import de.mkammerer.argon2.Argon2Factory
+import de.mkammerer.argon2.Argon2Factory.Argon2Types
 import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -64,7 +67,9 @@ object websocket {
               case "pass" =>
                 val username = (json \ "username").extract[String]
                 val pass = (json \ "pass").extract[String]
-                if (username == "test" && pass == "test") {
+                val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
+                val hash = data.getUserHash(username)
+                if (argon2.verify(hash, pass)) {
                   val random = new SecureRandom()
                   val sessionID = new BigInteger(32 * 5, random).toString(32) //  This generates a random String with length 32
                   currentSession = session(sessionID, username)
