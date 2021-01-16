@@ -19,6 +19,10 @@ case object settings {
   var mqtt = mqttBroker("localhost", 1500)
   var settingspath = "/etc/privatehome/settings.json"
 
+  val portable = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
+  if (portable)
+    settingspath = "settings.json"
+
   load()
 
   def load(): Unit = {

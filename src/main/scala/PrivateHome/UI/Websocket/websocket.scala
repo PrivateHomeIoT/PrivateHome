@@ -88,7 +88,9 @@ object websocket {
       }
       catch {
         case exception: JsonParseException => println(exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
-        case exception: Throwable => println(exception); sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
+        case exception: Throwable => println(exception)
+          exception.printStackTrace()
+          sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
     })
 

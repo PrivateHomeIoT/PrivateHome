@@ -10,7 +10,7 @@
   "database" : {
     "userName" : "user",
     "password" : "pass",
-    "path" : "./data/Devices"
+    "path" : "/etc/privatehome/data/Devices"
   },
   "mqtt" : {
     "url" : "localhost",
