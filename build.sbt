@@ -67,11 +67,11 @@ resolvers += "MQTT Repository" at "https://repo.eclipse.org/content/repositories
 libraryDependencies += "org.eclipse.paho" % "mqtt-client" % "0.4.0"
 
 //scalikejdbc library for mysql (backend h2)
-libraryDependencies ++= Seq
+libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
   "org.scalikejdbc" %% "scalikejdbc-test" % "3.4.0" % "test",
   "com.h2database" % "h2" % "1.4.200",
-  "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0",)
+  "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0")
 
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 
