@@ -11,18 +11,18 @@ class dataTest extends AnyFunSuite {
 
 
   test("testCreate") {
-    data.create()
+    data.create(true)
   }
 
   test("At Create empty") {
     val expected: Map[String, Switch] = Map()
-    data.create()
+    data.create(true)
     data.fillDevices()
     assertResult(expected)(data.devices)
   }
 
   test("Test: Add one Device") {
-    data.create()
+    data.create(true)
     data.addDevice(mqttSwitch("abcde", false, "Device one", "button"))
     var expected: Map[String, Switch] = Map()
     expected = expected + (("abcde", mqttSwitch("abcde", false, "Device one", "button")))
@@ -32,7 +32,7 @@ class dataTest extends AnyFunSuite {
   }
 
   test("Test: Add more Devices") {
-    data.create()
+    data.create(true)
     var expected: Map[String, Switch] = Map(("abcde", mqttSwitch("abcde", true, "Device two", "button")), ("hkIKH", mhzSwitch("hkIKH", _keepStatus = false, "Device three", "10101", "01010")))
     val expected2: Map[String, Switch] = Map(("kijhe", mhzSwitch("kijhe", _keepStatus = false, "Device Four", "11111", "00000")), ("testd", mqttSwitch("testd", false, "Device five", "slider")))
     expected.foreach(d => data.addDevice(d._2))
@@ -47,7 +47,7 @@ class dataTest extends AnyFunSuite {
   }
 
   test("Save State") {
-    data.create()
+    data.create(true)
     data.addDevice(mqttSwitch("abcde", false, "Device", "button"))
     var expected: Map[String, Switch] = Map()
     expected = expected + (("abcde", mqttSwitch("abcde", false, "Device", "button")))
@@ -55,7 +55,7 @@ class dataTest extends AnyFunSuite {
   }
 
   test("Test: getDevice") {
-    data.create()
+    data.create(true)
     val switch = mqttSwitch("abcde", false, "Test", "slider")
     data.addDevice(switch)
     assertResult(data.getDevice("abcde"))(switch)

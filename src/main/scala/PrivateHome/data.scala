@@ -42,9 +42,10 @@ object data {
   /**
    * Generates the table structures for the Database
    */
-  def create(): Unit = {
+  def create(dropTables: Boolean = false): Unit = {
 
     // Drops old Tables to Delete Data and make it possible to regenerate them
+    if (dropTables)
     sql"""DROP TABLE IF EXISTS `Mhz`;
          DROP TABLE IF EXISTS `Devices`;
          DROP TABLE IF EXISTS `User`""".execute().apply()
@@ -52,7 +53,7 @@ object data {
 
     val devices =
       sql"""
-                    CREATE TABLE `Devices` (
+                    CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
                     `type` varchar(16) NOT NULL,
@@ -64,7 +65,7 @@ object data {
 
 
     sql"""
-           CREATE TABLE `Mhz` (
+           CREATE TABLE IF NOT EXISTS `Mhz` (
            `id` varchar(5) NOT NULL,
            `systemcode` varchar(5) NOT NULL,
            `unitcode` varchar(5) NOT NULL,
@@ -73,7 +74,7 @@ object data {
          """.execute().apply()
 
     sql"""
-         CREATE TABLE `User` (
+         CREATE TABLE IF NOT EXISTS `User` (
          `username` varchar(30) NOT NULL,
          `passhash` varchar(100) NOT NULL,
          PRIMARY KEY (`username`))
