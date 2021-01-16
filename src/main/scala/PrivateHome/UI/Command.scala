@@ -2,7 +2,9 @@ package PrivateHome.UI
 
 import PrivateHome.data.idTest
 
-class Command()
+import java.util.Base64
+
+class Command() extends Serializable
 
 case class commandOn(id: String, private var percent: String) extends Command {
   idTest(id)
@@ -38,4 +40,12 @@ case class commandAddDevice(id: String, switchType: String, name: String, system
 case class commandGetDevice(id: String) extends Command {
   idTest(id)
 }
+
+case class commandAddUserBase64(userName: String, passHashBase64: String) extends Command {
+  def passHash: String = {
+    new String(Base64.getDecoder().decode(passHashBase64))
+  }
+}
+
+case class commandRecreateDatabase() extends Command
 

@@ -1,12 +1,13 @@
 package PrivateHome.UI
+
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.data
 import PrivateHome.data.devices
 import org.json4s.JsonAST.{JField, JObject, JValue}
 import org.json4s.JsonDSL._
-import org.json4s.{Formats, NoTypeHints}
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.{Formats, NoTypeHints}
 
 object uiControl {
 
@@ -25,7 +26,9 @@ object uiControl {
         JObject(JField("devices", devicesJson)) // because we don't use the "~" we must lift it to JSON that is why we use JObject(JField()) instead an simple "devices" -> devicesJSon.
       case c: commandAddDevice => data.addDevice(Switch(c)); JObject(JField("Success", true))
       case c: commandGetDevice => JsonMethods.parse(write(data.getDevice(c.id)))
-
+      case c: commandAddUserBase64 =>
+        data.addUser(c.userName, c.passHash)
+      case c: commandRecreateDatabase => data.create()
     }
   }
 }
