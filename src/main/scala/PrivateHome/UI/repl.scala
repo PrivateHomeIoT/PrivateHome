@@ -28,7 +28,6 @@ object cliHandler {
         val command: Array[String] = msg.stripSuffix(")").split('(')
         args = if ((command.length == 2) && (command(1) != null)) command(1).split(',') else null
         println(s"command = ${command(0)}")
-        args.foreach(println(_))
 
         val uiCommand: Command = command(0) match {
           case "commandAddUserBase64" =>
