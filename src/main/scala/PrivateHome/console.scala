@@ -33,7 +33,7 @@ object console {
 
   def recreate(): Unit = {
     val command = new commandRecreateDatabase
-    val s = Source.single(ByteString(command.toString + "\n")).via(outConnection).runWith(Sink.ignore)
+    send(command)
   }
 
   def safeCreate() = send(new commandSafeCreateDatabase)
