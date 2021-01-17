@@ -15,7 +15,7 @@ import scala.io.Source
 case object settings {
   var websocket: http = new http(port = 2888, "ws")
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
-  var database = new database(userName = "user", password = "pass", "./daten/Devices")
+  var database = new database(userName = "user", password = "pass", "/etc/privatehome/data/Devices")
   var mqtt = mqttBroker("localhost", 1500)
   var settingspath = "/etc/privatehome/settings.json"
 
