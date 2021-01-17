@@ -27,13 +27,16 @@ object console {
     "addDimmer" -> REPLCommand(_ => addSwitch(true), "Adds a new dimmable Switch"),
     "dimm" -> REPLCommand(_ => dimm(), "Set the dimming value of a dimmable Switch"),
     //"status" -> REPLCommand(_ => status(), "Show the status of Switches"),
-    "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data")
+    "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
+    "safeCreate" -> REPLCommand(_ => safeCreate(),"Adds missing tables to the database")
   )
 
   def recreate(): Unit = {
     val command = new commandRecreateDatabase
     val s = Source.single(ByteString(command.toString + "\n")).via(outConnection).runWith(Sink.ignore)
   }
+
+  def safeCreate() = send(new commandSafeCreateDatabase)
 
   def main(args: Array[String]): Unit = {
 

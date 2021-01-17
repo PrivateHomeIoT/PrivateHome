@@ -49,3 +49,5 @@ case class commandAddUserBase64(userName: String, passHashBase64: String) extend
 
 case class commandRecreateDatabase() extends Command
 
+case class commandSafeCreateDatabase() extends Command
+

@@ -28,7 +28,8 @@ object uiControl {
       case c: commandGetDevice => JsonMethods.parse(write(data.getDevice(c.id)))
       case c: commandAddUserBase64 =>
         data.addUser(c.userName, c.passHash)
-      case c: commandRecreateDatabase => data.create()
+      case c: commandRecreateDatabase => data.create(true)
+      case _: commandSafeCreateDatabase => data.create()
     }
   }
 }

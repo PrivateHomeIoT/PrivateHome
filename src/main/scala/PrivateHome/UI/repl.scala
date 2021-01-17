@@ -33,6 +33,7 @@ object cliHandler {
           case "commandAddUserBase64" =>
             commandAddUserBase64(args(0), args(1))
           case "commandRecreateDatabase" => commandRecreateDatabase()
+          case "commandSafeCreateDatabase" => commandSafeCreateDatabase()
           case "getRandomId" =>
             val random = new SecureRandom()
             var id: String = null
