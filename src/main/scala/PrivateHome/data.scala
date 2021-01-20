@@ -4,6 +4,7 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
+import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
@@ -35,7 +36,14 @@ object data {
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
-  if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
+  try {
+    if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
+      create()
+  } catch {
+    case e:JdbcSQLNonTransientConnectionException => Console.err.println(Console.RED + e.getMessage)
+      sys.exit(75)
+    case e:Throwable => e.printStackTrace(Console.err)
+  }
   fillDevices()
 
 
