@@ -246,7 +246,7 @@ object data {
   case class user(username: String, passhash: String)
 
   /**
-   * Syntaxsupport Object for devices table
+   * Syntax support Object for devices table
    */
   object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
@@ -256,7 +256,7 @@ object data {
   }
 
   /**
-   * Syntaxsupport Object for Mhz table
+   * Syntax support Object for Mhz table
    */
   object Mhz extends SQLSyntaxSupport[Mhz] {
     override val tableName = "Mhz"
