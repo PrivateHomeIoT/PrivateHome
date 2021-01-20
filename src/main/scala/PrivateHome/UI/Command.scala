@@ -43,7 +43,7 @@ case class commandGetDevice(id: String) extends Command {
 
 case class commandAddUserBase64(userName: String, passHashBase64: String) extends Command {
   def passHash: String = {
-    new String(Base64.getDecoder().decode(passHashBase64))
+    new String(Base64.getDecoder.decode(passHashBase64))
   }
 }
 
