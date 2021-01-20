@@ -16,6 +16,7 @@ case object settings {
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", password = "pass", "/etc/privatehome/data/Devices")
   var mqtt = mqttBroker("localhost", 1500)
+  var keystore = new keystore("/home/raoul/IdeaProjects/PrivateHome/src/main/resources/keystore.pkcs12","password")
   var settingspath = "/etc/privatehome/settings.json"
 
   val portable = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
@@ -51,12 +52,15 @@ case object settings {
     val mqttJson = jsonobj \ "mqtt"
     mqtt = mqttJson.extract[mqttBroker]
 
+    val keystoreJson = jsonobj \ "keystore"
+    keystore = keystoreJson.extract[keystore]
+
 
   }
 
   def save(): Unit = {
     val writer = new PrintWriter(new File(settingspath))
-    writer.write(pretty(render(("websocket" -> websocket.serialized) ~ ("http" -> http.serialized) ~ ("database" -> database.serialized) ~ ("mqtt" -> mqtt.serialized))))
+    writer.write(pretty(render(("websocket" -> websocket.serialized) ~ ("http" -> http.serialized) ~ ("database" -> database.serialized) ~ ("mqtt" -> mqtt.serialized) ~ ("keystore" -> keystore.serialized))))
     writer.close()
   }
 
@@ -81,6 +85,10 @@ case class mqttBroker(var url: String, var port: Int) extends setting {
   if (port < 0 || port > 0xffff) throw new IllegalArgumentException("Argument Port aut of bound must be between 0x0 and 0xffff=65536")
 
   override def serialized: JsonAST.JObject = ("url" -> url) ~ ("port" -> port)
+}
+
+case class keystore(var path: String, var pass: String) extends setting {
+  override def serialized: JsonAST.JObject = ("path" -> path) ~ ("pass" -> pass)
 }
 
 abstract class setting {

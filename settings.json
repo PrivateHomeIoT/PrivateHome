@@ -15,5 +15,9 @@
   "mqtt" : {
     "url" : "localhost",
     "port" : 1500
+  },
+  "keystore" : {
+    "path" : "./keystore.pkcs12",
+    "pass" : "password"
   }
 }
