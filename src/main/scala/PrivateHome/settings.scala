@@ -11,7 +11,6 @@ import org.json4s.jackson.JsonMethods._
 import scala.io.Source
 
 
-//ToDo: make settings for an config file
 case object settings {
   var websocket: http = new http(port = 2888, "ws")
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
