@@ -10,12 +10,12 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
-
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 object gui {
   implicit val actorSystem: ActorSystem = ActorSystem("system")
-  val password: Array[Char] = "password".toCharArray //TODO: Read from Settings
+  implicit val exectionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
   val ks: KeyStore = KeyStore.getInstance("PKCS12")
   val keystore = getClass.getClassLoader.getResourceAsStream("keystore.pkcs12") //ToDo: Reads from filesystem with Settings config
@@ -39,18 +39,28 @@ object gui {
       handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
     }
   }
-
-  Http().newServerAt("0.0.0.0",settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute)
-
- val httpRoute: Route =  {
-     concat(
-       pathEndOrSingleSlash {
-         redirect("/Devices.html", StatusCodes.PermanentRedirect)
-       },
-       getFromResourceDirectory(settings.http.path)
-     )
+  val httpRoute: Route = {
+    concat(
+      pathEndOrSingleSlash {
+        redirect("/Devices.html", StatusCodes.PermanentRedirect)
+      },
+      getFromResourceDirectory(settings.http.path)
+    )
   }
-  Http().newServerAt("0.0.0.0",settings.http.port).enableHttps(https).bind(httpRoute)
+
+  Http().newServerAt("0.0.0.0", settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute).failed.foreach(e => serverBindExeceptionhandler(e))
+  Http().newServerAt("0.0.0.0", settings.http.port).enableHttps(https).bind(httpRoute).failed.foreach(e => serverBindExeceptionhandler(e))
+
+  def serverBindExeceptionhandler(exception: Throwable): Unit = {
+    exception.getCause match {
+      case e: BindException =>
+        Console.err.println(Console.RED + e.getMessage.split("\n")(0))
+        sys.exit(75) // Linux Standard temp failure; user is invited to retry; most likely is another instance running or another server is listening to this port
+      case e: Throwable =>
+        e.printStackTrace(Console.err)
+        sys.exit(1)
+    }
+  }
 
 }
 
