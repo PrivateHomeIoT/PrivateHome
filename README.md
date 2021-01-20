@@ -8,11 +8,11 @@ This is a SmartHome project focused on design, security and expandability. It is
 
 This is still a work in progress. The following list represents our current status and planned goals.
 
-- [ ] Web-GUI
+- [x]  Web-GUI
 - [ ] Android-App
 - [ ] iOS-App
-- [ ] MQTT
-- [ ] 443 MHz 
+- [x] MQTT
+- [x] 443 MHz 
 - [ ] Infrared
 - [ ] ZigBee
 - [ ] Alexa 
