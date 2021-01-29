@@ -4,10 +4,11 @@ class WebSocketControll {
   sessionId = "";
   authenticated = false;
   connection = null;
+  url = "";
 
 
   constructor(url) {
-    this.setup(url);
+    this.url = url
   }
 
   authenticate() {
@@ -79,4 +80,8 @@ class WebSocketControll {
   }
 }
 
-var ws = new WebSocketControll("wss://" + location.hostname + ":2888/ws");
+window.addEventListener('load', function () {
+
+  ws.setup("wss://" + location.hostname + ":2888/ws");
+})
+var ws = new WebSocketControll();
