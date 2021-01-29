@@ -12,7 +12,7 @@ class WebSocketControll {
   }
 
   sendLoginData(username, password) {
-    this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
+    this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : password}));
     this.document.getElementById('login01').style.display='none';
   }
   authenticate() {
