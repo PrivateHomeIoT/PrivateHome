@@ -28,7 +28,7 @@ class WebSocketControll {
       //var pass = prompt("Enter password");
       //this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
       document.getElementById('login01').style.display='block';
-    }jva
+    }
     this.connection.onmessage = function (event) {ws.sessionauthenticationHandler(event);};
     console.log("set message handler")
   }
