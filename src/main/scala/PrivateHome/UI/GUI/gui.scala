@@ -3,9 +3,10 @@ package PrivateHome.UI.GUI
 import PrivateHome.UI.Websocket.websocket
 import PrivateHome.settings
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 
 import java.io.{FileInputStream, FileNotFoundException, IOException}
@@ -45,11 +46,21 @@ object gui {
   tmf.init(ks)
   val https: HttpsConnectionContext = ConnectionContext.httpsServer(sslContext)
   sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
-  val websocketRoute: Route = path(settings.websocket.path) {
-    extractRequest { request =>
-      handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
+  val websocketRoute: Route = {
+    concat(
+    path("test") {
+      extractHost{ host =>
+        redirect(s"https://${host}:${settings.http.port}",StatusCodes.TemporaryRedirect)
+      }
+    },
+    path(settings.websocket.path) {
+      extractRequest { request =>
+        handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
+      }
     }
+    )
   }
+
   val httpRoute: Route = {
     concat(
       pathEndOrSingleSlash {
