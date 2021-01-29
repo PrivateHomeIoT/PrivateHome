@@ -62,6 +62,12 @@ class WebSocketControll {
   }
 
   onclose(event) {
+    console.log(event.code)
+    console.log(event.reason)
+    if (event.code == 1015) {
+      alert("There was an Error in the TLS handshake for WebSocket probaly because you use a self-singed certificate. When you close this Allert you get redirected to the WebSocket endpoint were you should add an exception. If you have never added an exception for this side contact the site maintainer.")
+      window.location = `https://${location.hostname}:2888/test`
+    }
     this.setup(this.connection.url);
   }
 
