@@ -16,7 +16,7 @@ case object settings {
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", password = "pass", "/etc/privatehome/data/Devices")
   var mqtt = mqttBroker("localhost", 1500)
-  var keystore = new keystore("/home/raoul/IdeaProjects/PrivateHome/src/main/resources/keystore.pkcs12","password")
+  var keystore = new keystore("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
   var settingspath = "/etc/privatehome/settings.json"
 
   val portable = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")

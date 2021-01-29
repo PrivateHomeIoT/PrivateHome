@@ -10,6 +10,10 @@ class WebSocketControll {
     this.setup(url);
   }
 
+  sendLoginData(String username, String password){
+    this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
+    this.document.getElementById('login01').style.display='none';
+  }
   authenticate() {
     console.log(this.authenticated)
     this.sessionId = window.sessionStorage.getItem('sessionId');
@@ -19,10 +23,11 @@ class WebSocketControll {
       this.send(JSON.stringify({"auth" : "ID", "sessionID" : this.sessionId}));
       console.log("test nach senden")
     } else {
-      var username = prompt("Enter username");
-      var pass = prompt("Enter password");
-      this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
-    }
+      //var username = prompt("Enter username");
+      //var pass = prompt("Enter password");
+      //this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
+      this.document.getElementById('login01').style.display='block';
+    }jva
     this.connection.onmessage = function (event) {ws.sessionauthenticationHandler(event);};
     console.log("set message handler")
   }
