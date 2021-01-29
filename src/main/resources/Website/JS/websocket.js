@@ -13,7 +13,7 @@ class WebSocketControll {
 
   sendLoginData(username, password) {
     this.send(JSON.stringify({"auth" : "pass", "username" : username, "pass" : pass}));
-    //this.document.getElementById('login01').style.display='none';
+    this.document.getElementById('login01').style.display='none';
   }
   authenticate() {
     console.log(this.authenticated)
