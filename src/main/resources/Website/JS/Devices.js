@@ -74,10 +74,10 @@ function generateButton(id, name, status){
   else {status = "OFF"}
   var Button =
   `<td class="switch" id="${id}">
-  <button id="${id}on" class="button" style="display: ${(status == "ON") ? inline-block : none}" onclick="turnOff('${id}')">
+  <button id="${id}on" class="button" style="display: ${(status == "ON") ? "inline-block" : "none"}" onclick="turnOff('${id}')">
     <img src="Pictures/on.png" alt="ON" class="pic">
   </button>
-  <button id="${id}off" class="button" style="display: ${(status == "OFF") ? inline-block : none}" onclick="turnOn('${id}')">
+  <button id="${id}off" class="button" style="display: ${(status == "OFF") ? "inline-block" : "none"}" onclick="turnOn('${id}')">
     <img src="Pictures/off.png" alt="OFF" class="pic">
   </button>
   <a href="Settings/${id}.html" class="aButton">
