@@ -15,7 +15,7 @@ packageDescription := "This is a SmartHome project focused on design, security a
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
 debianPackageRecommends := Seq("wiringpi")
 linuxPackageMappings ++= Seq(
-  packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/debiansettings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
+  packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
 releaseIgnoreUntrackedFiles := true
