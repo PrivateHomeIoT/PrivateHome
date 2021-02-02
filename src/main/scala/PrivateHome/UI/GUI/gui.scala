@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 
 object gui {
   implicit val actorSystem: ActorSystem = ActorSystem("system")
-  implicit val exectionContext: ExecutionContextExecutor = actorSystem.dispatcher
+  implicit val exceptionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
   val ks: KeyStore = KeyStore.getInstance("PKCS12")
   val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
