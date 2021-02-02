@@ -1,5 +1,5 @@
 
-class WebSocketControll {
+class WebSocketControl {
 
   sessionId = "";
   authenticated = false;
@@ -95,4 +95,4 @@ window.addEventListener('load', function () {
   } );
   ws.setup("wss://" + location.hostname + ":2888/ws");
 })
-var ws = new WebSocketControll();
+var ws = new WebSocketControl();
