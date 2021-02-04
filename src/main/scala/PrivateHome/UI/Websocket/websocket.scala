@@ -66,7 +66,7 @@ object websocket {
                 currentSession = sessionMap.getOrElse(sessionId, currentSession) //replaces currentSession only wen a sessionObject exists
               case "pass" =>
                 val username = (json \ "username").extract[String]
-                val pass = (json \ "pass").extract[String]
+                val pass = (json \ "pass").extract[String].toCharArray
                 val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
                 val hash = data.getUserHash(username)
                 if (argon2.verify(hash, pass)) {
@@ -75,6 +75,8 @@ object websocket {
                   currentSession = session(sessionID, username)
                   sessionMap += sessionID -> currentSession
                 }
+                argon2.wipeArray(pass)
+
             }
 
             if (currentSession.valid) sendMsg(websocketId, ("auth" -> authType) ~ ("sessionID" -> currentSession.sessionID) ~ ("authenticated" -> true))
