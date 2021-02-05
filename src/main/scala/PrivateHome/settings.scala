@@ -84,7 +84,8 @@ class database(var userName: String, pass: String, var path: String) extends set
 
   def password_= (pass: Array[Char]): Unit = _passwordChar = pass
   def password: Array[Char] = _passwordChar
-  override def serialized: JsonAST.JObject = ("userName" -> userName) ~ ("password" -> password.toString) ~ ("path" -> path)
+  def passwordString: String = password.mkString("")
+  override def serialized: JsonAST.JObject = ("userName" -> userName) ~ ("password" -> password.mkString("")) ~ ("path" -> path)
 
 }
 
@@ -94,8 +95,19 @@ case class mqttBroker(var url: String, var port: Int) extends setting {
   override def serialized: JsonAST.JObject = ("url" -> url) ~ ("port" -> port)
 }
 
-case class keystore(var path: String, var pass: String) extends setting {
-  override def serialized: JsonAST.JObject = ("path" -> path) ~ ("pass" -> pass)
+class keystore(var path: String, pass: String) extends setting {
+
+  private var _passwordChar = pass.toCharArray
+  def password_= (pass: String): Unit = {
+    _passwordChar = pass.toCharArray
+  }
+
+  def password_= (pass: Array[Char]): Unit = _passwordChar = pass
+  def password: Array[Char] = _passwordChar
+  def passwordString: String = password.mkString("")
+
+
+  override def serialized: JsonAST.JObject = ("path" -> path) ~ ("pass" -> passwordString)
 }
 
 abstract class setting {

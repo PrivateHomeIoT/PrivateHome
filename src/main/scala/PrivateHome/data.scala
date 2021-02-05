@@ -32,7 +32,7 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.password)
+  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
