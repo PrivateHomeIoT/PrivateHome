@@ -26,7 +26,7 @@ object gui {
 
   try {
     keystore = new FileInputStream(settings.keystore.path)
-    ks.load(keystore, settings.keystore.pass.toCharArray)
+    ks.load(keystore, settings.keystore.password)
   } catch {
     case e: FileNotFoundException =>
       Console.err.println(e)
@@ -41,7 +41,7 @@ object gui {
       sys.exit(1) //I does not know what the error is
   }
   val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
-  keyManagerFactory.init(ks, settings.keystore.pass.toCharArray)
+  keyManagerFactory.init(ks, settings.keystore.password)
   val sslContext: SSLContext = SSLContext.getInstance("TLS")
   tmf.init(ks)
   val https: HttpsConnectionContext = ConnectionContext.httpsServer(sslContext)
