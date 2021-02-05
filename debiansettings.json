@@ -9,7 +9,7 @@
   },
   "database" : {
     "userName" : "user",
-    "password" : "pass",
+    "pass" : "pass",
     "path" : "/etc/privatehome/data/Devices"
   },
   "mqtt" : {
