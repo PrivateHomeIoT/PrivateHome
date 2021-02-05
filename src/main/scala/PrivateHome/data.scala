@@ -4,10 +4,11 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
-import org.json4s.{Formats, NoTypeHints}
+import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.{Formats, NoTypeHints}
 import scalikejdbc._
 
 
@@ -31,27 +32,36 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.password)
+  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: Map[String, String] = Map()
-  if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
+  try {
+    if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
+      create()
+  } catch {
+    case e:JdbcSQLNonTransientConnectionException => Console.err.println(Console.RED + e.getMessage)
+      sys.exit(75)
+    case e:Throwable => e.printStackTrace(Console.err)
+  }
   fillDevices()
 
 
   /**
    * Generates the table structures for the Database
    */
-  def create(): Unit = {
+  def create(dropTables: Boolean = false): Unit = {
 
     // Drops old Tables to Delete Data and make it possible to regenerate them
+    if (dropTables)
     sql"""DROP TABLE IF EXISTS `Mhz`;
-         DROP TABLE IF EXISTS `Devices`;""".execute().apply()
+         DROP TABLE IF EXISTS `Devices`;
+         DROP TABLE IF EXISTS `User`""".execute().apply()
 
 
     val devices =
       sql"""
-                    CREATE TABLE `Devices` (
+                    CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
                     `type` varchar(16) NOT NULL,
@@ -63,13 +73,24 @@ object data {
 
 
     sql"""
-           CREATE TABLE `Mhz` (
+           CREATE TABLE IF NOT EXISTS `Mhz` (
            `id` varchar(5) NOT NULL,
            `systemcode` varchar(5) NOT NULL,
            `unitcode` varchar(5) NOT NULL,
            PRIMARY KEY (`id`),
            CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
          """.execute().apply()
+
+    sql"""
+         CREATE TABLE IF NOT EXISTS `User` (
+         `username` varchar(30) NOT NULL,
+         `passhash` varchar(100) NOT NULL,
+         PRIMARY KEY (`username`))
+       """.execute().apply()
+
+    sql"""
+         SHOW Tables;
+       """.execute().apply().toString
 
 
     // insert initial data
@@ -86,7 +107,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
           if (d.keepState) {
             devices(d.id).on(d.state)
           }
@@ -127,6 +148,42 @@ object data {
     devices = devices.concat(Map((device.id, device)))
     implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
     websocket.broadcastMsg(("Command" -> "newSwitch") ~ ("Answer" -> JsonMethods.parse(write(device))))
+  }
+
+
+  /**
+   * Adds a user to the database
+   *
+   * @param username The username to Store
+   * @param passHash The argon2 hash of the password (encoded
+   */
+  def addUser(username: String, passHash: String): Unit = {
+    withSQL {
+      insertInto(user).values(username, passHash)
+    }.update().apply()
+  }
+
+
+  /**
+   * Gets the argon2 hash for the Username
+   *
+   * @param username the username for which to get the hash
+   * @return the hash of the User of there is no User with this name returns "no_Username"
+   */
+  def getUserHash(username: String): String = {
+    val m = user.syntax("m")
+    var value: String = null
+    withSQL {
+      select.from(user as m).where.eq(user.column.username, username)
+    }.map(rs => user(rs)).single().apply().foreach(u => {
+      if (u == null) {
+        value = "no_Username"
+      } else
+        value = u.passhash
+    })
+    if (value == null) {
+      "no_Username"
+    } else value
   }
 
   /**
@@ -181,7 +238,15 @@ object data {
   case class Mhz(id: String, systemcode: String, unitcode: String)
 
   /**
-   * Syntaxsupport Object for devices table
+   * Message class for user Table
+   *
+   * @param username the username
+   * @param passhash the argon2id hash
+   */
+  case class user(username: String, passhash: String)
+
+  /**
+   * Syntax support Object for devices table
    */
   object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
@@ -191,12 +256,21 @@ object data {
   }
 
   /**
-   * Syntaxsupport Object for Mhz table
+   * Syntax support Object for Mhz table
    */
   object Mhz extends SQLSyntaxSupport[Mhz] {
     override val tableName = "Mhz"
 
     def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.string("systemcode"), rs.string("unitcode"))
+  }
+
+  /**
+   * Syntax support Object for user table
+   */
+  object user extends SQLSyntaxSupport[user] {
+    override val tableName = "User"
+
+    def apply(rs: WrappedResultSet): user = new user(rs.string("username"), rs.string("passhash"))
   }
 
 }

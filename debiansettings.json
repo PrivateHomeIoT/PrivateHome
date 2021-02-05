@@ -10,14 +10,14 @@
   "database" : {
     "userName" : "user",
     "pass" : "pass",
-    "path" : "./data/Devices"
+    "path" : "/etc/privatehome/data/Devices"
   },
   "mqtt" : {
     "url" : "localhost",
     "port" : 1500
   },
   "keystore" : {
-    "path" : "./keystore.pkcs12",
+    "path" : "/etc/privatehome/keystore.pkcs12",
     "pass" : "password"
   }
 }

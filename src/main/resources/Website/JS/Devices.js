@@ -1,4 +1,4 @@
-var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
+
 
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
@@ -74,10 +74,10 @@ function generateButton(id, name, status){
   else {status = "OFF"}
   var Button =
   `<td class="switch" id="${id}">
-  <button id="${id}on" class="button" style="display: none" onclick="turnOff('${id}'')">
+  <button id="${id}on" class="button" style="display: ${(status == "ON") ? "inline-block" : "none"}" onclick="turnOff('${id}')">
     <img src="Pictures/on.png" alt="ON" class="pic">
   </button>
-  <button id="${id}off" class="button" style="display: inline-block" onclick="turnOn('${id}')">
+  <button id="${id}off" class="button" style="display: ${(status == "OFF") ? "inline-block" : "none"}" onclick="turnOn('${id}')">
     <img src="Pictures/off.png" alt="OFF" class="pic">
   </button>
   <a href="Settings/${id}.html" class="aButton">
@@ -114,7 +114,7 @@ Usage: onGraph(String id);
 function onGraph(ID) {
   document.getElementById(ID + "off").style.display = 'none';
   document.getElementById(ID + "on").style.display = 'inline-block';
-  document.getElementById(ID + "status").innerHTML = "ON";
+  document.getElementById(ID + "Status").innerHTML = "ON";
 }
 
 /*
@@ -168,9 +168,9 @@ Usage: turnOff(String id);
 */
 function turnOff(ID) {
   ws.send(JSON.stringify({
-    Command: "OFF",
+    Command: "off",
     Args: {
-      Percent: 0,
+      percent: 0,
       id: ID
     }
   }));

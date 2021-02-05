@@ -1,6 +1,5 @@
 import DebianConstants._
 import ReleaseTransformations._
-
 name := "PrivateHome"
 
 //version := "0.1"
@@ -16,7 +15,7 @@ packageDescription := "This is a SmartHome project focused on design, security a
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
 debianPackageRecommends := Seq("wiringpi")
 linuxPackageMappings ++= Seq(
-  packageMapping(file(s"settings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
+  packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
 releaseIgnoreUntrackedFiles := true
@@ -54,7 +53,10 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.typesafe.akka" %% "akka-http" % "10.2.0",
-  "com.typesafe.akka" %% "akka-stream" % akkaVersion
+  "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+  "com.lightbend.akka" %% "akka-stream-alpakka-unix-domain-socket" % "2.0.2",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "org.scalatest" %% "scalatest" % "3.2.2" % Test
 )
 
 //XML library for scala
@@ -66,15 +68,14 @@ libraryDependencies += "org.eclipse.paho" % "mqtt-client" % "0.4.0"
 
 //scalikejdbc library for mysql (backend h2)
 libraryDependencies ++= Seq(
-  "org.scalikejdbc" %% "scalikejdbc"       % "3.4.0",
-  "org.scalikejdbc" %% "scalikejdbc-test" % "3.4.0"   % "test",
-  "com.h2database"  %  "h2"                % "1.4.200",
-  "org.scalikejdbc" %% "scalikejdbc-config"  % "3.4.0"
-)
+  "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
+  "org.scalikejdbc" %% "scalikejdbc-test" % "3.4.0" % "test",
+  "com.h2database" % "h2" % "1.4.200",
+  "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0")
 
-//JSON library
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 
+libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.5"
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)
