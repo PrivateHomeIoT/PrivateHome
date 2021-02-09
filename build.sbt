@@ -75,7 +75,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 
-libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.5"
+libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)
