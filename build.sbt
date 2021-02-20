@@ -16,6 +16,7 @@ debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
 debianPackageRecommends := Seq("wiringpi")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
+  packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") ->s"/etc/mosquitto/conf.d/privatehome.conf"),
   packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
 releaseIgnoreUntrackedFiles := true
