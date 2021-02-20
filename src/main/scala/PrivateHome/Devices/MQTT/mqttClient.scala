@@ -11,7 +11,9 @@ object mqttClient {
   private val stat = "Home/stat/"
   private val cmnd = "Home/switch/cmnd/"
   private val persistence = new MemoryPersistence
-  private val client = new MqttClient(brokerUrl, MqttClient.generateClientId, persistence)
+  private var clientID = MqttClient.generateClientId
+  clientID = clientID.substring(0,Math.min(23,clientID.length))
+  private val client = new MqttClient(brokerUrl, clientID, persistence)
 
   var lastMsg: String = "" //here you can get the last received message
   var lastID: String = "" //her you can get the last received id

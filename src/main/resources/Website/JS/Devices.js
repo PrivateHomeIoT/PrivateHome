@@ -29,12 +29,12 @@ ws.onmessage = function(event) {
     }
     case "getDevice":{
       let answer = msg.answer;
-      switchGenerator(answer.id,answer.name,answer.status*100,answer.type);
+      switchGenerator(answer.id,answer.name,answer.status*100,answer.controlType);
       break;
     }
     case "newDevice": {
       let answer = msg.answer;
-      switchGenerator(answer.id,answer.name,answer.status*100,answer.type);
+      switchGenerator(answer.id,answer.name,answer.status*100,answer.controlType);
     }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
   }
