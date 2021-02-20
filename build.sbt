@@ -13,7 +13,7 @@ packageSummary := "This is a SmartHome system"
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
-debianPackageRecommends := Seq("wiringpi")
+debianPackageRecommends := Seq("wiringpi","pi4j")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") ->s"/etc/mosquitto/conf.d/privatehome.conf"),
