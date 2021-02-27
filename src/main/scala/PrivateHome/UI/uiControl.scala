@@ -14,22 +14,30 @@ object uiControl {
   implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
 
   def receiveCommand(command: Command): Any = {
-    command match {
-      case c: commandOn => devices(c.id).on(c.percentFloat)
-      case c: commandOff => devices(c.id).off()
-      case _: commandGetDevices =>
-        var devicesJson: List[JValue] = List()
-        for (device <- data.devices) {
+    try {
+      command match {
+        case c: commandOn => devices(c.id).on(c.percentFloat)
+          true
+        case c: commandOff => devices(c.id).off()
+          true
+        case _: commandGetDevices =>
+          var devicesJson: List[JValue] = List()
+          for (device <- data.devices) {
 
-          devicesJson = devicesJson.concat(List(JsonMethods.parse(write(device._2))))
-        }
-        JObject(JField("devices", devicesJson)) // because we don't use the "~" we must lift it to JSON that is why we use JObject(JField()) instead an simple "devices" -> devicesJSon.
-      case c: commandAddDevice => data.addDevice(Switch(c)); JObject(JField("Success", true))
-      case c: commandGetDevice => JsonMethods.parse(write(data.getDevice(c.id)))
-      case c: commandAddUserBase64 =>
-        data.addUser(c.userName, c.passHash)
-      case c: commandRecreateDatabase => data.create(true)
-      case _: commandSafeCreateDatabase => data.create()
+            devicesJson = devicesJson.concat(List(JsonMethods.parse(write(device._2))))
+          }
+          JObject(JField("devices", devicesJson)) // because we don't use the "~" we must lift it to JSON that is why we use JObject(JField()) instead an simple "devices" -> devicesJSon.
+        case c: commandAddDevice => data.addDevice(Switch(c)); true
+        case c: commandGetDevice => JsonMethods.parse(write(data.getDevice(c.id)))
+
+        case c: commandAddUserBase64 => data.addUser(c.userName, c.passHash)
+          true
+        case c: commandRecreateDatabase => data.create(true); true
+        case _: commandSafeCreateDatabase => data.create(); true
+        case c: commandUpdateDevice => data.updateDevice(c.oldId,Switch(c)); true
+      }
+    } catch {
+      case exception: Exception => exception
     }
   }
 }
