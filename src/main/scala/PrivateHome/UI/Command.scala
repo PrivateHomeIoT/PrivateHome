@@ -37,6 +37,20 @@ case class commandAddDevice(id: String, switchType: String, name: String, system
   }
 }
 
+case class commandUpdateDevice(oldId: String, newId: String, keepState: Boolean, name: String, controlType: String, switchType: String, systemCode: String = "", unitCode: String = "") extends Command{
+  println("test")
+  idTest(newId, create = oldId != newId)
+  idTest(oldId)
+  switchType match {
+    case "mqtt" =>
+    case "433Mhz" =>
+      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+  }
+}
+
 case class commandGetDevice(id: String) extends Command {
   idTest(id)
 }
