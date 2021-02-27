@@ -11,12 +11,14 @@ import org.json4s.jackson.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
 import scalikejdbc._
 
+import scala.collection.mutable
+
 
 object data {
   /**
    * An map containing all settings
    */
-  var devices: Map[String, Switch] = Map()
+  var devices: mutable.Map[String, Switch] = mutable.Map()
 
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
@@ -35,7 +37,7 @@ object data {
   ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
-  var mhzId: Map[String, String] = Map()
+  var mhzId: mutable.Map[String, String] = mutable.Map()
   try {
     if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
       create()
@@ -53,10 +55,12 @@ object data {
   def create(dropTables: Boolean = false): Unit = {
 
     // Drops old Tables to Delete Data and make it possible to regenerate them
-    if (dropTables)
-    sql"""DROP TABLE IF EXISTS `Mhz`;
+    if (dropTables) {
+      sql"""DROP TABLE IF EXISTS `Mhz`;
          DROP TABLE IF EXISTS `Devices`;
          DROP TABLE IF EXISTS `User`""".execute().apply()
+      devices = mutable.Map()
+    }
 
 
     val devices =
