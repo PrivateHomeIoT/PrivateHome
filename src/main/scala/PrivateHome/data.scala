@@ -136,7 +136,7 @@ object data {
    * @param device The device that should be added
    */
   def addDevice(device: Switch): Unit = {
-    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
+    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
       insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.status else 0, device.keepStatus, device.controlType)
     }.update.apply
@@ -155,7 +155,7 @@ object data {
 
   def updateDevice(oldid: String, pDevice: Switch): Unit = {
     println(s"update Start with $pDevice")
-    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
+    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
     if (pDevice.switchtype == devices(oldid).switchtype) {
       val oldDevice = devices(oldid)
       devices(oldid).id = pDevice.id
