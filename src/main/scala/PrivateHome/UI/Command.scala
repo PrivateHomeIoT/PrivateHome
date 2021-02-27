@@ -8,7 +8,7 @@ class Command() extends Serializable
 
 case class commandOn(id: String, private var percent: String) extends Command {
   idTest(id)
-  var percentFloat = percent.toFloat
+  val percentFloat: Float = percent.toFloat
   if (0 > percentFloat || percentFloat > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
 }
 
