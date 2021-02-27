@@ -41,6 +41,13 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
     }
 
     def id: String = setupID
+
+    def id_=(pId:String): Unit ={
+        if (pId != setupID) {
+            idTest(pId, create = true)
+            setupID = pId
+        }
+    }
     
     def controlType:String = _controlType
     
