@@ -45,7 +45,7 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
     def controlType:String = _controlType
     
     def controlType(newType:String):Unit = {
-        if (newType != "button"||newType != "slider") throw new IllegalArgumentException("controlType isn't Button/slider")
+        if (newType != "button" && newType != "slider") throw new IllegalArgumentException(s"controlType $newType isn't button/slider")
         _controlType = newType
     }
 
