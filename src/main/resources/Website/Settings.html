@@ -50,15 +50,15 @@
         <link rel="stylesheet" href="CSS/login.css">
         <button onclick="document.getElementById('login01').style.display='block'" style="width:auto;">Login</button>
         <div id="login01" class="modal">
-            <form class="modal-content animate" action="" method="POST">
-                <div class="container">
-                    <label for="uname"><b>Username</b></label>
-                    <input type="text" placeholder="Enter Username" name="uname" id="un01" required>
-                    <label for="psw"><b>Password</b></label>
-                    <input type="password" placeholder="Enter Password" name="psw" id="pw01" required>
-                    <button id="sub01" type="submit" onclick="sendLoginData(document.getElementById('un01'), document.getElementById('pw01'))">Login</button>
-                </div>
-            </form>
+        <form id="login01Form" class="modal-content animate">
+            <div class="container">
+                <label for="un01"><b>Username</b></label>
+                <input class="loginData" type="text" placeholder="Enter Username" name="uname" id="un01" required>
+                <label for="pw01"><b>Password</b></label>
+                <input class="loginData" type="password" placeholder="Enter Password" name="psw" id="pw01" required>
+                <button id="sub01" type="submit">Login</button>
+            </div>
+        </form>
         </div>
     </head>
     <body class="content">
