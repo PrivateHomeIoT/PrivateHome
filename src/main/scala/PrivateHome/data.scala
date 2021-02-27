@@ -153,6 +153,64 @@ object data {
     websocket.broadcastMsg(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(device))))
   }
 
+  def updateDevice(oldid: String, pDevice: Switch): Unit = {
+    println(s"update Start with $pDevice")
+    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
+    if (pDevice.switchtype == devices(oldid).switchtype) {
+      val oldDevice = devices(oldid)
+      devices(oldid).id = pDevice.id
+      devices(oldid).name = pDevice.name
+      devices(oldid).keepStatus = pDevice.keepStatus
+      devices(oldid).controlType = pDevice.controlType
+    } else {
+      devices(oldid) = pDevice
+    }
+
+    println(s"devices($oldid) is now ${devices(oldid)}")
+
+    withSQL {
+      update(Device).set(
+        Device.column.id -> pDevice.id,
+        Device.column.name -> pDevice.name,
+        Device.column.keepstate -> pDevice.keepStatus,
+        Device.column.switchtype -> pDevice.switchtype,
+        Device.column.controlType -> pDevice.controlType,
+        Device.column.state -> pDevice.status
+      ).where.eq(Device.column.id, pDevice.id)
+    }.update.apply()
+    if (oldid != pDevice.id) {
+      devices += (pDevice.id -> devices(oldid))
+      devices -= oldid
+    }
+
+    pDevice match {
+      case device: mhzSwitch => withSQL {
+        update(Mhz).set(
+          Mhz.column.id -> device.id,
+          Mhz.column.systemcode -> device.systemCode,
+          Mhz.column.unitcode -> device.unitCode).where.eq(Device.column.id, oldid)
+      }.update().apply()
+        mhzId(device.systemCode + device.unitCode) = device.id
+      case _: mqttSwitch =>
+      case _ => throw wrongclass
+    }
+  }
+
+
+  /**
+   * Deletes the switch form the Database and the Devices Map
+   * @param id The Id of the Switch to delet
+   */
+  def deleteDevice(id: String): Unit = {
+    withSQL{
+      delete.from(Device).where.eq(Device.column.id, id)
+    }.update.apply()
+    withSQL {
+      delete.from(Mhz).where.eq(Device.column.id, id)
+    }.update().apply()
+    devices -= id
+  }
+
 
   /**
    * Adds a user to the database
