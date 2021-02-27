@@ -63,7 +63,6 @@ object data {
     }
 
 
-    val devices =
       sql"""
                     CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
