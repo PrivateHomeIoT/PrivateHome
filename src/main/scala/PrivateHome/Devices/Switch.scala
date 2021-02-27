@@ -16,10 +16,10 @@ import scala.xml._
  * The general Switch class
  *
  * @param setupID         an unique Base64 ID
- * @param setupKeepStatus toggles if the Switch should save State over program restart (failure)
+ * @param keepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var name:String, private var _controlType:String) {
+abstract class Switch(private var setupID: String, var keepStatus: Boolean, var name:String, private var _controlType:String) {
     idTest(setupID)
     if (_controlType != "button"&&_controlType != "slider") throw new IllegalArgumentException("controlType isn't button/slider")
 
@@ -36,7 +36,7 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var
      */
     def Status(state: Float): Unit = {
         _status = state
-        if (setupKeepStatus) data.saveStatus(id,state)
+        if (keepStatus) data.saveStatus(id,state)
         websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType))))
     }
 
@@ -54,8 +54,6 @@ abstract class Switch(private val setupID: String, setupKeepStatus: Boolean, var
     def Status: Float = _status
 
     def toXml: Node
-
-    def keepStatus: Boolean = setupKeepStatus
 
 
 
@@ -103,7 +101,7 @@ object Switch {
 }
 
 class switchSerializer extends CustomSerializer[Switch](format => ({
-  case jsonObj: JObject => mqttSwitch("",false,"This Switch should never be used","")
+  case jsonObj: JObject => mqttSwitch("",_keepStatus = false,"This Switch should never be used","")
 },{
   case switch:mqttSwitch => switch.serializer
   case switch: mhzSwitch => switch.serializer ~ ("systemCode"->switch.systemCode) ~("unitCode"->switch.unitCode)
