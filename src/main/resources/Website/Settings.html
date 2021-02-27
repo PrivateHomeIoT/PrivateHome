@@ -7,10 +7,13 @@
         <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+        <link rel="icon" type="image/x-icon" href=""/>
 
         <link rel="stylesheet" href="CSS/menu.css">
-        
+
+        <script src="JS/websocket.js"></script>
+        <script src="JS/settings.js"></script>
+
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -41,10 +44,9 @@
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
                 setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
+
             }
         </script>
-        <script src="JS/websocket.js"></script>
 
         <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
         <link rel="stylesheet" href="CSS/login.css">
