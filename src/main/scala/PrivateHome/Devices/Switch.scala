@@ -2,7 +2,7 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
-import PrivateHome.UI.commandAddDevice
+import PrivateHome.UI.{commandAddDevice, commandUpdateDevice}
 import PrivateHome.{data, editXML}
 import PrivateHome.data.idTest
 import PrivateHome.UI.Websocket.websocket
@@ -93,6 +93,13 @@ object Switch {
         data.switchType match {
             case "433Mhz" => mhzSwitch(data.id,data.keepState,data.name,data.systemCode,data.unitCode)
             case "mqtt" => mqttSwitch(data.id,data.keepState,data.name,data.controlType)
+        }
+    }
+
+    def apply(data: commandUpdateDevice): Switch = {
+        data.switchType match {
+            case "433Mhz" => mhzSwitch(data.newId,data.keepState,data.name,data.systemCode,data.unitCode)
+            case "mqtt" => mqttSwitch(data.newId,data.keepState,data.name,data.controlType)
         }
     }
 
