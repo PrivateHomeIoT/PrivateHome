@@ -66,7 +66,7 @@ object data {
                     `name` varchar(64) NOT NULL,
                     `type` varchar(16) NOT NULL,
                     `state` decimal(5,4) NOT NULL,
-                    `keepState` boolean NOT NULL,
+                    `keepstate` boolean NOT NULL,
                     `controltype` varchar(16),
                     PRIMARY KEY (`id`))
          """.execute.apply()
@@ -107,8 +107,8 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
-          if (d.keepState) {
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controlType)))
+          if (d.keepstate) {
             devices(d.id).on(d.state)
           }
         case "433Mhz" =>
@@ -116,9 +116,9 @@ object data {
           val data = withSQL {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id, mhzSwitch(d.id, d.keepState, d.name, data.systemcode, data.unitcode)))
+          devices += ((d.id, mhzSwitch(d.id, d.keepstate, d.name, data.systemcode, data.unitcode)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
-          if (d.keepState) {
+          if (d.keepstate) {
             devices(d.id).on(d.state)
           }
       }
@@ -220,13 +220,14 @@ object data {
   /**
    * Message class for devices Table
    *
-   * @param id         ID of the Device in the Format [0-9a-Z] five character long
-   * @param name       The name of the Device any String lenght in the Table 64 character
-   * @param switchtype A String identification of the Switch type max length 16 character
-   * @param state      an foatingpoint representation of the State when keepState is true 4 decimalpoints long
-   * @param keepState  Boolean that indicates if the State should be restored at turn on
+   * @param id          ID of the Device in the Format [0-9a-Z] five character long
+   * @param name        The name of the Device any String lenght in the Table 64 character
+   * @param switchtype  A String identification of the Switch type max length 16 character
+   * @param state       an foatingpoint representation of the State when keepState is true 4 decimalpoints long
+   * @param keepstate   Boolean that indicates if the State should be restored at turn on
+   * @param controlType either slider or button
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean, controlType: String)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controlType: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
