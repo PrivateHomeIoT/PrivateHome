@@ -15,11 +15,11 @@ case object settings {
   var websocket: http = new http(port = 2888, "ws")
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", pass = "pass", "/etc/privatehome/data/Devices")
-  var mqtt = mqttBroker("localhost", 1500)
+  var mqtt: mqttBroker = mqttBroker("localhost", 1500)
   var keystore = new keystore("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
   var settingspath = "/etc/privatehome/settings.json"
 
-  val portable = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
+  val portable: Boolean = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
   if (portable)
     settingspath = "settings.json"
 
