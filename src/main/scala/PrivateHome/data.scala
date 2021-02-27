@@ -64,7 +64,7 @@ object data {
                     CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
-                    `type` varchar(16) NOT NULL,
+                    `switchtype` varchar(16) NOT NULL,
                     `state` decimal(5,4) NOT NULL,
                     `keepstate` boolean NOT NULL,
                     `controltype` varchar(16),
@@ -193,7 +193,6 @@ object data {
    * @param state the new state
    */
   def saveStatus(id: String, state: Float): Unit = {
-    val d = Device.syntax("d")
     withSQL {
       update(Device).set(Device.column.state -> state).where.eq(Device.column.id, id)
     }.update().apply()
@@ -253,7 +252,7 @@ object data {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
+      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
   }
 
   /**
