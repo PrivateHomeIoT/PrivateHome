@@ -54,7 +54,9 @@ object websocket {
             }
             answer match {
               case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
-              case _ => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+              case exception: Exception => sendMsg(websocketId,("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
+              case false => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Fail"))
+              case true => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
             }
 
 
