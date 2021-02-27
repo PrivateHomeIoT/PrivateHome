@@ -259,8 +259,6 @@ object data {
     }.update().apply()
   }
 
-  //ToDo: add support for Settingschanges
-
   def idTest(id: String, create: Boolean = false): Unit = {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
