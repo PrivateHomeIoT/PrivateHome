@@ -135,7 +135,7 @@ class GpioPinListener extends GpioPinListenerDigital {
 
     try {
       val ID = data.mhzId(commandCode)
-      data.devices(ID).Status(if (command) 1 else 0)
+      data.devices(ID).status = if (command) 1 else 0
     } catch {
       case _:NoSuchElementException => ;
       case unknown:Throwable => throw unknown

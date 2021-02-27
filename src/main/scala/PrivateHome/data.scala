@@ -135,7 +135,7 @@ object data {
   def addDevice(device: Switch): Unit = {
     var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
-      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus, device.controlType)
+      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.status else 0, device.keepStatus, device.controlType)
     }.update.apply
     device match {
       case device: mhzSwitch => withSQL {

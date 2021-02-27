@@ -34,7 +34,7 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
      *
      * @param state The State the Switch should change to
      */
-    def Status(state: Float): Unit = {
+    def status_=(state: Float): Unit = {
         _status = state
         if (keepStatus) data.saveStatus(id,state)
         websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType))))
@@ -44,21 +44,21 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
     
     def controlType:String = _controlType
     
-    def controlType(newType:String):Unit = {
+    def controlType_=(newType:String):Unit = {
         if (newType != "button" && newType != "slider") throw new IllegalArgumentException(s"controlType $newType isn't button/slider")
         _controlType = newType
     }
 
     def switchtype: String
 
-    def Status: Float = _status
+    def status: Float = _status
 
     def toXml: Node
 
 
 
     def serializer: JsonAST.JObject = {
-        ("id" -> id) ~ ("keepState"->keepStatus) ~ ("name"->name) ~ ("switchType"->switchtype) ~ ("controlType"->controlType) ~ ("status"-> Status)
+        ("id" -> id) ~ ("keepState"->keepStatus) ~ ("name"->name) ~ ("switchType"->switchtype) ~ ("controlType"->controlType) ~ ("status"-> status)
     }
 
 }
