@@ -22,6 +22,14 @@ object privatehome {
     gui
     data
     val repl = new repl()
+    logger.debug("Registering Shutdown Handler")
+    val intHandler = new SignalHandler {
+      override def handle(signal: Signal): Unit = {
+        shutdown()
+      }
+    }
+    Signal.handle(new Signal("INT"),intHandler)
+    logger.info("Server started")
   }
 
   def shutdown(exitCode: Int = 0): Unit = {
