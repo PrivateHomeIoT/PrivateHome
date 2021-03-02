@@ -4,6 +4,7 @@ package PrivateHome
 import java.io.{File, FileNotFoundException, PrintWriter}
 
 import PrivateHome.UI.uiControl.formats
+import PrivateHome.privatehome.portable
 import org.json4s.JsonAST
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
@@ -19,7 +20,7 @@ case object settings {
   var keystore = new keystore("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
   var settingspath = "/etc/privatehome/settings.json"
 
-  val portable: Boolean = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
+
   if (portable)
     settingspath = "settings.json"
 
