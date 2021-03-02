@@ -10,4 +10,10 @@ object privatehome {
     data
     val repl = new repl()
   }
+
+  def shutdown(exitCode: Int = 0): Unit = {
+    repl.shutdown
+    sys.exit(exitCode)
+  }
+
 }
