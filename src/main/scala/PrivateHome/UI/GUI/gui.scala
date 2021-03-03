@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 object gui {
-  val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = LoggerFactory.getLogger(this.getClass)
   implicit val actorSystem: ActorSystem = ActorSystem("system")
   implicit val exceptionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
@@ -32,13 +32,13 @@ object gui {
   } catch {
     case e: FileNotFoundException =>
       logger.error("Keystore not Found",e)
-      sys.exit(78) //78 linux standard for config error or 74 linux standard for IO Error
+      privatehome.shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
     case e: IOException =>
       logger.error("Keystore passord wrong",e)
-      sys.exit(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
+      privatehome.shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
     case e: Throwable =>
       logger.error("Unknown Error in Keystore setup",e)
-      sys.exit(1) //I does not know what the error is
+      privatehome.shutdown(1) //I does not know what the error is
   }
   val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
   keyManagerFactory.init(ks, settings.keystore.password)

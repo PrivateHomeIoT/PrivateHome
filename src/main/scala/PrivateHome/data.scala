@@ -43,7 +43,7 @@ object data {
       create()
   } catch {
     case e:JdbcSQLNonTransientConnectionException => Console.err.println(Console.RED + e.getMessage)
-      sys.exit(75)
+      privatehome.shutdown(75)
     case e:Throwable => e.printStackTrace(Console.err)
   }
   fillDevices()
