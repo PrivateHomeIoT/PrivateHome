@@ -17,7 +17,7 @@ object privatehome {
 
   def main(args: Array[String]): Unit = {
 
-    logger.info("Server gets started")
+    logger.info("Server is starting")
 
     gui
     data
