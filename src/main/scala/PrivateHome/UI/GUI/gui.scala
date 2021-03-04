@@ -1,6 +1,7 @@
 package PrivateHome.UI.GUI
 
 import PrivateHome.UI.Websocket.websocket
+import PrivateHome.privatehome.shutdown
 import PrivateHome.{privatehome, settings}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
@@ -32,13 +33,13 @@ object gui {
   } catch {
     case e: FileNotFoundException =>
       logger.error("Keystore not Found",e)
-      privatehome.shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
+      shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
     case e: IOException =>
       logger.error("Keystore passord wrong",e)
-      privatehome.shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
+      shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
     case e: Throwable =>
       logger.error("Unknown Error in Keystore setup",e)
-      privatehome.shutdown(1) //I does not know what the error is
+      shutdown(1) //I does not know what the error is
   }
   val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
   keyManagerFactory.init(ks, settings.keystore.password)
