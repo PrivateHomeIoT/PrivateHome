@@ -4,6 +4,7 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
+import PrivateHome.privatehome.shutdown
 import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
@@ -47,7 +48,7 @@ object data {
       create()
   } catch {
     case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
-      privatehome.shutdown(75)
+      sys.exit(75)
     case e: Throwable => logger.error("Unknown error in database init",e)
   }
   fillDevices()
@@ -158,7 +159,7 @@ object data {
   }
 
   def updateDevice(oldid: String, pDevice: Switch): Unit = {
-    println(s"update Start with $pDevice")
+    logger.debug("update Start with new switch data: {}", pDevice)
     val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
     if (pDevice.switchtype == devices(oldid).switchtype) {
       val oldDevice = devices(oldid)
@@ -170,7 +171,7 @@ object data {
       devices(oldid) = pDevice
     }
 
-    println(s"devices($oldid) is now ${devices(oldid)}")
+    logger.debug(s"devices({}) is now {}", oldid, devices(oldid))
 
     withSQL {
       update(Device).set(
