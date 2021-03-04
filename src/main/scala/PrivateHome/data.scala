@@ -10,6 +10,7 @@ import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
 import scalikejdbc._
+import org.slf4j.Logger
 
 import scala.collection.mutable
 
