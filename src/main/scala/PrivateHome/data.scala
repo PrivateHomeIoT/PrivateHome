@@ -9,13 +9,16 @@ import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
+import org.slf4j.LoggerFactory
 import scalikejdbc._
-import org.slf4j.Logger
 
 import scala.collection.mutable
 
 
 object data {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   /**
    * An map containing all settings
    */
@@ -43,9 +46,9 @@ object data {
     if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
       create()
   } catch {
-    case e:JdbcSQLNonTransientConnectionException => Console.err.println(Console.RED + e.getMessage)
+    case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
       privatehome.shutdown(75)
-    case e:Throwable => e.printStackTrace(Console.err)
+    case e: Throwable => logger.error("Unknown error in database init",e)
   }
   fillDevices()
 

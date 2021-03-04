@@ -2,17 +2,18 @@ package PrivateHome
 
 
 import java.io.{File, FileNotFoundException, PrintWriter}
-
 import PrivateHome.UI.uiControl.formats
 import PrivateHome.privatehome.portable
 import org.json4s.JsonAST
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
+import org.slf4j.LoggerFactory
 
 import scala.io.Source
 
 
 case object settings {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   var websocket: http = new http(port = 2888, "ws")
   var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
   var database = new database(userName = "user", pass = "pass", "/etc/privatehome/data/Devices")
@@ -31,7 +32,7 @@ case object settings {
       val fSource = Source.fromFile(settingspath)
     }
     catch {
-      case e: FileNotFoundException => println("settings.json doesn't exist. Saving standard to create a new one.")
+      case e: FileNotFoundException => logger.warn("settings.json doesn't exist. Saving standard to create a new one.")
         save()
       case e: Throwable => throw e
     }
