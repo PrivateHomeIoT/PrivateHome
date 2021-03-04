@@ -6,6 +6,7 @@ package PrivateHome
 
 import scala.xml._
 
+@deprecated
 class editXML {
 
   /**
