@@ -114,7 +114,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controlType)))
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controltype)))
           if (d.keepstate) {
             devices(d.id).on(d.state)
           }
@@ -178,7 +178,7 @@ object data {
         Device.column.name -> pDevice.name,
         Device.column.keepstate -> pDevice.keepStatus,
         Device.column.switchtype -> pDevice.switchtype,
-        Device.column.controlType -> pDevice.controlType,
+        Device.column.controltype -> pDevice.controlType,
         Device.column.state -> pDevice.status
       ).where.eq(Device.column.id, pDevice.id)
     }.update.apply()
@@ -203,10 +203,11 @@ object data {
 
   /**
    * Deletes the switch form the Database and the Devices Map
+   *
    * @param id The Id of the Switch to delet
    */
   def deleteDevice(id: String): Unit = {
-    withSQL{
+    withSQL {
       delete.from(Device).where.eq(Device.column.id, id)
     }.update.apply()
     withSQL {
@@ -287,9 +288,9 @@ object data {
    * @param switchtype  A String identification of the Switch type max length 16 character
    * @param state       an foatingpoint representation of the State when keepState is true 4 decimalpoints long
    * @param keepstate   Boolean that indicates if the State should be restored at turn on
-   * @param controlType either slider or button
+   * @param controltype either slider or button
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controlType: String)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controltype: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -315,7 +316,7 @@ object data {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
+      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepstate"), rs.string("controltype"))
   }
 
   /**
