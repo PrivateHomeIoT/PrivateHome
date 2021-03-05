@@ -50,7 +50,7 @@ object gui {
     concat(
     path("test") {
       extractHost{ host =>
-        redirect(s"https://${host}:${settings.http.port}",StatusCodes.TemporaryRedirect)
+        redirect(s"https://$host:${settings.http.port}",StatusCodes.TemporaryRedirect)
       }
     },
     path(settings.websocket.path) {

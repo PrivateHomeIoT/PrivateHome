@@ -8,7 +8,7 @@ class Command() extends Serializable
 
 case class commandOn(id: String, private var percent: String) extends Command {
   idTest(id)
-  var percentFloat = percent.toFloat
+  val percentFloat: Float = percent.toFloat
   if (0 > percentFloat || percentFloat > 1) throw new IllegalArgumentException("percent has to be between 0 and 1")
 }
 
@@ -27,6 +27,20 @@ case class commandSettingsDevice(id: String, setting: String, value: AnyVal) ext
 
 case class commandAddDevice(id: String, switchType: String, name: String, systemCode: String = "", unitCode: String = "", controlType: String, keepState: Boolean) extends Command {
   idTest(id, create = true)
+  switchType match {
+    case "mqtt" =>
+    case "433Mhz" =>
+      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+  }
+}
+
+case class commandUpdateDevice(oldId: String, newId: String, keepState: Boolean, name: String, controlType: String, switchType: String, systemCode: String = "", unitCode: String = "") extends Command{
+  println("test")
+  idTest(newId, create = oldId != newId)
+  idTest(oldId)
   switchType match {
     case "mqtt" =>
     case "433Mhz" =>

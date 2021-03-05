@@ -36,8 +36,7 @@ object mqttClient {
         lastMsg = ""
         lastID = topic.substring(topic.length - 5)
         lastMsg = message.toString
-        if (lastMsg == "ON") data.devices(lastID).Status(1)
-        else if (lastMsg == "OFF") data.devices(lastID).Status(0)
+        data.devices(lastID).status = if (lastMsg == "ON") 1 else 0 //if (lastMsg == "OFF") 0 else data.devices(lastID).status
       }
       else if (topic.startsWith(cmnd)) println("Simple Command")
       else println("Unknown Topic")

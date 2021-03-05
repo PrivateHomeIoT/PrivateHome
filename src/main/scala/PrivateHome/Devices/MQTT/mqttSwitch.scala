@@ -7,7 +7,7 @@ import org.json4s.JsonAST.JObject
 
 import scala.xml.Node
 
-case class mqttSwitch(ID: String, setupKeepStatus: Boolean, _name: String, setupControlType:String) extends Switch(ID, setupKeepStatus, _name,setupControlType) {
+case class mqttSwitch(ID: String, _keepStatus: Boolean, _name: String, setupControlType:String) extends Switch(ID, _keepStatus, _name,setupControlType) {
 
   /**
    * This method turns on the MQTT-Device.
@@ -26,7 +26,7 @@ case class mqttSwitch(ID: String, setupKeepStatus: Boolean, _name: String, setup
   override def toXml: Node = <switch id={ID}>
     <type>MQTT</type>
     <id>{ID}</id>
-    <keepStatus>{keepStatus}</keepStatus>
+    <keepStatus>{_keepStatus}</keepStatus>
   </switch>
 
   def switchtype: String = "mqtt"

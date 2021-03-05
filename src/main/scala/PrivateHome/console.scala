@@ -36,7 +36,7 @@ object console {
     send(command)
   }
 
-  def safeCreate() = send(new commandSafeCreateDatabase)
+  def safeCreate(): Unit = send(new commandSafeCreateDatabase)
 
   def main(args: Array[String]): Unit = {
 

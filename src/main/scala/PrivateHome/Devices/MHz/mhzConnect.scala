@@ -116,7 +116,7 @@ object sendMhz {
   def apply(pCommand: mhzCommand):Unit = if(send) mhz.send(pCommand) else {
     println(pCommand)
     val device = data.devices(data.mhzId(pCommand.systemCode + pCommand.unitCode))
-    if (pCommand.command) device.Status(1) else device.Status(0)
+    device.status = if (pCommand.command) 1 else 0
   }
 }
 
