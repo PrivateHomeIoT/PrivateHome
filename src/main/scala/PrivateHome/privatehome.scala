@@ -21,7 +21,7 @@ object privatehome {
 
     gui
     data
-    val repl = new repl()
+    repl
     logger.debug("Registering Shutdown Handler")
     val intHandler = new SignalHandler {
       override def handle(signal: Signal): Unit = {
@@ -34,7 +34,7 @@ object privatehome {
 
   def shutdown(exitCode: Int = 0): Unit = {
     logger.info("Shutting down Server")
-    repl.shutdown
+    repl.shutdown()
     sys.exit(exitCode)
   }
 

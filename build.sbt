@@ -55,7 +55,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.typesafe.akka" %% "akka-http" % "10.2.0",
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-  "com.lightbend.akka" %% "akka-stream-alpakka-unix-domain-socket" % "2.0.2",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "org.scalatest" %% "scalatest" % "3.2.2" % Test
 )
@@ -77,6 +76,8 @@ libraryDependencies ++= Seq(
 libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 
 libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
+
+libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)
