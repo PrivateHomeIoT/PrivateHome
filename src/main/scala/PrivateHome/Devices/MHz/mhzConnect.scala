@@ -3,10 +3,12 @@ package PrivateHome.Devices.MHz
 import com.pi4j.io.gpio._
 import PrivateHome.Devices.MHz.Protocol
 import PrivateHome.data
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
 class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: Int = 28) {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
 
   /**
@@ -104,17 +106,18 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
 }
 
 object sendMhz {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private var mhz:mhzConnect = _
   private var send = true
   try {
     mhz = new mhzConnect()
   }
   catch {
-    case e:UnsatisfiedLinkError => println("Because not all dependencies are installed GPIO is deactivated and the commands get only printed to the Console")
+    case e:UnsatisfiedLinkError => logger.info("Because not all dependencies are installed GPIO is deactivated and the commands get only printed to the Console")
       send=false
   }
   def apply(pCommand: mhzCommand):Unit = if(send) mhz.send(pCommand) else {
-    println(pCommand)
+    logger.info("Would send {}",pCommand)
     val device = data.devices(data.mhzId(pCommand.systemCode + pCommand.unitCode))
     device.status = if (pCommand.command) 1 else 0
   }

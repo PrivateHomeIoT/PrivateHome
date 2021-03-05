@@ -89,6 +89,7 @@ window.addEventListener('load', function () {
   form = document.getElementById("login01Form")
   form.addEventListener( "submit", function ( event ) {
     event.preventDefault();
+    form = document.getElementById("login01Form")
     username = form["uname"].value
     password = form["psw"].value
     ws.sendLoginData(username, password)

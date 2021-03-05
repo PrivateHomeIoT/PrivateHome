@@ -38,7 +38,7 @@ case class commandAddDevice(id: String, switchType: String, name: String, system
 }
 
 case class commandUpdateDevice(oldId: String, newId: String, keepState: Boolean, name: String, controlType: String, switchType: String, systemCode: String = "", unitCode: String = "") extends Command{
-  println("test")
+
   idTest(newId, create = oldId != newId)
   idTest(oldId)
   switchType match {

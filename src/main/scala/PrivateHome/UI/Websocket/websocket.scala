@@ -13,12 +13,14 @@ import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.slf4j.LoggerFactory
 
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.util.Calendar
 
 object websocket {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
@@ -92,9 +94,8 @@ object websocket {
 
       }
       catch {
-        case exception: JsonParseException => println(exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
-        case exception: Throwable => println(exception)
-          exception.printStackTrace()
+        case exception: JsonParseException => logger.warn("Can not parse the command send over Websocket", exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+        case exception: Throwable => logger.error("UnknownError",exception)
           sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
     })

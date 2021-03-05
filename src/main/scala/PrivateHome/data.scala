@@ -4,17 +4,22 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
+import PrivateHome.privatehome.shutdown
 import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
+import org.slf4j.LoggerFactory
 import scalikejdbc._
 
 import scala.collection.mutable
 
 
 object data {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   /**
    * An map containing all settings
    */
@@ -42,9 +47,9 @@ object data {
     if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
       create()
   } catch {
-    case e:JdbcSQLNonTransientConnectionException => Console.err.println(Console.RED + e.getMessage)
+    case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
       sys.exit(75)
-    case e:Throwable => e.printStackTrace(Console.err)
+    case e: Throwable => logger.error("Unknown error in database init",e)
   }
   fillDevices()
 
@@ -110,7 +115,7 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controlType)))
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controltype)))
           if (d.keepstate) {
             devices(d.id).on(d.state)
           }
@@ -154,7 +159,7 @@ object data {
   }
 
   def updateDevice(oldid: String, pDevice: Switch): Unit = {
-    println(s"update Start with $pDevice")
+    logger.debug("update Start with new switch data: {}", pDevice)
     val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
     if (pDevice.switchtype == devices(oldid).switchtype) {
       val oldDevice = devices(oldid)
@@ -166,7 +171,7 @@ object data {
       devices(oldid) = pDevice
     }
 
-    println(s"devices($oldid) is now ${devices(oldid)}")
+    logger.debug(s"devices({}) is now {}", oldid, devices(oldid))
 
     withSQL {
       update(Device).set(
@@ -174,7 +179,7 @@ object data {
         Device.column.name -> pDevice.name,
         Device.column.keepstate -> pDevice.keepStatus,
         Device.column.switchtype -> pDevice.switchtype,
-        Device.column.controlType -> pDevice.controlType,
+        Device.column.controltype -> pDevice.controlType,
         Device.column.state -> pDevice.status
       ).where.eq(Device.column.id, pDevice.id)
     }.update.apply()
@@ -199,10 +204,11 @@ object data {
 
   /**
    * Deletes the switch form the Database and the Devices Map
+   *
    * @param id The Id of the Switch to delet
    */
   def deleteDevice(id: String): Unit = {
-    withSQL{
+    withSQL {
       delete.from(Device).where.eq(Device.column.id, id)
     }.update.apply()
     withSQL {
@@ -283,9 +289,9 @@ object data {
    * @param switchtype  A String identification of the Switch type max length 16 character
    * @param state       an foatingpoint representation of the State when keepState is true 4 decimalpoints long
    * @param keepstate   Boolean that indicates if the State should be restored at turn on
-   * @param controlType either slider or button
+   * @param controltype either slider or button
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controlType: String)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controltype: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -311,7 +317,7 @@ object data {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
+      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepstate"), rs.string("controltype"))
   }
 
   /**

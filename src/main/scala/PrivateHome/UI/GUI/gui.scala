@@ -1,13 +1,15 @@
 package PrivateHome.UI.GUI
 
 import PrivateHome.UI.Websocket.websocket
-import PrivateHome.settings
+import PrivateHome.privatehome.shutdown
+import PrivateHome.{privatehome, settings}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
+import org.slf4j.LoggerFactory
 
 import java.io.{FileInputStream, FileNotFoundException, IOException}
 import java.net.BindException
@@ -17,6 +19,7 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 
 object gui {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   implicit val actorSystem: ActorSystem = ActorSystem("system")
   implicit val exceptionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
@@ -29,16 +32,14 @@ object gui {
     ks.load(keystore, settings.keystore.password)
   } catch {
     case e: FileNotFoundException =>
-      Console.err.println(e)
-      e.printStackTrace()
-      sys.exit(78) //78 linux standard for config error or 74 linux standard for IO Error
+      logger.error("Keystore not Found",e)
+      shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
     case e: IOException =>
-      Console.err.println(Console.RED + e)
-      sys.exit(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
+      logger.error("Keystore passord wrong",e)
+      shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
     case e: Throwable =>
-      println(e)
-      e.printStackTrace(Console.err)
-      sys.exit(1) //I does not know what the error is
+      logger.error("Unknown Error in Keystore setup",e)
+      shutdown(1) //I does not know what the error is
   }
   val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
   keyManagerFactory.init(ks, settings.keystore.password)
@@ -75,12 +76,11 @@ object gui {
 
   def serverBindExeceptionhandler(exception: Throwable): Unit = {
     exception.getCause match {
-      case e: BindException =>
-        Console.err.println(Console.RED + e.getMessage.split("\n")(0))
-        sys.exit(75) // Linux Standard temp failure; user is invited to retry; most likely is another instance running or another server is listening to this port
+      case _: BindException =>
+        privatehome.shutdown(75) // Linux Standard temp failure; user is invited to retry; most likely is another instance running or another server is listening to this port
       case e: Throwable =>
-        e.printStackTrace(Console.err)
-        sys.exit(1)
+        logger.error("Unknown error in Webserver",e)
+        privatehome.shutdown(1)
     }
   }
 
