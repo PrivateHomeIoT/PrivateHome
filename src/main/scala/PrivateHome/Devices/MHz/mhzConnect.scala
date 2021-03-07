@@ -100,6 +100,18 @@ class mhzConnect(Repeat: Int = 10, pulseLength: Long = 350,pIn: Int = 25, pOu: I
     sending = false
   }
 
+  /**
+   * Removes all GPIO triggers and resets the pins
+   */
+  def shutdown: Unit = {
+    input.setShutdownOptions(true,PinState.LOW,PinPullResistance.OFF)
+    output.setShutdownOptions(true,PinState.LOW,PinPullResistance.OFF)
+
+    gpio.removeAllListeners()
+    gpio.removeAllTriggers()
+    gpio.unexportAll()
+    gpio.shutdown()
+  }
 
 
 
@@ -121,5 +133,7 @@ object sendMhz {
     val device = data.devices(data.mhzId(pCommand.systemCode + pCommand.unitCode))
     device.status = if (pCommand.command) 1 else 0
   }
+
+  def shutdown = mhz.shutdown
 }
 

@@ -71,8 +71,8 @@ object gui {
     )
   }
 
-  Http().newServerAt("0.0.0.0", settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute).failed.foreach(e => serverBindExeceptionhandler(e))
-  Http().newServerAt("0.0.0.0", settings.http.port).enableHttps(https).bind(httpRoute).failed.foreach(e => serverBindExeceptionhandler(e))
+  Http().newServerAt("0.0.0.0", settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute).map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds)).failed.foreach(e => serverBindExeceptionhandler(e))
+  Http().newServerAt("0.0.0.0", settings.http.port).enableHttps(https).bind(httpRoute).map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds)).failed.foreach(e => serverBindExeceptionhandler(e))
 
   def serverBindExeceptionhandler(exception: Throwable): Unit = {
     exception.getCause match {
@@ -82,6 +82,13 @@ object gui {
         logger.error("Unknown error in Webserver",e)
         privatehome.shutdown(1)
     }
+  }
+
+  /**
+   * Shutdown all akka http endpoints
+   */
+  def shutdown: Unit = {
+    actorSystem.terminate()
   }
 
 }
