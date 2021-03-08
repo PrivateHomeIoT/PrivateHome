@@ -1,25 +1,19 @@
 package PrivateHome
 
 import PrivateHome.UI._
-import akka.actor.ActorSystem
-import akka.stream.alpakka.unixdomainsocket.scaladsl.UnixDomainSocket
-import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.util.ByteString
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
+import org.scalasbt.ipcsocket.UnixDomainSocket
 
-import java.io.Console
-import java.nio.file.{Path, Paths}
+import java.io.{BufferedReader, Console, InputStreamReader, PrintWriter}
 import java.util.Base64
-import scala.concurrent.Future
 import scala.io.StdIn.readLine
 
 object console {
-
-  implicit val actorSystem: ActorSystem = ActorSystem("system")
   val StdInJava: Console = System.console()
-  val path: Path = Paths.get("/tmp/privatehome.sock") //here we need to use Java wich isn't that beautiful but outgoingConnection only accepts java.nio.file.Path
-  val outConnection: Flow[ByteString, ByteString, Future[UnixDomainSocket.OutgoingConnection]] = UnixDomainSocket().outgoingConnection(path)
+  val socket = new UnixDomainSocket("/tmp/privatehome2.sock")
+  val out = new PrintWriter(socket.getOutputStream)
+  val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
   private val commands = Map(
     "help" -> REPLCommand(_ => help(), "Prints all available commands"),
     "addUser" -> REPLCommand(_ => addUser(), "Adds a new User for the WebGui"),
@@ -28,7 +22,7 @@ object console {
     "dimm" -> REPLCommand(_ => dimm(), "Set the dimming value of a dimmable Switch"),
     //"status" -> REPLCommand(_ => status(), "Show the status of Switches"),
     "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
-    "safeCreate" -> REPLCommand(_ => safeCreate(),"Adds missing tables to the database")
+    "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database")
   )
 
   def recreate(): Unit = {
@@ -79,11 +73,15 @@ object console {
   }
 
   private def addSwitch(dimmable: Boolean): Unit = {
-    val result = Source.single(ByteString("getRandomId")).via(outConnection).runWith(Sink.fold(ByteString("")) { case (acc, b) => acc ++ b })
-    while (!result.isCompleted) {}
-    result.value.get.get.utf8String
-    var id: String = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) id = readLine("id> ")
+    while (in.ready()) println(in.readLine())
+    send("getRandomId")
+    val tmpid: String = in.readLine()
+    while (in.ready()) println(in.readLine())
+    var id = ""
+    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
+      id = readLine(s"id[$tmpid]> ")
+      if (id == "") id = tmpid
+    }
     val name = readLine("name> ").replace(',', ' ')
     val keepStateChar = readLine("Keep State (y/n)")(0).toLower
     val keepState = keepStateChar == 'y' || keepStateChar == 'j'
@@ -130,7 +128,8 @@ object console {
   }
 
   private def send(msg: String): Unit = {
-    Source.single(ByteString(msg + "\n")).via(outConnection).runWith(Sink.ignore)
+    out.println(msg)
+    out.flush()
   }
 
   private def status(): Unit = {

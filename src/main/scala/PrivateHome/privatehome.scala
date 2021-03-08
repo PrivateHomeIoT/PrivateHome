@@ -23,7 +23,7 @@ object privatehome {
 
     gui
     data
-    val repl = new repl()
+    repl
     logger.debug("Registering Shutdown Handler")
     val intHandler = new SignalHandler {
       override def handle(signal: Signal): Unit = {
