@@ -3,14 +3,17 @@
     <head>
         <meta charset="UTF-8">
         <title>PrivateHome - Settings</title>
-        <meta name="author" content="Raoul Honermann" >
+        <meta name="author" content="PrivateHomeIoT" >
         <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+        <link rel="icon" type="image/x-icon" href=""/>
 
         <link rel="stylesheet" href="CSS/menu.css">
-        
+
+        <script src="JS/websocket.js"></script>
+        <script src="JS/settings.js"></script>
+
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -41,11 +44,47 @@
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
                 setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
+
             }
         </script>
+
+        <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
+        <link rel="stylesheet" href="CSS/login.css">
+        <div id="login01" class="modal">
+        <form id="login01Form" class="modal-content animate">
+            <div class="container">
+                <label for="un01"><b>Username</b></label>
+                <input class="loginData" type="text" placeholder="Enter Username" name="uname" id="un01" required>
+                <label for="pw01"><b>Password</b></label>
+                <input class="loginData" type="password" placeholder="Enter Password" name="psw" id="pw01" required>
+                <button id="sub01" type="submit">Login</button>
+            </div>
+        </form>
+        </div>
     </head>
     <body class="content">
+
+
+    <form id="switchform">
+        <label for="idtext">New ID for the Switch</label>
+        <input type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="Fünf Zeichen a-Z-_"><br>
+        <input type="checkbox" id="keepState" name="keepState">
+        <label for="keepState">Should keepState at reboot</label><br>
+        <label for="name">New Name</label>
+        <input id="name" name="name" type="text" size="64" minlength="1" maxlength="64"><br>
+        <label for="controlType">Dimmable</label>
+        <input id="controlType" type="checkbox" name="dimmable"><br>
+        <label for="switchType">What technic does the Switch use</label>
+        <select id="switchType" name="switchType">
+            <option value="433Mhz">433MHz</option>
+            <option value="mqtt">MQTT</option>
+        </select><br>
+        <label for="systemCode">Systemcode:</label>
+        <input id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"><br>
+        <label for="unitCode">Unitcode:</label>
+        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}">
+        <input type="submit">
+    </form>
       
     </body>
 </html>

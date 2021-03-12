@@ -1,0 +1,23 @@
+{
+  "websocket" : {
+    "port" : 2888,
+    "path" : "ws"
+  },
+  "http" : {
+    "port" : 2000,
+    "path" : "Website"
+  },
+  "database" : {
+    "userName" : "user",
+    "pass" : "pass",
+    "path" : "/etc/privatehome/data/Devices"
+  },
+  "mqtt" : {
+    "url" : "localhost",
+    "port" : 1500
+  },
+  "keystore" : {
+    "path" : "/etc/privatehome/keystore.pkcs12",
+    "pass" : "password"
+  }
+}

@@ -1,11 +1,12 @@
 package PrivateHome.Devices.MHz
 
 import java.util.NoSuchElementException
-
 import PrivateHome.data
 import com.pi4j.io.gpio.event.{GpioPinDigitalStateChangeEvent, GpioPinListenerDigital}
+import org.slf4j.LoggerFactory
 
 class GpioPinListener extends GpioPinListenerDigital {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val nSeperationlimit = 4600
   private val nReceiveTolerance = 60
   private val rcSwitchMaxChanges = 67
@@ -118,7 +119,7 @@ class GpioPinListener extends GpioPinListenerDigital {
         code >>= 2
       }
       else {
-        println("error" + (code & 3))
+        logger.warn("Error while decoding Code" + (code & 3))
         return false
 
       }
@@ -131,11 +132,11 @@ class GpioPinListener extends GpioPinListenerDigital {
     val systemCode = commandCode.substring(0, 5)
     val unitCode = commandCode.substring(5)
 
-    println(s"""An: $command; SystemCode: $systemCode UnitCode: $unitCode""")
+    logger.debug("""Received 433MHz Command: on: {}; SystemCode: {} UnitCode: {}""",command,systemCode,unitCode)
 
     try {
       val ID = data.mhzId(commandCode)
-      data.devices(ID).Status(if (command) 1 else 0)
+      data.devices(ID).status = if (command) 1 else 0
     } catch {
       case _:NoSuchElementException => ;
       case unknown:Throwable => throw unknown

@@ -1,17 +1,17 @@
-var ws = new WebSocket("ws://" + location.hostname + ":2888/ws");
+
 
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
   switch (msg.Command) {
     case "statusChange":
-    if (msg.answer.type == "Button") {
-      if (msg.status == 1) {
-        onGraph(msg.id);
-      } else if (msg.status == 0) {
-        offGraph(msg.id);
+    if (msg.answer.type == "button") {
+      if (msg.answer.status == 1) {
+        onGraph(msg.answer.id);
+      } else if (msg.answer.status == 0) {
+        offGraph(msg.answer.id);
       }
     } else {
-      setSlider(id,msg.answer.status*100)
+      setSlider(msg.answer.id,msg.answer.status*100)
     }
     break;
     case "getDevices": {
@@ -29,12 +29,12 @@ ws.onmessage = function(event) {
     }
     case "getDevice":{
       let answer = msg.answer;
-      switchGenerator(answer.id,answer.name,answer.status*100,answer.type);
+      switchGenerator(answer.id,answer.name,answer.status*100,answer.controlType);
       break;
     }
     case "newDevice": {
       let answer = msg.answer;
-      switchGenerator(answer.id,answer.name,answer.status*100,answer.type);
+      switchGenerator(answer.id,answer.name,answer.status*100,answer.controlType);
     }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
   }
@@ -74,13 +74,13 @@ function generateButton(id, name, status){
   else {status = "OFF"}
   var Button =
   `<td class="switch" id="${id}">
-  <button id="${id}on" class="button" style="display: none" onclick="turnOff('${id}'')">
+  <button id="${id}on" class="button" style="display: ${(status == "ON") ? "inline-block" : "none"}" onclick="turnOff('${id}')">
     <img src="Pictures/on.png" alt="ON" class="pic">
   </button>
-  <button id="${id}off" class="button" style="display: inline-block" onclick="turnOn('${id}')">
+  <button id="${id}off" class="button" style="display: ${(status == "OFF") ? "inline-block" : "none"}" onclick="turnOn('${id}')">
     <img src="Pictures/off.png" alt="OFF" class="pic">
   </button>
-  <a href="Settings/${id}.html" class="aButton">
+  <a href="Settings.html?id=${id}" class="aButton">
     <p id="${id}Name">${name}</p>
     <p id="${id}Status">${status}</p>
   </a>
@@ -97,7 +97,7 @@ function generateSlider(id, name, status){
   text =
   `<td class="switch" id="${id}">
   <input id="${id}slider" class="slider button" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
-  <a href="Settings/${id}.html" class="aButton">
+  <a href="Settings.html?id=${id}" class="aButton">
     <p id="${id}Name">${name}</p>
     <p id="${id}Status">${status} %</p>
   </a>
@@ -114,7 +114,7 @@ Usage: onGraph(String id);
 function onGraph(ID) {
   document.getElementById(ID + "off").style.display = 'none';
   document.getElementById(ID + "on").style.display = 'inline-block';
-  document.getElementById(ID + "status").innerHTML = "ON";
+  document.getElementById(ID + "Status").innerHTML = "ON";
 }
 
 /*
@@ -129,7 +129,7 @@ function offGraph(ID) {
 
 function setSlider(ID,Status) {
   document.getElementById(ID+"slider").value  = Status;
-  document.getElementById(ID+"Status").innerHTML = status + " %";
+  document.getElementById(ID+"Status").innerHTML = Status + " %";
 }
 
 /*
@@ -168,9 +168,9 @@ Usage: turnOff(String id);
 */
 function turnOff(ID) {
   ws.send(JSON.stringify({
-    Command: "OFF",
+    Command: "off",
     Args: {
-      Percent: 0,
+      percent: 0,
       id: ID
     }
   }));

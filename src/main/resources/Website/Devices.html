@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>PrivateHome - Devices</title>
-    <meta name="author" content="Raoul Honermann" >
+    <meta name="author" content="PrivateHomeIoT" >
     <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -35,7 +35,8 @@
 
     <link rel="stylesheet" href="CSS/menu.css">
     <link rel="stylesheet" href="CSS/button.css">
-    <script src="Devices.js"></script>
+    <script src="JS/websocket.js"></script>
+    <script src="JS/Devices.js"></script>
 
     <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
     <div id="mySidenav" class="sidenav">
@@ -77,8 +78,22 @@
                 document.getElementById("content").style.paddingLeft = "0%";
             }, 500)
         }
-
     </script>
+
+    <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
+    <link rel="stylesheet" href="CSS/login.css">
+    <!--<button onclick="document.getElementById('login01').style.display='block'" style="width:auto;">Login</button> -->
+    <div id="login01" class="modal">
+        <form id="login01Form" class="modal-content animate">
+            <div class="container">
+                <label for="uname"><b>Username</b></label>
+                <input class="loginData" type="text" placeholder="Enter Username" name="uname" id="un01" required>
+                <label for="psw"><b>Password</b></label>
+                <input class="loginData" type="password" placeholder="Enter Password" name="psw" id="pw01" required>
+                <button id="sub01" type="submit">Login</button>
+            </div>
+        </form>
+    </div>
 </head>
 
 <body class="content" id="content">

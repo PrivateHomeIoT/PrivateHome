@@ -4,18 +4,26 @@ import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
-import org.json4s.{Formats, NoTypeHints}
+import PrivateHome.privatehome.shutdown
+import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
 import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.{Formats, NoTypeHints}
+import org.slf4j.LoggerFactory
 import scalikejdbc._
+
+import scala.collection.mutable
 
 
 object data {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   /**
    * An map containing all settings
    */
-  var devices: Map[String, Switch] = Map()
+  var devices: mutable.Map[String, Switch] = mutable.Map()
 
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
@@ -31,45 +39,66 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.password)
+  val conn = ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
-  var mhzId: Map[String, String] = Map()
-  if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty) create()
+  var mhzId: mutable.Map[String, String] = mutable.Map()
+  try {
+    if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
+      create()
+  } catch {
+    case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
+      sys.exit(75)
+    case e: Throwable => logger.error("Unknown error in database init",e)
+  }
   fillDevices()
 
 
   /**
    * Generates the table structures for the Database
    */
-  def create(): Unit = {
+  def create(dropTables: Boolean = false): Unit = {
 
     // Drops old Tables to Delete Data and make it possible to regenerate them
-    sql"""DROP TABLE IF EXISTS `Mhz`;
-         DROP TABLE IF EXISTS `Devices`;""".execute().apply()
+    if (dropTables) {
+      sql"""DROP TABLE IF EXISTS `Mhz`;
+         DROP TABLE IF EXISTS `Devices`;
+         DROP TABLE IF EXISTS `User`""".execute().apply()
+      devices = mutable.Map()
+    }
 
 
-    val devices =
       sql"""
-                    CREATE TABLE `Devices` (
+                    CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
-                    `type` varchar(16) NOT NULL,
+                    `switchtype` varchar(16) NOT NULL,
                     `state` decimal(5,4) NOT NULL,
-                    `keepState` boolean NOT NULL,
+                    `keepstate` boolean NOT NULL,
                     `controltype` varchar(16),
                     PRIMARY KEY (`id`))
          """.execute.apply()
 
 
     sql"""
-           CREATE TABLE `Mhz` (
+           CREATE TABLE IF NOT EXISTS `Mhz` (
            `id` varchar(5) NOT NULL,
            `systemcode` varchar(5) NOT NULL,
            `unitcode` varchar(5) NOT NULL,
            PRIMARY KEY (`id`),
            CONSTRAINT `Mhz_ibfk_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`))
          """.execute().apply()
+
+    sql"""
+         CREATE TABLE IF NOT EXISTS `User` (
+         `username` varchar(30) NOT NULL,
+         `passhash` varchar(100) NOT NULL,
+         PRIMARY KEY (`username`))
+       """.execute().apply()
+
+    sql"""
+         SHOW Tables;
+       """.execute().apply().toString
 
 
     // insert initial data
@@ -86,8 +115,8 @@ object data {
       select.from(Device as m)
     }.map(rs => Device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "MQTT" => devices += ((d.id, mqttSwitch(d.id, d.keepState, d.name, d.controlType)))
-          if (d.keepState) {
+        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controltype)))
+          if (d.keepstate) {
             devices(d.id).on(d.state)
           }
         case "433Mhz" =>
@@ -95,9 +124,9 @@ object data {
           val data = withSQL {
             select.from(Mhz as m).where.eq(m.id, d.id)
           }.map(rs => Mhz(rs)).single().apply().get
-          devices += ((d.id, mhzSwitch(d.id, d.keepState, d.name, data.systemcode, data.unitcode)))
+          devices += ((d.id, mhzSwitch(d.id, d.keepstate, d.name, data.systemcode, data.unitcode)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
-          if (d.keepState) {
+          if (d.keepstate) {
             devices(d.id).on(d.state)
           }
       }
@@ -112,9 +141,9 @@ object data {
    * @param device The device that should be added
    */
   def addDevice(device: Switch): Unit = {
-    var wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
+    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
     withSQL {
-      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.Status else 0, device.keepStatus, device.controlType)
+      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.status else 0, device.keepStatus, device.controlType)
     }.update.apply
     device match {
       case device: mhzSwitch => withSQL {
@@ -126,7 +155,102 @@ object data {
     }
     devices = devices.concat(Map((device.id, device)))
     implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
-    websocket.broadcastMsg(("Command" -> "newSwitch") ~ ("Answer" -> JsonMethods.parse(write(device))))
+    websocket.broadcastMsg(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(device))))
+  }
+
+  def updateDevice(oldid: String, pDevice: Switch): Unit = {
+    logger.debug("update Start with new switch data: {}", pDevice)
+    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
+    if (pDevice.switchtype == devices(oldid).switchtype) {
+      val oldDevice = devices(oldid)
+      devices(oldid).id = pDevice.id
+      devices(oldid).name = pDevice.name
+      devices(oldid).keepStatus = pDevice.keepStatus
+      devices(oldid).controlType = pDevice.controlType
+    } else {
+      devices(oldid) = pDevice
+    }
+
+    logger.debug(s"devices({}) is now {}", oldid, devices(oldid))
+
+    withSQL {
+      update(Device).set(
+        Device.column.id -> pDevice.id,
+        Device.column.name -> pDevice.name,
+        Device.column.keepstate -> pDevice.keepStatus,
+        Device.column.switchtype -> pDevice.switchtype,
+        Device.column.controltype -> pDevice.controlType,
+        Device.column.state -> pDevice.status
+      ).where.eq(Device.column.id, pDevice.id)
+    }.update.apply()
+    if (oldid != pDevice.id) {
+      devices += (pDevice.id -> devices(oldid))
+      devices -= oldid
+    }
+
+    pDevice match {
+      case device: mhzSwitch => withSQL {
+        update(Mhz).set(
+          Mhz.column.id -> device.id,
+          Mhz.column.systemcode -> device.systemCode,
+          Mhz.column.unitcode -> device.unitCode).where.eq(Device.column.id, oldid)
+      }.update().apply()
+        mhzId(device.systemCode + device.unitCode) = device.id
+      case _: mqttSwitch =>
+      case _ => throw wrongclass
+    }
+  }
+
+
+  /**
+   * Deletes the switch form the Database and the Devices Map
+   *
+   * @param id The Id of the Switch to delet
+   */
+  def deleteDevice(id: String): Unit = {
+    withSQL {
+      delete.from(Device).where.eq(Device.column.id, id)
+    }.update.apply()
+    withSQL {
+      delete.from(Mhz).where.eq(Device.column.id, id)
+    }.update().apply()
+    devices -= id
+  }
+
+
+  /**
+   * Adds a user to the database
+   *
+   * @param username The username to Store
+   * @param passHash The argon2 hash of the password (encoded
+   */
+  def addUser(username: String, passHash: String): Unit = {
+    withSQL {
+      insertInto(user).values(username, passHash)
+    }.update().apply()
+  }
+
+
+  /**
+   * Gets the argon2 hash for the Username
+   *
+   * @param username the username for which to get the hash
+   * @return the hash of the User of there is no User with this name returns "no_Username"
+   */
+  def getUserHash(username: String): String = {
+    val m = user.syntax("m")
+    var value: String = null
+    withSQL {
+      select.from(user as m).where.eq(user.column.username, username)
+    }.map(rs => user(rs)).single().apply().foreach(u => {
+      if (u == null) {
+        value = "no_Username"
+      } else
+        value = u.passhash
+    })
+    if (value == null) {
+      "no_Username"
+    } else value
   }
 
   /**
@@ -136,13 +260,10 @@ object data {
    * @param state the new state
    */
   def saveStatus(id: String, state: Float): Unit = {
-    val d = Device.syntax("d")
     withSQL {
       update(Device).set(Device.column.state -> state).where.eq(Device.column.id, id)
     }.update().apply()
   }
-
-  //ToDo: add support for Settingschanges
 
   def idTest(id: String, create: Boolean = false): Unit = {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
@@ -161,15 +282,23 @@ object data {
   }
 
   /**
+   * closes the database connections
+   */
+  def shutdown: Unit = {
+    session.close()
+  }
+
+  /**
    * Message class for devices Table
    *
-   * @param id         ID of the Device in the Format [0-9a-Z] five character long
-   * @param name       The name of the Device any String lenght in the Table 64 character
-   * @param switchtype A String identification of the Switch type max length 16 character
-   * @param state      an foatingpoint representation of the State when keepState is true 4 decimalpoints long
-   * @param keepState  Boolean that indicates if the State should be restored at turn on
+   * @param id          ID of the Device in the Format [0-9a-Z] five character long
+   * @param name        The name of the Device any String lenght in the Table 64 character
+   * @param switchtype  A String identification of the Switch type max length 16 character
+   * @param state       an foatingpoint representation of the State when keepState is true 4 decimalpoints long
+   * @param keepstate   Boolean that indicates if the State should be restored at turn on
+   * @param controltype either slider or button
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepState: Boolean, controlType: String)
+  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controltype: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -181,22 +310,39 @@ object data {
   case class Mhz(id: String, systemcode: String, unitcode: String)
 
   /**
-   * Syntaxsupport Object for devices table
+   * Message class for user Table
+   *
+   * @param username the username
+   * @param passhash the argon2id hash
+   */
+  case class user(username: String, passhash: String)
+
+  /**
+   * Syntax support Object for devices table
    */
   object Device extends SQLSyntaxSupport[Device] {
     override val tableName = "devices"
 
     def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("type"), rs.float("state"), rs.boolean("keepState"), rs.string("controlType"))
+      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepstate"), rs.string("controltype"))
   }
 
   /**
-   * Syntaxsupport Object for Mhz table
+   * Syntax support Object for Mhz table
    */
   object Mhz extends SQLSyntaxSupport[Mhz] {
     override val tableName = "Mhz"
 
     def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.string("systemcode"), rs.string("unitcode"))
+  }
+
+  /**
+   * Syntax support Object for user table
+   */
+  object user extends SQLSyntaxSupport[user] {
+    override val tableName = "User"
+
+    def apply(rs: WrappedResultSet): user = new user(rs.string("username"), rs.string("passhash"))
   }
 
 }

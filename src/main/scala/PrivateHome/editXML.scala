@@ -6,6 +6,7 @@ package PrivateHome
 
 import scala.xml._
 
+@deprecated
 class editXML {
 
   /**
@@ -71,7 +72,7 @@ class editXML {
    */
   //noinspection ScalaDeprecation
   private def addANode(to: Node, newNode: Node): Node = to match {
-    case Elem(prefix, label, attributes, scope, child@_*) => Elem(prefix, label, attributes, scope, child ++ newNode: _*)
+    case Elem(prefix, label, attributes, scope, child@_*) => Elem(prefix, label, attributes, scope,true, child ++ newNode: _*)
     case _ => println(" could not find node ")
       to
   }
