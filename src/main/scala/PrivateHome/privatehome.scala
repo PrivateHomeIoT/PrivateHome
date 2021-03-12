@@ -1,5 +1,7 @@
 package PrivateHome
 
+import PrivateHome.Devices.MHz.sendMhz
+import PrivateHome.Devices.MQTT.mqttClient
 import PrivateHome.UI.GUI.gui
 import PrivateHome.UI.repl
 import org.slf4j.LoggerFactory
@@ -34,7 +36,11 @@ object privatehome {
 
   def shutdown(exitCode: Int = 0): Unit = {
     logger.info("Shutting down Server")
-    repl.shutdown()
+    repl.shutdown
+    gui.shutdown
+    data.shutdown
+    sendMhz.shutdown
+    mqttClient.shutdown
     sys.exit(exitCode)
   }
 

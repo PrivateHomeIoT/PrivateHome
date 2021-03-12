@@ -39,7 +39,7 @@ object data {
 
 
   Class.forName("org.h2.Driver")
-  ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
+  val conn = ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: mutable.Map[String, String] = mutable.Map()
@@ -279,6 +279,13 @@ object data {
    */
   def getDevice(deviceID: String): Switch = {
     devices(deviceID)
+  }
+
+  /**
+   * closes the database connections
+   */
+  def shutdown: Unit = {
+    session.close()
   }
 
   /**

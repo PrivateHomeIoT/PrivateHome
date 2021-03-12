@@ -33,13 +33,13 @@ object gui {
   } catch {
     case e: FileNotFoundException =>
       logger.error("Keystore not Found",e)
-      shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
+      privatehome.shutdown(78) //78 linux standard for config error or 74 linux standard for IO Error
     case e: IOException =>
-      logger.error("Keystore passord wrong",e)
-      shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
+      logger.error("Keystore password wrong",e)
+      privatehome.shutdown(78) //78 linux standard for config error even though it is a java IO exception it really is a config error because it gets thrown by the keystore decrypt because the password was wrong
     case e: Throwable =>
       logger.error("Unknown Error in Keystore setup",e)
-      shutdown(1) //I does not know what the error is
+      privatehome.shutdown(1) //I does not know what the error is
   }
   val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
   keyManagerFactory.init(ks, settings.keystore.password)
@@ -71,8 +71,8 @@ object gui {
     )
   }
 
-  Http().newServerAt("0.0.0.0", settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute).failed.foreach(e => serverBindExeceptionhandler(e))
-  Http().newServerAt("0.0.0.0", settings.http.port).enableHttps(https).bind(httpRoute).failed.foreach(e => serverBindExeceptionhandler(e))
+  Http().newServerAt("0.0.0.0", settings.websocket.port).adaptSettings(_.mapWebsocketSettings(_.withPeriodicKeepAliveMaxIdle(1.second))).enableHttps(https).bind(websocketRoute).map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds)).failed.foreach(e => serverBindExeceptionhandler(e))
+  Http().newServerAt("0.0.0.0", settings.http.port).enableHttps(https).bind(httpRoute).map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds)).failed.foreach(e => serverBindExeceptionhandler(e))
 
   def serverBindExeceptionhandler(exception: Throwable): Unit = {
     exception.getCause match {
@@ -82,6 +82,13 @@ object gui {
         logger.error("Unknown error in Webserver",e)
         privatehome.shutdown(1)
     }
+  }
+
+  /**
+   * Shutdown all akka http endpoints
+   */
+  def shutdown: Unit = {
+    actorSystem.terminate()
   }
 
 }

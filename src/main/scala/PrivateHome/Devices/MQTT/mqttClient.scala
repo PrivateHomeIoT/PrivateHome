@@ -72,4 +72,9 @@ object mqttClient {
     val msg = new MqttMessage(message.getBytes("utf-8"))
     msgTopic.publish(msg)
   }
+
+  def shutdown: Unit = {
+    client.disconnect()
+    client.close()
+  }
 }
