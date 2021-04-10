@@ -26,7 +26,7 @@ ws.onmessage = function(event) {
 function fillForm(args) {
   let answer = args;
   oldid = answer.id
-  form = document.getElementById("switchform")
+  form = document.getElementById("form")
   form.keepState.checked = answer.keepState;
   form.name.value = answer.name;
   form.controlType.checked = answer.controlType == "slider";
@@ -55,7 +55,7 @@ ws.onopen = function (event) {
 }
 
 function sendNewData() {
-  form = document.getElementById("switchform")
+  form = document.getElementById("form")
   var arguments = new Object();
   arguments.oldId = oldid;
   arguments.newId = form.idtext.value;
@@ -76,7 +76,7 @@ function sendNewData() {
 
 
 function registerHandler() {
-  form = document.getElementById("switchform")
+  form = document.getElementById("form")
   form.addEventListener( "submit", function ( event ) {
     event.preventDefault();
     sendNewData();

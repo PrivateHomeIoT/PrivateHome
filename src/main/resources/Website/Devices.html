@@ -7,7 +7,7 @@
     <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--    <link rel="icon" type="image/x-icon" href="" alt="icon" />-->
+    <!--    <link rel="icon" type="image/x-icon" href="" alt="icon" /> -->
 
     <!-- generics -->
     <link rel="icon" href="Pictures/favicon-32.png" sizes="32x32">
@@ -19,22 +19,24 @@
     <link rel="icon" href="Pictures/favicon-228.png" sizes="228x228">
 
     <!-- Android -->
-    <link rel="shortcut icon" sizes="196x196" href=“Pictures/favicon-196.png">
+    <link rel="shortcut icon" sizes="196x196" href="Pictures/favicon-196.png">
 
     <!-- iOS -->
     <link rel="apple-touch-icon" href="Pictures/favicon-120.png" sizes="120x120">
     <link rel="apple-touch-icon" href="path/to/favicon-152.png" sizes="152x152">
     <link rel="apple-touch-icon" href="path/to/favicon-180.png" sizes="180x180">
 
-    <!-- Windows 8 IE 10-->
+    <!-- Windows 8 IE 10 -->
     <meta name="msapplication-TileColor" content="#FFFFFF">
     <meta name="msapplication-TileImage" content="Pictures/favicon-144.png">
 
-    <!— Windows 8.1 + IE11 and above —>
+    <!-- Windows 8.1 + IE11 and above -->
     <meta name="msapplication-config" content="Pictures/browserconfig.xml" />
 
     <link rel="stylesheet" href="CSS/menu.css">
     <link rel="stylesheet" href="CSS/button.css">
+    <link rel="stylesheet" href="CSS/general.css">
+                                                
     <script src="JS/websocket.js"></script>
     <script src="JS/Devices.js"></script>
 
@@ -48,37 +50,31 @@
         <a href="Settings.html">Settings</a>
         <a href="Setup.html">Setup</a>
     </div>
-    <div class="content" id="contentHeading">
+    <div id="title">
         <h1>Devices</h1>
     </div>
     <script>
-        var sidebar = false;
-        closeNav();
-
-        /*
-            This function opens the sidebar.
-        */
-        function openNav() {
-            if (sidebar == true) {
-                closeNav();
-            } else {
-                sidebar = true;
-                document.getElementById("mySidenav").style.width = "30%";
-                document.getElementById("content").style.paddingLeft = "31%";
+            var sidebar = false;
+            closeNav();
+            function openNav() {
+                if(sidebar == true){
+                    closeNav();
+                }
+                else{
+                    sidebar = true;
+                    document.getElementById("mySidenav").style.width = "30%";
+                    document.getElementById("body").style.paddingLeft = "31%";
+                }
             }
-        }
+            function closeNav() {
+                sidebar=false;
+                document.getElementById("mySidenav").style.width = "0%";
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
 
-        /*
-            This function closes the sidebar.
-        */
-        function closeNav() {
-            sidebar = false;
-            document.getElementById("mySidenav").style.width = "0%";
-            setTimeout(function() {
-                document.getElementById("content").style.paddingLeft = "0%";
-            }, 500)
-        }
-    </script>
+            }
+        </script>
 
     <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
     <link rel="stylesheet" href="CSS/login.css">
@@ -96,8 +92,7 @@
     </div>
 </head>
 
-<body class="content" id="content">
-
+<body id="body">
     <table style="width: 100%">
         <tr>
             <th>1</th>

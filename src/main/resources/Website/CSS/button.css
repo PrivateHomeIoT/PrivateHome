@@ -53,27 +53,6 @@ p {
     font-size: 18px;
 }
 
-table {
-    padding: 10px;
-    margin: 10px;
-    margin-right: 0px;
-}
-
-th{
-    visibility: hidden;
-}
-
-table, body{
-    padding-right: 0px;
-    margin-right: 0px;
-    padding-right: 10px;
-}
-
-td{
-    margin: 0px;
-    padding: 0px;
-}
-
 .slider {
   -webkit-appearance: none;
   width: 100%;

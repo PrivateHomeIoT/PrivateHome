@@ -1,0 +1,53 @@
+table {
+    padding: 10px;
+    margin: 10px;
+    margin-right: 0px;
+    width: 100%;
+}
+
+th{
+    visibility: hidden;
+}
+
+td{
+    padding: 0px;
+    margin: 10px;
+    float: left;
+    background: transparent;
+    border-style: none;
+    max-height: 10%;
+    max-width: 50%;
+}
+
+.list01{
+    max-width: 50%;
+    min-width: 20%;
+    width: 40%;
+    align-content: center;
+    display: block;
+}
+
+.listcontent{
+    width: 100%;
+    align-content: center;
+    display: block;
+}
+
+#form{
+    color: black;
+}
+
+#submit01 {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px;
+  border: none;
+  cursor: pointer;
+  width: 99%;
+}
+
+#form{
+    background-color: lightgray;
+    border-radius: 10px;
+}

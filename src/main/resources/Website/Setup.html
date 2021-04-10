@@ -21,7 +21,7 @@
             <a href="Settings.html">Settings</a>
             <a href="Setup.html" style="background-color: green; color: ghostwhite">Setup</a>
         </div>
-        <div class="content" id="content">
+        <div id="title">
             <h1>Setup</h1>
         </div>
         <script>
@@ -34,14 +34,16 @@
                 else{
                     sidebar = true;
                     document.getElementById("mySidenav").style.width = "30%";
-                    document.getElementById("content").style.paddingLeft = "31%";
+                    document.getElementById("body").style.paddingLeft = "31%";
                 }
             }
             function closeNav() {
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
-                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
+
             }
         </script>
         <script src="JS/websocket.js"></script>
@@ -61,7 +63,7 @@
             </form>
         </div>
     </head>
-    <body class="content">
+    <body id="body">
         
     </body>
 </html>
