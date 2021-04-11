@@ -2,11 +2,6 @@ package PrivateHome.UI
 
 import PrivateHome.UI.GUI.gui.actorSystem
 import PrivateHome.data
-import akka.NotUsed
-import akka.stream.OverflowStrategy
-import akka.stream.alpakka.unixdomainsocket.scaladsl.UnixDomainSocket
-import akka.stream.scaladsl.{SourceQueueWithComplete, _}
-import akka.util.ByteString
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
