@@ -134,6 +134,6 @@ object sendMhz {
     device.status = if (pCommand.command) 1 else 0
   }
 
-  def shutdown = mhz.shutdown
+  def shutdown = if (send) mhz.shutdown
 }
 
