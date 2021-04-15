@@ -18,11 +18,28 @@
 
 package PrivateHome.UI
 
+import PrivateHome.data
 import PrivateHome.data.idTest
 
 import java.util.Base64
 
-class Command() extends Serializable
+class Command() extends Serializable {
+  def testArgumentsSwitch(switchType: String, masterId: String, pin: Int, systemCode: String, unitCode: String): Boolean = {
+    switchType match {
+      case "mqtt" =>
+        if (masterId.length != 10) throw new IllegalArgumentException("""Length of masterId is not 10""")
+        if (!masterId.matches("[0-9a-zA-Z]{10}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
+        if (!data.masterIdExists(masterId)) throw new IllegalArgumentException("""This masterId is not known""")
+        if (!(pin >= 0 && pin < 64)) throw new IllegalArgumentException("""pin is not in range from 0-64""")
+      case "433Mhz" =>
+        if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
+        if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
+        if (unitCode.length != 5) throw new IllegalArgumentException("""Length of unitCode is not 5""")
+        if (!unitCode.matches("[01]{5}")) throw new IllegalArgumentException("""unitCode Contains not Allowed Characters""")
+    }
+    true
+  }
+}
 
 case class commandOn(id: String, private var percent: String) extends Command {
   idTest(id)
@@ -43,30 +60,21 @@ case class commandSettingsDevice(id: String, setting: String, value: AnyVal) ext
 
 }
 
-case class commandAddDevice(id: String, switchType: String, name: String, systemCode: String = "", unitCode: String = "", controlType: String, keepState: Boolean) extends Command {
+case class commandAddDevice(id: String, switchType: String, name: String, systemCode: String = "", unitCode: String = "", controlType: String, keepState: Boolean, pin: Int = 0, masterId: String = "") extends Command {
   idTest(id, create = true)
-  switchType match {
-    case "mqtt" =>
-    case "433Mhz" =>
-      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
-      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
-  }
+  testArgumentsSwitch(switchType, masterId, pin, systemCode, unitCode)
 }
 
-case class commandUpdateDevice(oldId: String, newId: String, keepState: Boolean, name: String, controlType: String, switchType: String, systemCode: String = "", unitCode: String = "") extends Command{
+case class commandAddController(name: String) extends Command
+
+case class commandGetController() extends Command
+
+case class commandUpdateDevice(oldId: String, newId: String, keepState: Boolean, name: String, controlType: String, switchType: String, systemCode: String = "", unitCode: String = "", pin: Int = 0, masterId: String = "") extends Command {
 
   idTest(newId, create = oldId != newId)
   idTest(oldId)
-  switchType match {
-    case "mqtt" =>
-    case "433Mhz" =>
-      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
-      if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
-      if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
-  }
+  testArgumentsSwitch(switchType, masterId, pin, systemCode, unitCode)
+
 }
 
 case class commandGetDevice(id: String) extends Command {
