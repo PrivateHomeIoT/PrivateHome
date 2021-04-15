@@ -1,7 +1,6 @@
 package PrivateHome.UI
 
-import PrivateHome.UI.GUI.gui.actorSystem
-import PrivateHome.data
+
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
@@ -18,6 +17,7 @@ object repl {
   val serverSocket = new UnixDomainServerSocket(socketPath)
 
   class readThread extends Thread {
+    setName("replReadThread")
     override def run(): Unit = {
       while (true) {
         val clientSocket = serverSocket.accept()
@@ -40,9 +40,9 @@ object repl {
     }
   }
 
-  val thread = new readThread
+  val replReadThread = new readThread
 
-  thread.start()
+  replReadThread.start()
   logger.info("Started repl handler thread")
 
   def shutdown(): Unit ={
