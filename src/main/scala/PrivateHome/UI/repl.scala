@@ -1,20 +1,11 @@
 package PrivateHome.UI
 
-import PrivateHome.UI.GUI.gui.actorSystem
-import PrivateHome.data
-import akka.NotUsed
-import akka.stream.OverflowStrategy
-import akka.stream.alpakka.unixdomainsocket.scaladsl.UnixDomainSocket
-import akka.stream.scaladsl.{SourceQueueWithComplete, _}
-import akka.util.ByteString
+
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
-import java.io.{BufferedReader, File, IOException, InputStreamReader, PrintWriter}
-import java.math.BigInteger
-import java.nio.file.{Path, Paths}
-import java.security.SecureRandom
-import scala.concurrent.Future
+import java.io._
+
 
 
 object repl {
@@ -23,6 +14,7 @@ object repl {
   val serverSocket = new UnixDomainServerSocket(socketPath)
 
   class readThread extends Thread {
+    setName("replReadThread")
     override def run(): Unit = {
       while (true) {
         val clientSocket = serverSocket.accept()
@@ -45,9 +37,9 @@ object repl {
     }
   }
 
-  val thread = new readThread
+  val replReadThread = new readThread
 
-  thread.start()
+  replReadThread.start()
   logger.info("Started repl handler thread")
 
   def shutdown(): Unit ={
