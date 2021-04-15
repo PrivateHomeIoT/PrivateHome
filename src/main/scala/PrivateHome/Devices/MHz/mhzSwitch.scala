@@ -1,7 +1,6 @@
 package PrivateHome.Devices.MHz
 
 import PrivateHome.Devices.Switch
-import PrivateHome.Devices.MHz.sendMhz
 
 import scala.xml.Node
 
@@ -25,7 +24,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, _name: String, priva
    *
    * @param newSystemCode The new System Code
    */
-  def systemCode_(newSystemCode: String): Unit = {
+  def systemCode_=(newSystemCode: String): Unit = {
     if (_systemCode.length != 5) throw new IllegalArgumentException(s"System code ${_systemCode} should be 5 Char long")
     if (!_systemCode.matches("[01]{5}")) throw new IllegalArgumentException(s"System code ${_systemCode} should only contain 0/1")
     _systemCode = newSystemCode
@@ -36,7 +35,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, _name: String, priva
    *
    * @param newUnitCode The new Unit Code
    */
-  def unitCode_(newUnitCode: String): Unit = {
+  def unitCode_=(newUnitCode: String): Unit = {
     if (_unitCode.length != 5) throw new IllegalArgumentException(s"Unit Code ${_unitCode} should be 5 Char long")
     if (!_unitCode.matches("[01]{5}")) throw new IllegalArgumentException(s"Unit code ${_unitCode} should only contain 0/1")
     _unitCode = newUnitCode
