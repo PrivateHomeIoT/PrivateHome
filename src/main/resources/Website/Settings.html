@@ -29,7 +29,7 @@
         <div id="title">
             <h1>Settings</h1>
         </div>
-        
+
         <script>
             var sidebar = false;
             closeNav();
@@ -110,5 +110,33 @@
             </table>
         <input type="submit" style="align-content: center" id="submit01">
         </form>
+    <body class="content">
+
+
+    <form id="switchform">
+        <label for="idtext">New ID for the Switch</label>
+        <input type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="Fünf Zeichen a-Z-_"><br>
+        <input type="checkbox" id="keepState" name="keepState">
+        <label for="keepState">Should keepState at reboot</label><br>
+        <label for="name">New Name</label>
+        <input id="name" name="name" type="text" size="64" minlength="1" maxlength="64"><br>
+        <label for="controlType">Dimmable</label>
+        <input id="controlType" type="checkbox" name="dimmable"><br>
+        <label for="switchType">What technic does the Switch use</label>
+        <select id="switchType" name="switchType">
+            <option value="433Mhz">433MHz</option>
+            <option value="mqtt">MQTT</option>
+        </select><br>
+        <label for="systemCode">Systemcode:</label>
+        <input id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"><br>
+        <label for="unitCode">Unitcode:</label>
+        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"><br>
+        <label for="pin">Pin on Controller</label>
+        <input id="pin" name="pin" type="number" min="0" max="63"><br>
+        <label for="masterId">Wich Contoller should be used</label>
+        <select id="masterId" name="masterId"></select><br>
+        <input type="submit">
+    </form>
+
     </body>
 </html>
