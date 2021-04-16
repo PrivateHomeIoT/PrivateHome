@@ -18,7 +18,13 @@
 
 package PrivateHome.UI
 
+import PrivateHome.data
+import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
+
+import java.lang.Integer.parseInt
+import java.math.BigInteger
+import java.security.SecureRandom
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -37,18 +43,22 @@ object stringCommandHandler {
         case "getRandomId" => commandGetRandomId()
         case "commandOn" => commandOn(args(0), args(1))
         case "commandOff" => commandOff(args(0))
-        case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean)
+        case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8))
+        case "commandAddController" => commandAddController(args(0))
+        case "commandGetController" => commandGetController()
+        case "getControllerKey" => data.getControllerMasterId(args(0)).keyArray.map("%02X" format _).mkString(";")
 
         case _ => logger.warn("Unknown Command")
           new Command
       }
       uiCommand match {
-        case c:Command => uiControl.receiveCommand(c)
-        //case s:String => s
+        case c: Command => uiControl.receiveCommand(c)
+        //case s: String => s
+        case _ => ""
       }
 
     } catch {
-      case e: Throwable => logger.error("Unknown Error while interpreting Console command",e)
+      case e: Throwable => logger.error("Unknown Error while interpreting Console command", e)
         e + e.getStackTrace.mkString("\n")
     }
   }

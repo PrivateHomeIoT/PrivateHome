@@ -72,13 +72,16 @@ object websocket {
               case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
               case "getRandomId" => JObject(JField("id",uiControl.receiveCommand(commandGetRandomId()).asInstanceOf[String]))
               case "updateDevice" => uiControl.receiveCommand(args.extract[commandUpdateDevice])
+              case "getController" => uiControl.receiveCommand(commandGetController())
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
             }
             answer match {
               case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
               case exception: Exception => sendMsg(websocketId,("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
+              case list: List[(String,String)] => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> JArray(list.map(tupel => ("masterId" -> tupel._1) ~ ("name" -> tupel._2)))))
               case false => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Fail"))
               case true => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+              case c:Any => logger.warn("Unknown answer type from uiControl.receiveCommand Class:{} element: {}",c.getClass,c)
             }
 
 

@@ -18,9 +18,10 @@
 
 package PrivateHome.UI
 
+import PrivateHome.Devices.MQTT.mqttController
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.data
-import PrivateHome.data.devices
+import PrivateHome.data.{chars, devices}
 import org.json4s.JsonAST.{JField, JObject, JValue}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
@@ -28,13 +29,14 @@ import org.json4s.jackson.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
 import org.slf4j.LoggerFactory
 
+import java.lang.Integer.parseInt
 import java.math.BigInteger
 import java.security.SecureRandom
 
 object uiControl {
 
-  implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
   private val logger = LoggerFactory.getLogger(this.getClass)
+  implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
 
   def receiveCommand(command: Command): Any = {
     try {
@@ -76,9 +78,29 @@ object uiControl {
             }
           }
           id
+        case c: commandUpdateDevice => data.updateDevice(c.oldId,c); true
+        case _: commandGetController =>
+          var answer = ""
+          val masterids = data.masterIds
+          val test: List[(String, String)] = masterids.map(t => {
+            (t -> data.getControllerMasterId(t).name)
+          })
+          test
+        case c: commandAddController =>
+          var masterId: String = ""
+          do {
+            masterId = ""
+            new BigInteger(5 * 6, new SecureRandom()).toString(2).grouped(6).foreach(t => {
+              masterId += chars(parseInt(t, 2) % 62)
+            })
+          } while (data.masterIdExists(masterId))
+          val key: Array[Byte] = new BigInteger(16*8,new SecureRandom()).toByteArray
+          data.addController(new mqttController(masterId,key,c.name),key)
       }
     } catch {
-      case exception: Exception => exception
+      case exception: Exception =>
+        logger.debug("Unhandled exception will get forwarded to connector",exception)
+        exception
     }
   }
 }
