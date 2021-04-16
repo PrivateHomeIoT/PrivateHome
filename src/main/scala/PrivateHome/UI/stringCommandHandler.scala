@@ -8,11 +8,12 @@ import java.security.SecureRandom
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
+
   def interpretMessage(msg: String): Any = {
     try {
       val command: Array[String] = msg.stripSuffix(")").split('(')
       val args = if ((command.length == 2) && (command(1) != null)) command(1).split(',') else null
-      logger.debug("command = {}",command(0))
+      logger.debug("command = {}", command(0))
 
       val uiCommand = command(0) match {
         case "commandAddUserBase64" =>

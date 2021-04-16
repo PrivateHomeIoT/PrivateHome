@@ -82,7 +82,7 @@ object Switch {
       case "MQTT" => val id = (data \ "@id").text
         val KeepStatus = (data \ "keepStatus").head.text.toBoolean
         val name = (data \ "name").head.text
-        mqttSwitch(id, KeepStatus, name, "button")
+        mqttSwitch(id, KeepStatus, name, "button",1)
       case _ => throw new IllegalArgumentException("Wrong Switch Type")
     }
   }
@@ -90,14 +90,14 @@ object Switch {
   def apply(data: commandAddDevice): Switch = {
     data.switchType match {
       case "433Mhz" => mhzSwitch(data.id, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.id, data.keepState, data.name, data.controlType)
+      case "mqtt" => mqttSwitch(data.id, data.keepState, data.name, data.controlType,data.pin ,data.masterId)
     }
   }
 
   def apply(data: commandUpdateDevice): Switch = {
     data.switchType match {
       case "433Mhz" => mhzSwitch(data.newId, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.newId, data.keepState, data.name, data.controlType)
+      case "mqtt" => mqttSwitch(data.newId, data.keepState, data.name, data.controlType,data.pin,data.masterId)
     }
   }
 
@@ -112,9 +112,9 @@ object Switch {
   }
 }
 
-class switchSerializer extends CustomSerializer[Switch](format => ( {
-  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", "")
+class switchSerializer extends CustomSerializer[Switch](ser = format => ( {
+  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", "", 0)
 }, {
-  case switch: mqttSwitch => switch.serializer
+  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin()) ~ ("masterId" -> switch.masterId)
   case switch: mhzSwitch => switch.serializer ~ ("systemCode" -> switch.systemCode) ~ ("unitCode" -> switch.unitCode)
 }))

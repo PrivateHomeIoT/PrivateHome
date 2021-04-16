@@ -1,3 +1,21 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.Devices.MQTT
 
 import PrivateHome.{data, settings}
@@ -9,19 +27,18 @@ object mqttClient {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val brokerUrl = "tcp://" + settings.mqtt.url + ":" + settings.mqtt.port
-  private val home = "Home/#"
-  private val stat = "Home/stat/"
-  private val cmnd = "Home/switch/cmnd/"
+  private val home = "Home/"
   private val persistence = new MemoryPersistence
   private var clientID = MqttClient.generateClientId
-  clientID = clientID.substring(0,Math.min(23,clientID.length))
+  clientID = clientID.substring(0, Math.min(23, clientID.length))
   private val client = new MqttClient(brokerUrl, clientID, persistence)
 
   var lastMsg: String = "" //here you can get the last received message
   var lastID: String = "" //her you can get the last received id
 
   client.connect()
-  client.subscribe(home)
+  client.subscribe(stat.topicString + "#")
+  client.subscribe(setupRequest.topicString+ "#")
 
   val callback: MqttCallback = new MqttCallback {
 
@@ -32,16 +49,27 @@ object mqttClient {
      * @param message is the message which was recieved. You can also get it from lastMsg.
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
-      if(topic.startsWith(stat)){
-        lastID = ""
-        lastMsg = ""
-        lastID = topic.substring(topic.length - 5)
-        lastMsg = message.toString
-        data.devices(lastID).status = if (lastMsg == "ON") 1 else 0 //if (lastMsg == "OFF") 0 else data.devices(lastID).status
-        logger.debug("Received status change for \"{}\" to {}",lastID,lastMsg)
+      logger.debug("Received message {} in Topic {}", message.getPayload, topic)
+      try {
+        if (topic.startsWith(stat.topicString)) {
+          val randomCode = topic.substring(topic.length - 10)
+          val controller = data.getControllerRandomCode(randomCode)
+          controller.receiveStatuschange(message.getPayload)
+        }
+        //else if (topic.startsWith(publishTopic.cmnd)) logger.trace("Received own command {} for \"{}\"", topic.substring(topic.length-5),message.toString)
+        else if (topic.startsWith(setupRequest.topicString)) {
+          val masterID = topic.substring(topic.length - 5)
+          if (data.masterIdExists(masterID)) {
+            val controller = data.getControllerMasterId(masterID)
+            if (controller.checkSetup(message.getPayload))
+              controller.setupClient()
+
+          }
+        }
+        else logger.warn("Received message in unknown Topic: {} and Message: {}", topic, message.toString)
+      } catch {
+        case e:Throwable => logger.warn("Error in MQTT message handler",e)
       }
-      else if (topic.startsWith(cmnd)) logger.trace("Received own command {} for \"{}\"", topic.substring(topic.length-5),message.toString)
-      else logger.warn("Received message in unknown Topic: {} and Message: {}",topic,message.toString)
     }
 
     /**
@@ -49,7 +77,9 @@ object mqttClient {
      *
      * @param cause is the error, why the connection is lost.
      */
-    override def connectionLost(cause: Throwable): Unit = logger.warn("Lost mqtt connection!",cause)
+    override def connectionLost(cause: Throwable): Unit = {
+      logger.warn("Lost mqtt connection!", cause)
+    }
 
     /**
      * I think, it's the method, which acts after sending a MQTT-Message
@@ -67,14 +97,39 @@ object mqttClient {
    * @param topic   Is the topic in which you want to publish your message.
    * @param message Is the message you want to publish.
    */
+  @deprecated("This is deprecated because you should only use publish(topic: topic,message: Array[Byte]")
   def publish(topic: String, message: String): Unit = {
-    val msgTopic = client.getTopic(topic)
+
+
     val msg = new MqttMessage(message.getBytes("utf-8"))
-    msgTopic.publish(msg)
+    val topicswit = client.getTopic(topic)
+    topicswit.publish(msg)
+  }
+
+  def publish(topic: publishTopic,message: Array[Byte]): Unit = {
+    val msg = new MqttMessage(message)
+    val topicswit = client.getTopic(topic.topicString)
+    topicswit.publish(msg)
   }
 
   def shutdown: Unit = {
     client.disconnect()
     client.close()
   }
+
+
+  object setup extends publishTopic(home + "setup")
+
+  class cmnd(code: String) extends publishTopic(home + "switch/cmnd/" + code)
+
+  case class topic(topicString: String)
+
+  class publishTopic(topic: String) extends topic(topic)
+
+  class subscribeTopic(topic: String) extends topic(topic)
+
+  object stat extends subscribeTopic(home + "stat/")
+
+  object setupRequest extends subscribeTopic(home + "setupRequest/")
+
 }
