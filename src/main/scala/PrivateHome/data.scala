@@ -72,9 +72,15 @@ object data {
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: mutable.Map[String, String] = mutable.Map()
+  val tablesWanted: List[String] = List("DEVICES", "MHZ", "MQTT", "MQTTCONTROLLER", "USER")
   try {
-    if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
+    val tables = sql"""show tables;""".map(rs => rs.string(1)).list.apply()
+    var allTablesExisting = true
+    tablesWanted.foreach(t => allTablesExisting = tables.contains(t) && allTablesExisting)
+    if (tables.isEmpty || !allTablesExisting) {
+      logger.info(s"Because not all Tables do exists we will add all missing with data.create()")
       create()
+    }
   } catch {
     case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
       sys.exit(75)
