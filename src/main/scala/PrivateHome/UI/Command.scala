@@ -27,8 +27,8 @@ class Command() extends Serializable {
   def testArgumentsSwitch(switchType: String, masterId: String, pin: Int, systemCode: String, unitCode: String): Boolean = {
     switchType match {
       case "mqtt" =>
-        if (masterId.length != 10) throw new IllegalArgumentException("""Length of masterId is not 10""")
-        if (!masterId.matches("[0-9a-zA-Z]{10}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
+        if (masterId.length != 5) throw new IllegalArgumentException("""Length of masterId is not 5""")
+        if (!masterId.matches("[0-9a-zA-Z]{5}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
         if (!data.masterIdExists(masterId)) throw new IllegalArgumentException("""This masterId is not known""")
         if (!(pin >= 0 && pin < 64)) throw new IllegalArgumentException("""pin is not in range from 0-64""")
       case "433Mhz" =>
