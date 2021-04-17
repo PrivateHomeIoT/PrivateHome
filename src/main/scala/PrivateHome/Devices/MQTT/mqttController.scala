@@ -18,7 +18,7 @@
 
 package PrivateHome.Devices.MQTT
 
-import PrivateHome.Devices.MQTT.mqttClient.cmnd
+import PrivateHome.Devices.MQTT.mqttClient.{cmnd, setup}
 import PrivateHome.data
 import org.json4s.JsonDSL._
 import org.json4s._
