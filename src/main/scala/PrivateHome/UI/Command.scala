@@ -1,3 +1,21 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.UI
 
 import PrivateHome.data
@@ -9,8 +27,8 @@ class Command() extends Serializable {
   def testArgumentsSwitch(switchType: String, masterId: String, pin: Int, systemCode: String, unitCode: String): Boolean = {
     switchType match {
       case "mqtt" =>
-        if (masterId.length != 10) throw new IllegalArgumentException("""Length of masterId is not 10""")
-        if (!masterId.matches("[0-9a-zA-Z]{10}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
+        if (masterId.length != 5) throw new IllegalArgumentException("""Length of masterId is not 5""")
+        if (!masterId.matches("[0-9a-zA-Z]{5}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
         if (!data.masterIdExists(masterId)) throw new IllegalArgumentException("""This masterId is not known""")
         if (!(pin >= 0 && pin < 64)) throw new IllegalArgumentException("""pin is not in range from 0-64""")
       case "433Mhz" =>

@@ -78,7 +78,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
     // TODO: Support Inputs
     val message = ("randomCode" -> _randomCode) ~ ("outputs" -> JArray(output)) ~ ("inputs" -> JArray(List()))
-    mqttClient.publish(mqttClient.setup, encryptMessage(compact(render(message))))
+    mqttClient.publish(new setup(masterID), encryptMessage(compact(render(message))))
   }
 
   private def encryptMessage(message: String): Array[Byte] = {
