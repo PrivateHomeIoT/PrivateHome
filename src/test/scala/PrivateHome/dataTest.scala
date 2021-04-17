@@ -18,7 +18,6 @@
 
 package PrivateHome
 
-import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.{mqttController, mqttSwitch}
 import PrivateHome.Devices.Switch
 import org.scalatest.funsuite.AnyFunSuite
@@ -26,7 +25,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class dataTest extends AnyFunSuite {
   settings.database.path = "mem:devices"
-  val key = Array[Byte](0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+  val key = Array[Byte](0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 
   test("testCreate") {
