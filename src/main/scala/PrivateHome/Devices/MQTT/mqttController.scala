@@ -23,12 +23,15 @@ import PrivateHome.data
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.slf4j.LoggerFactory
 
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
 
 class mqttController(val masterID: String, _key: Array[Byte], val name: String = "") {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   implicit val formats: DefaultFormats.type = DefaultFormats
   val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
   private val key = new SecretKeySpec(_key, "AES")
@@ -115,5 +118,6 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   def sendCommand(pin: Int, value: Int): Unit = {
     if (!(value >= 0 && value < 1024)) throw new IllegalArgumentException("Value should be between 0 and 1023")
     mqttClient.publish(new cmnd(randomCode),encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
+    logger.debug("Send message pin: {} value: {}",pin,value)
   }
 }
