@@ -46,7 +46,7 @@ object stringCommandHandler {
         case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8))
         case "commandAddController" => commandAddController(args(0))
         case "commandGetController" => commandGetController()
-        case "getControllerKey" => data.getControllerMasterId(args(0)).keyArray.map("%02X" format _).mkString(";")
+        case "getControllerKey" => data.getControllerMasterId(args(0)).keyArray.map(_ & 0xFF).mkString(",")
 
         case _ => logger.warn("Unknown Command")
           new Command
