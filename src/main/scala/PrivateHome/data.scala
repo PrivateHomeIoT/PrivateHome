@@ -97,8 +97,8 @@ object data {
     // Drops old Tables to Delete Data and make it possible to regenerate them
     if (dropTables) {
       sql"""DROP TABLE IF EXISTS `Mhz`;
-         DROP TABLE IF EXISTS `mqttController`;
          DROP TABLE IF EXISTS `mqtt`;
+         DROP TABLE IF EXISTS `mqttController`;
          DROP TABLE IF EXISTS `Devices`;
          DROP TABLE IF EXISTS `User`""".execute().apply()
       devices = mutable.Map()
