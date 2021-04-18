@@ -79,11 +79,12 @@ object uiControl {
           }
           id
         case c: commandUpdateDevice => data.updateDevice(c.oldId,c); true
+        case c: commandProgramController => data.getControllerMasterId(c.masterId).programController(c.path, c.ssid, c.pass)
         case _: commandGetController =>
           var answer = ""
           val masterids = data.masterIds
           val test: List[(String, String)] = masterids.map(t => {
-            (t -> data.getControllerMasterId(t).name)
+            t -> data.getControllerMasterId(t).name
           })
           test
         case c: commandAddController =>

@@ -24,6 +24,7 @@ import de.mkammerer.argon2.Argon2Factory.Argon2Types
 import org.scalasbt.ipcsocket.UnixDomainSocket
 
 import java.io.{BufferedReader, Console, InputStreamReader, PrintWriter}
+import java.nio.file.{Files, Path}
 import java.util.Base64
 import scala.io.StdIn.readLine
 
@@ -43,7 +44,8 @@ object console {
     "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
     "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
     "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
-    "getKey" -> REPLCommand(_ => getControllerKey(), "Displays the Key of a given Controller.")
+    "getKey" -> REPLCommand(_ => getControllerKey(), "Displays the Key of a given Controller."),
+    "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller")
   )
 
   def recreate(): Unit = {
@@ -179,6 +181,48 @@ object console {
       if (!controller.contains(chosenController)) chosenController = null
     }
     chosenController
+  }
+
+  def programController(): Unit = {
+    val standardPath = "/dev/ttyUSB0"
+    val masterId = getControllerId()
+    var ssid = ""
+    var pass = ""
+    var path = ""
+    var loop = true
+    println("Next you can enter your SSID/WiFi name and Wifi Password if you just press enter they won't get set")
+    while (loop) {
+      loop = false
+      ssid = readLine("ssid >")
+      if (ssid.length > 32) {
+        println("SSID has a max length of 32")
+        loop = true
+      }else if (ssid.isEmpty) ssid = ""
+    }
+
+    loop = true
+    while (loop) {
+      loop = false
+      pass = readLine("pass >")
+      if (pass.length > 64) {
+        println("Password has a max length of 64")
+        loop = true
+      } else if (pass.isEmpty) pass = ""
+    }
+
+    while (path.isBlank) {
+      path = readLine("interface path [%s]>", standardPath)
+      if (path.isBlank) path = standardPath
+      else {
+        if (!Files.isRegularFile(Path.of(path))) {
+          println("Path is not a File")
+          path = ""
+        }
+      }
+    }
+
+
+    send(commandProgramController(path, masterId, ssid, pass))
   }
 
   def addController(): Unit = {
