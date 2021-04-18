@@ -15,22 +15,23 @@ ws.onmessage = function(event) {
     case "deviceChange":{
       break;
     }
-    case "randomID":{
+    case "getRandomId":{
       setID(msg.answer);
+      break;
     }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
   }
 }
 
 function setID(args){
-  let answer = arguments;
-  randomID = answer.id;
+  randomID = args.id;
+  document.getElementById("idtext").value = randomID
 }
 
 ws.onopen = function (event) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  ws.send(JSON.stringify({Command:"getRandomID",Args:{}}));
+  ws.send(JSON.stringify({Command:"getRandomId",Args:{}}));
 }
 
 function sendNewData() {
