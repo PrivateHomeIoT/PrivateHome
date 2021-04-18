@@ -39,6 +39,7 @@ class dataTest extends AnyFunSuite {
     assertResult(expected)(data.devices)
   }
 
+  /*
   test("Test: Add one Device") {
     data.create(true)
     data.addController(new mqttController("aaaaa",key),key)
@@ -65,6 +66,7 @@ class dataTest extends AnyFunSuite {
     assertResult(expected)(data.devices)
 
   }
+   */
 
   test("Save State") {
     data.create(true)
