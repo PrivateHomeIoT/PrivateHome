@@ -38,7 +38,7 @@ function sendNewData() {
   form = document.getElementById("form")
   var arguments = new Object();
   arguments.randomID = randomID;
-  arguments.newId = form.idtext.value;
+  arguments.id = form.idtext.value;
   arguments.keepState = form.keepState.checked;
   arguments.name = form.name.value;
   if (form.controlType.checked) {
@@ -51,7 +51,7 @@ function sendNewData() {
     arguments.unitCode = form.unitCode.value;
   }
   console.log(JSON.stringify(arguments));
-  ws.send(JSON.stringify({Command:"createDevice",Args:arguments}));
+  ws.send(JSON.stringify({Command:"addDevice",Args:arguments}));
 }
 
 
