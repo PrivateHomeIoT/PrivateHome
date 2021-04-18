@@ -37,6 +37,7 @@ object uiControl {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def receiveCommand(command: Command): Any = {
     try {
