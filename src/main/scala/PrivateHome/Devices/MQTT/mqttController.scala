@@ -81,6 +81,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
     // TODO: Support Inputs
     val message = ("randomCode" -> _randomCode) ~ ("outputs" -> JArray(output)) ~ ("inputs" -> JArray(List()))
+
     mqttClient.publish(new setup(masterID), encryptMessage(compact(render(message))))
   }
 
@@ -100,24 +101,26 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
     val messageString = new String(cipher.doFinal(message.slice(16, message.length)), "ASCII")
     val messageJson = parse(messageString)
     val pin = (messageJson \ "pin").extract[Int]
-    val value: Float = (messageJson \ "value").extract[String].toFloat/1024
+    val value: Float = (messageJson \ "value").extract[String].toFloat / 1024
     pins(pin).status = value
   }
 
   def checkSetup(message: Array[Byte]): Boolean = {
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(message.slice(0, 16)))
     val messageString = new String(cipher.doFinal(message.slice(16, message.length)), "ASCII")
-    messageString.equals(masterID)
+    val valid = messageString.equals(masterID)
+    if (!valid) logger.info("Setup requested for {} with message {}", masterID, messageString)
+    valid
   }
 
-  def sendCommand(pin:Int, value: Float): Unit = {
+  def sendCommand(pin: Int, value: Float): Unit = {
     if (!(value >= 0 && value <= 1)) throw new IllegalArgumentException("Value should be between 0 and 1")
-    sendCommand(pin,(value*1023).toInt)
+    sendCommand(pin, (value * 1023).toInt)
   }
 
   def sendCommand(pin: Int, value: Int): Unit = {
     if (!(value >= 0 && value < 1024)) throw new IllegalArgumentException("Value should be between 0 and 1023")
-    mqttClient.publish(new cmnd(randomCode),encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
-    logger.debug("Send message pin: {} value: {}",pin,value)
+    mqttClient.publish(new cmnd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
+    logger.debug("Send message pin: {} value: {}", pin, value)
   }
 }
