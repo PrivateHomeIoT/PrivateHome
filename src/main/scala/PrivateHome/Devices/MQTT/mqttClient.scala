@@ -49,7 +49,7 @@ object mqttClient {
      * @param message is the message which was recieved. You can also get it from lastMsg.
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
-      logger.debug("Received message length: {} {} in Topic {}", message.getPayload.length, message.getPayload.map("%02X" format _), topic)
+      logger.debug("Received message in Topic {}: length: {} {} ", topic, message.getPayload.length, message.getPayload.map("%02X" format _))
       try {
         if (topic.startsWith(stat.topicString)) {
           val randomCode = topic.substring(topic.length - 10)
@@ -61,8 +61,12 @@ object mqttClient {
           val masterID = topic.substring(topic.length - 5)
           if (data.masterIdExists(masterID)) {
             val controller = data.getControllerMasterId(masterID)
-            if (controller.checkSetup(message.getPayload))
+            if (controller.checkSetup(message.getPayload)) {
+              logger.debug("Doing Setup for {}", masterID)
               controller.setupClient()
+            } else {
+              logger.debug("A setup for {} was requested but not granted because the message wasn't correctly encrypted.", masterID)
+            }
 
           }
         }
