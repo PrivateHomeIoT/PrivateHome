@@ -3,6 +3,12 @@ var randomID;
 ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
   switch (msg.Command) {
+    case "addDevice": {
+      if (msg.answer == "Success") {
+        window.location.href = "/Devices.html"
+      }
+      break;
+    }
     case "getDevices": {
       break;
     }
