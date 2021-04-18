@@ -35,9 +35,6 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   implicit val formats: DefaultFormats.type = DefaultFormats
   val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
   private val key = new SecretKeySpec(_key, "AES")
-  for (i: Int <- 0 to _key.length) {
-    _key(0) = 0
-  }
 
   def keyArray: Array[Byte] = _key
 
@@ -50,6 +47,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
     pins(pin) match {
       case null =>
         pins(pin) = pSwitch
+        setupClient()
         true
       case old: mqttSwitch =>
         false
@@ -58,12 +56,14 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
   def deleteSwitch(pin: Int): Unit = {
     pins(pin) = null
+    setupClient()
   }
 
   def changePin(oldPin: Int, newPin: Int): Boolean = {
     if (pins(newPin) == null) {
       pins(newPin) = pins(oldPin)
       pins(oldPin) = null
+      setupClient()
       true
     } else false
   }
