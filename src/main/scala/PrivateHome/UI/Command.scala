@@ -51,6 +51,14 @@ case class commandOff(id: String) extends Command {
   idTest(id)
 }
 
+case class commandProgramController(path: String, masterId: String, ssid: String, pass: String) extends Command {
+  override def toString: String = {
+    val msgSsid = if (ssid.isBlank) " "
+    val msgPass = if (pass.isBlank) " "
+    "commandProgramController(%s,%s,%s,%s)".format(path,masterId,msgSsid, msgPass)
+  }
+}
+
 case class commandGetDevices() extends Command
 
 case class commandSettingsMain(setting: String, value: AnyVal) extends Command

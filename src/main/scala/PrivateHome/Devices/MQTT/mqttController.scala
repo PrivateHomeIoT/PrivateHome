@@ -19,12 +19,14 @@
 package PrivateHome.Devices.MQTT
 
 import PrivateHome.Devices.MQTT.mqttClient.{cmnd, setup}
-import PrivateHome.data
+import PrivateHome.{data, settings}
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.slf4j.LoggerFactory
 
+import java.io.{File, FileWriter}
+import java.nio.charset.Charset
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.{IvParameterSpec, SecretKeySpec}
@@ -122,5 +124,16 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
     if (!(value >= 0 && value < 1024)) throw new IllegalArgumentException("Value should be between 0 and 1023")
     mqttClient.publish(new cmnd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
     logger.debug("Send message pin: {} value: {}", pin, value)
+  }
+
+  def programController(path: String, ssid: String, wifiPass: String ): Unit = {
+    val file = new FileWriter(new File(path),Charset.forName("US-ASCII"))
+    if (!ssid.isBlank)
+    file.write("setSSID\n%s\n".format(ssid))
+    if (!wifiPass.isBlank)
+    file.write("setPW\n%s\n".format(wifiPass))
+    file.write("setServer\n%s\nsetKey\n%s\nsetID\n%s\n".format(settings.mqtt.url, _key.map(_ & 0xFF).mkString(","), masterID))
+    file.flush()
+    file.close()
   }
 }
