@@ -1,10 +1,24 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.UI
 
-import PrivateHome.data
 import org.slf4j.LoggerFactory
-
-import java.math.BigInteger
-import java.security.SecureRandom
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -19,23 +33,7 @@ object stringCommandHandler {
           commandAddUserBase64(args(0), args(1))
         case "commandRecreateDatabase" => commandRecreateDatabase()
         case "commandSafeCreateDatabase" => commandSafeCreateDatabase()
-        case "getRandomId" =>
-          var id: String = null
-          val random = new SecureRandom()
-          var run = true
-          while (run) {
-
-            id = new BigInteger(5 * 5, random).toString(32) //  This generates a random String with length 5
-            try {
-              data.idTest(id, create = true)
-              logger.debug("Recomended id: \"{}\"",id)
-              run = false
-            }
-            catch {
-              case _: IllegalArgumentException =>
-            }
-          }
-          id
+        case "getRandomId" => commandGetRandomId()
         case "commandOn" => commandOn(args(0), args(1))
         case "commandOff" => commandOff(args(0))
         case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean)
@@ -45,7 +43,7 @@ object stringCommandHandler {
       }
       uiCommand match {
         case c:Command => uiControl.receiveCommand(c)
-        case s:String => s
+        //case s:String => s
       }
 
     } catch {

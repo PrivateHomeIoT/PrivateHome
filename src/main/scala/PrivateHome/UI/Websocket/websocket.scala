@@ -1,3 +1,21 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.UI.Websocket
 
 import PrivateHome.UI._
@@ -52,6 +70,7 @@ object websocket {
               case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
               case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
               case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
+              case "getRandomId" => JObject(JField("id",uiControl.receiveCommand(commandGetRandomId()).asInstanceOf[String]))
               case "updateDevice" => uiControl.receiveCommand(args.extract[commandUpdateDevice])
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
             }
