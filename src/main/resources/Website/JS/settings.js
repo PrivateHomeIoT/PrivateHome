@@ -67,6 +67,7 @@ function fillForm(args) {
   }
 
   disableMqtt = answer.switchType != "mqtt";
+  console.log(disableMqtt)
   form.pin.disabled = disableMqtt;
   form.masterId.disabled = disableMqtt;
   if (disableMqtt) {
@@ -127,27 +128,28 @@ function registerHandler() {
   });
   form.controlType.addEventListener("change", function (event) {
     disable = form.controlType.checked
-    form.systemCode.disabled = disable;
-    form.unitCode.disabled = disable;
     form.switchType.disabled = disable;
     if (disable) {
     form.switchType.value = "mqtt";
-    form.unitCode.value = "";
-    form.systemCode.value = "";
     }
+    controlTypeCheck();
   });
-  form.switchType.addEventListener("change", function (event) {
-    disable433 = form.switchType.value != "433Mhz";
-    form.systemCode.disabled = disable433;
-    form.unitCode.disabled = disable433;
-    if (disable433) {
-      form.unitCode.value = "";
-      form.systemCode.value = "";
-    }
-    disableMqtt = answer.switchType != "mqtt";
-    form.pin.disabled = disableMqtt;
-    form.masterId.disabled = disableMqtt;
-  });
+  form.switchType.addEventListener("change", controlTypeCheck);
+}
+
+
+function controlTypeCheck() {
+  form = document.getElementById("form")
+      disable433 = form.switchType.value != "433Mhz";
+      form.systemCode.disabled = disable433;
+      form.unitCode.disabled = disable433;
+      if (disable433) {
+        form.unitCode.value = "";
+        form.systemCode.value = "";
+      }
+      disableMqtt = form.switchType.value != "mqtt";
+      form.pin.disabled = disableMqtt;
+      form.masterId.disabled = disableMqtt;
 }
 
 

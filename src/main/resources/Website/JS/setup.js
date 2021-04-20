@@ -25,6 +25,10 @@ ws.onmessage = function(event) {
       setID(msg.answer);
       break;
     }
+    case "getController": {
+      setController(msg.answer)
+      break;
+    }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
   }
 }
@@ -53,6 +57,7 @@ ws.onopen = function (event) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   ws.send(JSON.stringify({Command:"getRandomId",Args:{}}));
+  ws.send(JSON.stringify({Command:"getController",Args:{}}));
 }
 
 function sendNewData() {
@@ -90,18 +95,13 @@ function registerHandler() {
   form.controlType.addEventListener("change", function (event) {
     form = document.getElementById("form")
     disable = form.controlType.checked
-    form.systemCode.disabled = disable;
-    form.unitCode.disabled = disable;
     form.switchType.disabled = disable;
-    if (disable) {
-    form.switchType.value = "mqtt";
-    form.unitCode.value = "";
-    form.systemCode.value = "";
+    if(disable) {
+      form.switchType.value = "mqtt"
     }
-  });
-  form.switchType.addEventListener("change", function (event) {
     controlTypeCheck();
   });
+  form.switchType.addEventListener("change", controlTypeCheck);
 }
 
 function controlTypeCheck() {
@@ -113,7 +113,7 @@ function controlTypeCheck() {
         form.unitCode.value = "";
         form.systemCode.value = "";
       }
-      disableMqtt = form.switchType != "mqtt";
+      disableMqtt = form.switchType.value != "mqtt";
       form.pin.disabled = disableMqtt;
       form.masterId.disabled = disableMqtt;
 }
