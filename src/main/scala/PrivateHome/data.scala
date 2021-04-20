@@ -86,8 +86,11 @@ object data {
       sys.exit(75)
     case e: Throwable => logger.error("Unknown error in database init", e)
   }
+  try
   fillDevices()
-
+  catch {
+    case _:Exception => logger.error("Could not load Database settings You should repair or reset the database.")
+  }
 
   /**
    * Generates the table structures for the Database
@@ -292,7 +295,6 @@ object data {
       devices(oldid) = Switch(pDevice)
     }
 
-    logger.debug(s"devices({}) is now {}", oldid, devices(oldid))
 
     withSQL {
       update(device).set(
@@ -308,20 +310,20 @@ object data {
       devices -= oldid
     }
 
-    devices(pDevice.newId) match {
+    devices(pDevice.newId) = devices(pDevice.newId) match {
       case newDevice: mhzSwitch =>
         newDevice.systemCode = pDevice.systemCode
         newDevice.unitCode = pDevice.unitCode
         withSQL {
-        update(mhz).set(
-          mhz.column.id -> newDevice.id,
-          mhz.column.systemcode -> newDevice.systemCode,
-          mhz.column.unitcode -> newDevice.unitCode).where.eq(mhz.column.id, oldid)
-      }.update().apply()
+          update(mhz).set(
+            mhz.column.id -> newDevice.id,
+            mhz.column.systemcode -> newDevice.systemCode,
+            mhz.column.unitcode -> newDevice.unitCode).where.eq(mhz.column.id, oldid)
+        }.update().apply()
         mhzId(newDevice.systemCode + newDevice.unitCode) = newDevice.id
-
+        newDevice
       case newDevice: mqttSwitch =>
-        newDevice.changePinAndController(pDevice.pin,pDevice.masterId)
+        newDevice.changePinAndController(pDevice.pin, pDevice.masterId)
         withSQL {
           update(mqtt).set(
             mqtt.column.id -> newDevice.id,
@@ -329,8 +331,10 @@ object data {
             mqtt.column.port -> newDevice.pin
           ).where.eq(mqtt.column.id, oldid)
         }.update().apply()
+        newDevice
       case _ => throw wrongClass
     }
+    logger.debug(s"devices({}) is now {}", oldid, devices(pDevice.newId))
   }
 
 
@@ -370,6 +374,7 @@ object data {
    * Gets the argon2 hash for the Username
    *
    * @param username the username for which to get the hash
+   *
    * @return the hash of the User of there is no User with this name returns "no_Username"
    */
   def getUserHash(username: String): String = {
@@ -410,6 +415,7 @@ object data {
    * An better access to the devices Map
    *
    * @param deviceID The ID of the switch you want
+   *
    * @return the Switch object the you requested
    */
   def getDevice(deviceID: String): Switch = {
