@@ -15,8 +15,9 @@ This is still a work in progress. The following list represents our current stat
 - [x] 443 MHz 
 - [ ] Infrared
 - [ ] ZigBee
+- [ ] MyCroft skill
 - [ ] Alexa 
 - [ ] Apple Home
 - [ ] Google Assistant
 - [ ] Setup assistent
-- [ ] Setup assistent for devices
+- [x] Setup assistent for devices

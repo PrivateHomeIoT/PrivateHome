@@ -70,6 +70,7 @@ object websocket {
               case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
               case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
               case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
+              case "getRandomId" => JObject(JField("id",uiControl.receiveCommand(commandGetRandomId()).asInstanceOf[String]))
               case "updateDevice" => uiControl.receiveCommand(args.extract[commandUpdateDevice])
               case "getController" => uiControl.receiveCommand(commandGetController())
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))

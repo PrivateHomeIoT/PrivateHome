@@ -28,6 +28,8 @@
         <link rel="icon" type="image/x-icon" href=""/>
 
         <link rel="stylesheet" href="CSS/menu.css">
+        <link rel="stylesheet" href="CSS/general.css">
+        <link rel="stylesheet" href="CSS/button.css">
 
         <script src="JS/websocket.js"></script>
         <script src="JS/settings.js"></script>
@@ -39,12 +41,12 @@
             <a href="Devices.html">Devices</a>
             <a href="Rooms.html">Rooms</a>
             <a href="Sensors.html">Sensors</a>
-            <a href="Settings.html" style="background-color: green; color: ghostwhite">Settings</a>
             <a href="Setup.html">Setup</a>
         </div>
-        <div class="content" id="content">
+        <div id="title">
             <h1>Settings</h1>
         </div>
+
         <script>
             var sidebar = false;
             closeNav();
@@ -55,13 +57,15 @@
                 else{
                     sidebar = true;
                     document.getElementById("mySidenav").style.width = "30%";
-                    document.getElementById("content").style.paddingLeft = "31%";
+                    document.getElementById("body").style.paddingLeft = "31%";
                 }
             }
             function closeNav() {
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
-                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
 
             }
         </script>
@@ -80,33 +84,57 @@
         </form>
         </div>
     </head>
-    <body class="content">
+    <body id="body">
+        <form id="form">
+        <table>
+            <tr>
+                <th>1</th>
+                <th>2</th>
+            </tr>
+            <tr>
+                <td class="list01"><b>Internal ID of the Device</b></td>
+                <td class="list01"><input class="listcontent" type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="5 characters a-Z-_"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Should the device restore its previous status after a reboot?</b></td>
+                <td class="list01"><input class="listcontent" type="checkbox" id="keepState" name="keepState"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Visible name of the Device</b></td>
+                <td class="list01"><input class="listcontent" id="name" name="name" type="text" size="64" minlength="1" maxlength="64"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Is the Device dimmable?</b></td>
+                <td class="list01"><input class="listcontent" id="controlType" type="checkbox" name="dimmable"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Control Type of Device</b></td>
+                <td class="list01">
+                    <select class="listcontent" id="switchType" name="switchType">
+                        <option value="433Mhz">433MHz</option>
+                        <option value="mqtt">MQTT</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="list01"><b>433 MHz systemcode</b></td>
+                <td class="list01"><input class="listcontent" id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>433 MHz unitcode</b></td>
+                <td class="list01"><input class="listcontent" id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Pin on Controller</b></td>
+                <td class="list01"><input class="listcontent" id="pin" name="pin" type="number" min="0" max="63"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Wich Controller should be used</b></td>
+                <td class="list01"><select class="listcontent" id="masterId" name="masterId"></select></td>
+            </tr>
+            </table>
+        <input type="submit" style="align-content: center" id="submit01">
+        </form>
 
-
-    <form id="switchform">
-        <label for="idtext">New ID for the Switch</label>
-        <input type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="Fünf Zeichen a-Z-_"><br>
-        <input type="checkbox" id="keepState" name="keepState">
-        <label for="keepState">Should keepState at reboot</label><br>
-        <label for="name">New Name</label>
-        <input id="name" name="name" type="text" size="64" minlength="1" maxlength="64"><br>
-        <label for="controlType">Dimmable</label>
-        <input id="controlType" type="checkbox" name="dimmable"><br>
-        <label for="switchType">What technic does the Switch use</label>
-        <select id="switchType" name="switchType">
-            <option value="433Mhz">433MHz</option>
-            <option value="mqtt">MQTT</option>
-        </select><br>
-        <label for="systemCode">Systemcode:</label>
-        <input id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"><br>
-        <label for="unitCode">Unitcode:</label>
-        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"><br>
-        <label for="pin">Pin on Controller</label>
-        <input id="pin" name="pin" type="number" min="0" max="63"><br>
-        <label for="masterId">Wich Contoller should be used</label>
-        <select id="masterId" name="masterId"></select><br>
-        <input type="submit">
-    </form>
-      
     </body>
 </html>

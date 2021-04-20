@@ -99,3 +99,5 @@ case class commandRecreateDatabase() extends Command
 
 case class commandSafeCreateDatabase() extends Command
 
+case class commandGetRandomId() extends Command
+

@@ -1,3 +1,21 @@
+<!--
+  ~ Privatehome
+  ~     Copyright (C) 2021  RaHoni honisuess@gmail.com
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -18,10 +36,9 @@
             <a href="Devices.html">Devices</a>
             <a href="Rooms.html">Rooms</a>
             <a href="Sensors.html" style="background-color: green; color: ghostwhite">Sensors</a>
-            <a href="Settings.html">Settings</a>
             <a href="Setup.html">Setup</a>
         </div>
-        <div class="content" id="content">
+        <div id="title">
             <h1>Sensors</h1>
         </div>
         <script>
@@ -34,14 +51,16 @@
                 else{
                     sidebar = true;
                     document.getElementById("mySidenav").style.width = "30%";
-                    document.getElementById("content").style.paddingLeft = "31%";
+                    document.getElementById("body").style.paddingLeft = "31%";
                 }
             }
             function closeNav() {
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
-                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
+
             }
         </script>
         <script src="JS/websocket.js"></script>
@@ -61,7 +80,7 @@
             </form>
         </div>
     </head>
-    <body class="content">
+    <body id="body">
         
     </body>
 </html>

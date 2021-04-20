@@ -60,6 +60,25 @@ object uiControl {
         case c: commandRecreateDatabase => data.create(true); true
         case _: commandSafeCreateDatabase => data.create(); true
         case c: commandUpdateDevice => data.updateDevice(c.oldId,c); true
+        case _: commandGetRandomId =>
+
+          var id: String = null
+          val random = new SecureRandom()
+          var run = true
+          while (run) {
+
+            id = new BigInteger(5 * 5, random).toString(32) //  This generates a random String with length 5
+            try {
+              data.idTest(id, create = true)
+              logger.debug("Recomended id: \"{}\"",id)
+              run = false
+            }
+            catch {
+              case _: IllegalArgumentException =>
+            }
+          }
+          id
+        case c: commandUpdateDevice => data.updateDevice(c.oldId,c); true
         case c: commandProgramController => data.getControllerMasterId(c.masterId).programController(c.path, c.ssid, c.pass)
         case _: commandGetController =>
           var answer = ""

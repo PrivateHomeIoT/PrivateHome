@@ -22,10 +22,6 @@ import PrivateHome.data
 import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
 
-import java.lang.Integer.parseInt
-import java.math.BigInteger
-import java.security.SecureRandom
-
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -40,25 +36,7 @@ object stringCommandHandler {
           commandAddUserBase64(args(0), args(1))
         case "commandRecreateDatabase" => commandRecreateDatabase()
         case "commandSafeCreateDatabase" => commandSafeCreateDatabase()
-        case "getRandomId" =>
-          logger.debug("Running getRandomId")
-          var id: String = ""
-          val random = new SecureRandom()
-          var run = true
-          while (run) {
-            id = ""
-            new BigInteger(5 * 6, random).toString(2).grouped(6).foreach(t => id += chars(parseInt(t,2))) //  This generates a random String with length 5 and the chars -_a-Z0-9
-            try {
-              data.idTest(id, create = true)
-              logger.debug("Recomended id: \"{}\"", id)
-              run = false
-            }
-            catch {
-              case t: IllegalArgumentException => logger.debug("Error while generating randomID",t)
-              case t: Exception => logger.warn("Error while generating randomID",t)
-            }
-          }
-          id
+        case "getRandomId" => commandGetRandomId()
         case "commandOn" => commandOn(args(0), args(1))
         case "commandOff" => commandOff(args(0))
         case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8))
