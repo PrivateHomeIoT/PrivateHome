@@ -117,7 +117,7 @@ object mqttClient {
 
   def publish(topic: publishTopic,message: Array[Byte]): Unit = {
     val messageConverted = message.map(_ & 0xFF).mkString(",")
-    val msg = new MqttMessage(messageConverted.getBytes("ASCII"))
+    val msg = new MqttMessage(message)//messageConverted.getBytes("ASCII"))
     val topicswit = client.getTopic(topic.topicString)
     topicswit.publish(msg)
     logger.debug("Send message in topic {} length: {}", topic.topicString, message.length)

@@ -77,7 +77,8 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
       if (pins(i) != null) {
         val switch = pins(i)
 
-        output.+:(("pin" -> i) ~ ("value" -> (switch.status * 1023).toInt))
+        output = output.concat(List(("pin" -> i) ~ ("value" -> (switch.status * 1023).toInt)))
+        logger.debug("Added a switch to output")
       }
     }
 
