@@ -1,7 +1,24 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome
 
 
-import java.io.{File, FileNotFoundException, PrintWriter}
 import PrivateHome.UI.uiControl.formats
 import PrivateHome.privatehome.portable
 import org.json4s.JsonAST
@@ -9,16 +26,17 @@ import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import org.slf4j.LoggerFactory
 
+import java.io.{File, FileNotFoundException, PrintWriter}
 import scala.io.Source
 
 
 case object settings {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  var websocket: http = new http(port = 2888, "ws")
-  var http: http = new http(2000, "Website") //ToDo: change to 80 in produktion
-  var database = new database(userName = "user", pass = "pass", "/etc/privatehome/data/Devices")
-  var mqtt: mqttBroker = mqttBroker("localhost", 1500)
-  var keystore = new keystore("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
+  var websocket: httpSetting = httpSetting(port = 2888, "ws")
+  var http: httpSetting = httpSetting(2000, "Website") //ToDo: change to 80 in produktion
+  var database = new databaseSetting(userName = "user", pass = "pass", "/etc/privatehome/data/Devices")
+  var mqtt: mqttBrokerSetting = mqttBrokerSetting("localhost", 1500)
+  var keystore = new keystoreSetting("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
   var settingspath = "/etc/privatehome/settings.json"
 
 
@@ -43,19 +61,19 @@ case object settings {
       ftext = ftext + line
     val jsonobj = parse(ftext)
     val web = jsonobj \ "websocket"
-    websocket = web.extract[http]
+    websocket = web.extract[httpSetting]
 
     val httpJson = jsonobj \ "http"
-    http = httpJson.extract[http]
+    http = httpJson.extract[httpSetting]
 
     val databaseJson = jsonobj \ "database"
-    database = databaseJson.extract[database]
+    database = databaseJson.extract[databaseSetting]
 
     val mqttJson = jsonobj \ "mqtt"
-    mqtt = mqttJson.extract[mqttBroker]
+    mqtt = mqttJson.extract[mqttBrokerSetting]
 
     val keystoreJson = jsonobj \ "keystore"
-    keystore = keystoreJson.extract[keystore]
+    keystore = keystoreJson.extract[keystoreSetting]
 
 
   }
@@ -70,7 +88,7 @@ case object settings {
 
 }
 
-case class http(var port: Int, var path: String = "") extends setting {
+case class httpSetting(var port: Int, var path: String = "") extends setting {
   if (port < 0 || port > 0xffff) throw new IllegalArgumentException("Argument Port out of bound must be between 0x0 and 0xffff=65536")
 
   def serialized: JsonAST.JObject = {
@@ -78,7 +96,7 @@ case class http(var port: Int, var path: String = "") extends setting {
   }
 }
 
-class database(var userName: String, pass: String, var path: String) extends setting {
+class databaseSetting(var userName: String, pass: String, var path: String) extends setting {
   private var _passwordChar = pass.toCharArray
   def password_= (pass: String): Unit = {
     _passwordChar = pass.toCharArray
@@ -91,13 +109,13 @@ class database(var userName: String, pass: String, var path: String) extends set
 
 }
 
-case class mqttBroker(var url: String, var port: Int) extends setting {
+case class mqttBrokerSetting(var url: String, var port: Int) extends setting {
   if (port < 0 || port > 0xffff) throw new IllegalArgumentException("Argument Port aut of bound must be between 0x0 and 0xffff=65536")
 
   override def serialized: JsonAST.JObject = ("url" -> url) ~ ("port" -> port)
 }
 
-class keystore(var path: String, pass: String) extends setting {
+class keystoreSetting(var path: String, pass: String) extends setting {
 
   private var _passwordChar = pass.toCharArray
   def password_= (pass: String): Unit = {

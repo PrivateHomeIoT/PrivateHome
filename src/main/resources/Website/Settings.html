@@ -1,3 +1,21 @@
+<!--
+  ~ Privatehome
+  ~     Copyright (C) 2021  RaHoni honisuess@gmail.com
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -82,7 +100,11 @@
         <label for="systemCode">Systemcode:</label>
         <input id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"><br>
         <label for="unitCode">Unitcode:</label>
-        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}">
+        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"><br>
+        <label for="pin">Pin on Controller</label>
+        <input id="pin" name="pin" type="number" min="0" max="63"><br>
+        <label for="masterId">Wich Contoller should be used</label>
+        <select id="masterId" name="masterId"></select><br>
         <input type="submit">
     </form>
       

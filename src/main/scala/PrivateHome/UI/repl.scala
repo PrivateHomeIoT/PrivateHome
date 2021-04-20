@@ -1,20 +1,29 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.UI
 
-import PrivateHome.UI.GUI.gui.actorSystem
-import PrivateHome.data
-import akka.NotUsed
-import akka.stream.OverflowStrategy
-import akka.stream.alpakka.unixdomainsocket.scaladsl.UnixDomainSocket
-import akka.stream.scaladsl.{SourceQueueWithComplete, _}
-import akka.util.ByteString
+
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
-import java.io.{BufferedReader, File, IOException, InputStreamReader, PrintWriter}
-import java.math.BigInteger
-import java.nio.file.{Path, Paths}
-import java.security.SecureRandom
-import scala.concurrent.Future
+import java.io._
+
 
 
 object repl {
@@ -23,6 +32,7 @@ object repl {
   val serverSocket = new UnixDomainServerSocket(socketPath)
 
   class readThread extends Thread {
+    setName("replReadThread")
     override def run(): Unit = {
       while (true) {
         val clientSocket = serverSocket.accept()
@@ -34,7 +44,12 @@ object repl {
           do {
             line = in.readLine()
             if (line != null) {
-              out.println(stringCommandHandler.interpretMessage(line))
+              val answer = stringCommandHandler.interpretMessage(line)
+              answer match {
+                case _: Exception => logger.warn("Will drop the exception")
+                case list: List[(String,String)] => out.println(list.map(tupel => s"${tupel._1}:${tupel._2}").mkString(","))
+                case ans => out.println(ans)
+              }
             }
           } while (line != null && !line.trim().equals("bye"))
         } catch {
@@ -45,9 +60,9 @@ object repl {
     }
   }
 
-  val thread = new readThread
+  val replReadThread = new readThread
 
-  thread.start()
+  replReadThread.start()
   logger.info("Started repl handler thread")
 
   def shutdown(): Unit ={

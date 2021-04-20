@@ -1,3 +1,21 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
@@ -31,6 +49,7 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
 
   def switchtype: String
 
+  @deprecated("Will be removed with editXML","0.3.1")
   def toXml: Node
 
   def serializer: JsonAST.JObject = {
@@ -69,6 +88,7 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
 }
 
 object Switch {
+  @deprecated("Switch constructor only working with XML.","0.3.1")
   def apply(data: Node): Switch = {
 
     val switchType = (data \ "type").head.text
@@ -82,7 +102,7 @@ object Switch {
       case "MQTT" => val id = (data \ "@id").text
         val KeepStatus = (data \ "keepStatus").head.text.toBoolean
         val name = (data \ "name").head.text
-        mqttSwitch(id, KeepStatus, name, "button")
+        mqttSwitch(id, KeepStatus, name, "button",1)
       case _ => throw new IllegalArgumentException("Wrong Switch Type")
     }
   }
@@ -90,14 +110,14 @@ object Switch {
   def apply(data: commandAddDevice): Switch = {
     data.switchType match {
       case "433Mhz" => mhzSwitch(data.id, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.id, data.keepState, data.name, data.controlType)
+      case "mqtt" => mqttSwitch(data.id, data.keepState, data.name, data.controlType,data.pin ,data.masterId)
     }
   }
 
   def apply(data: commandUpdateDevice): Switch = {
     data.switchType match {
       case "433Mhz" => mhzSwitch(data.newId, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.newId, data.keepState, data.name, data.controlType)
+      case "mqtt" => mqttSwitch(data.newId, data.keepState, data.name, data.controlType,data.pin,data.masterId)
     }
   }
 
@@ -112,9 +132,9 @@ object Switch {
   }
 }
 
-class switchSerializer extends CustomSerializer[Switch](format => ( {
-  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", "")
+class switchSerializer extends CustomSerializer[Switch](ser = format => ( {
+  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", "", 0)
 }, {
-  case switch: mqttSwitch => switch.serializer
+  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin()) ~ ("masterId" -> switch.masterId)
   case switch: mhzSwitch => switch.serializer ~ ("systemCode" -> switch.systemCode) ~ ("unitCode" -> switch.unitCode)
 }))

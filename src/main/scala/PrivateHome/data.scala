@@ -1,10 +1,28 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome
 
 import PrivateHome.Devices.MHz.mhzSwitch
-import PrivateHome.Devices.MQTT.mqttSwitch
+import PrivateHome.Devices.MQTT.{mqttController, mqttSwitch}
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.UI.Websocket.websocket
-import PrivateHome.privatehome.shutdown
+import PrivateHome.UI.commandUpdateDevice
 import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization.write
@@ -13,17 +31,28 @@ import org.json4s.{Formats, NoTypeHints}
 import org.slf4j.LoggerFactory
 import scalikejdbc._
 
+import java.io.ByteArrayInputStream
+import java.lang.Integer.parseInt
+import java.math.BigInteger
+import java.security.SecureRandom
+import java.sql.PreparedStatement
 import scala.collection.mutable
 
-
 object data {
+  def masterIds: List[String] = controller.keys.toList
+
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+
+  val chars: Array[Char] = (('0' to '9') ++ ('a' to 'z') ++ ('A' to 'Z') ++ Vector('-', '_')).toArray
 
   /**
    * An map containing all settings
    */
   var devices: mutable.Map[String, Switch] = mutable.Map()
+
+  private var controller: Map[String, mqttController] = Map()
+  private var controllerRandom: mutable.Map[String, mqttController] = mutable.Map()
 
 
   GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
@@ -43,16 +72,25 @@ object data {
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: mutable.Map[String, String] = mutable.Map()
+  val tablesWanted: List[String] = List("DEVICES", "MHZ", "MQTT", "MQTTCONTROLLER", "USER")
   try {
-    if (sql"""show tables;""".map(rs => rs).list.apply().isEmpty)
+    val tables = sql"""show tables;""".map(rs => rs.string(1)).list.apply()
+    var allTablesExisting = true
+    tablesWanted.foreach(t => allTablesExisting = tables.contains(t) && allTablesExisting)
+    if (tables.isEmpty || !allTablesExisting) {
+      logger.info(s"Because not all Tables do exists we will add all missing with data.create()")
       create()
+    }
   } catch {
     case e: JdbcSQLNonTransientConnectionException => logger.warn(e.getMessage)
       sys.exit(75)
-    case e: Throwable => logger.error("Unknown error in database init",e)
+    case e: Throwable => logger.error("Unknown error in database init", e)
   }
+  try
   fillDevices()
-
+  catch {
+    case _:Exception => logger.error("Could not load Database settings You should repair or reset the database.")
+  }
 
   /**
    * Generates the table structures for the Database
@@ -62,13 +100,15 @@ object data {
     // Drops old Tables to Delete Data and make it possible to regenerate them
     if (dropTables) {
       sql"""DROP TABLE IF EXISTS `Mhz`;
+         DROP TABLE IF EXISTS `mqtt`;
+         DROP TABLE IF EXISTS `mqttController`;
          DROP TABLE IF EXISTS `Devices`;
          DROP TABLE IF EXISTS `User`""".execute().apply()
       devices = mutable.Map()
     }
 
 
-      sql"""
+    sql"""
                     CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
@@ -90,15 +130,35 @@ object data {
          """.execute().apply()
 
     sql"""
+         CREATE TABLE IF NOT EXISTS `mqttController` (
+         `masterid` varchar(10) NOT NULL,
+         `name` varchar(64) NOT NULL,
+         `key` BINARY(16) NOT NULL,
+         PRIMARY KEY (`masterid`))
+       """.execute().apply()
+
+    sql"""
+         CREATE TABLE IF NOT EXISTS `mqtt` (
+         `id` varchar(5) NOT NULL,
+         `masterid` varchar(10) NOT NULL,
+         `port` int NOT NULL,
+         PRIMARY KEY (`id`),
+         CONSTRAINT `mqtt_1` FOREIGN KEY (`id`) REFERENCES `Devices` (`id`),
+         CONSTRAINT `mqtt_2` FOREIGN KEY (`masterid`) REFERENCES `mqttController` (`masterid`))
+       """.execute().apply()
+
+
+    sql"""
          CREATE TABLE IF NOT EXISTS `User` (
          `username` varchar(30) NOT NULL,
          `passhash` varchar(100) NOT NULL,
          PRIMARY KEY (`username`))
        """.execute().apply()
 
-    sql"""
+    println(
+      sql"""
          SHOW Tables;
-       """.execute().apply().toString
+       """.map(rs => rs.string(1)).list().apply())
 
 
     // insert initial data
@@ -106,24 +166,86 @@ object data {
 
   }
 
+  def getControllerRandomCode(code: String): mqttController = {
+    controllerRandom(code)
+  }
+
+  def getControllerMasterId(masterId: String): mqttController = {
+    controller(masterId)
+  }
+
+  def controllerNewRandom(tmpController: mqttController): String = {
+    var randomCode = ""
+    val t = 50 % 15
+    val oldCode = tmpController.randomCode
+    do {
+      val tmp = new BigInteger(10 * 6, new SecureRandom()).toString(2)
+      tmp.grouped(6).foreach(t => {
+        randomCode += chars(parseInt(t, 2) % 62)
+      })
+    } while (controllerRandom.contains(randomCode))
+    controllerRandom += ((randomCode, tmpController))
+    controllerRandom -= oldCode
+    randomCode
+  }
+
+  def masterIdExists(masterId: String): Boolean = {
+    controller.contains(masterId)
+  }
+
+  def addController(newController: mqttController, key: Array[Byte]): Unit = {
+    newController.setupClient()
+    controller += ((newController.masterID, newController))
+    val in = new ByteArrayInputStream(key)
+    val bytesBinder = ParameterBinder(
+      value = in,
+      binder = (stmt: PreparedStatement, idx: Int) => stmt.setBinaryStream(idx, in, key.length)
+    )
+    withSQL {
+      insertInto(mqttControllerData).values(newController.masterID, newController.name, bytesBinder)
+    }.update().apply()
+  }
+
   /**
    * Fills the devices Map with all Devices from the DB and turns all Switches with keepState on
    */
   def fillDevices(): Unit = {
-    val m = Device.syntax("m")
+    val m = device.syntax("m")
+
     withSQL {
-      select.from(Device as m)
-    }.map(rs => Device(rs)).list().apply().foreach(d => {
+      selectFrom(mqttControllerData as mqttControllerData.syntax)
+    }.map(rs => mqttControllerData(rs)).list().apply().foreach(controllerData => {
+      val newController = new mqttController(controllerData.masterid, controllerData.key, controllerData.name)
+      controller += ((controllerData.masterid, newController))
+    })
+
+    withSQL {
+      select.from(device as m)
+    }.map(rs => device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case "mqtt" => devices += ((d.id, mqttSwitch(d.id, d.keepstate, d.name, d.controltype)))
+        case "mqtt" =>
+          val mq = mqtt.syntax("mq")
+          val mqttData = withSQL {
+            select.from(mqtt as mq).where.eq(mq.id, d.id)
+          }.map(rs => mqtt(rs)).single().apply().get
+
+          var newDevice = new mqttSwitch(d.id, d.keepstate, d.name, d.controltype, mqttData.port)
+
+          if (controller.contains(mqttData.masterid)) {
+            newDevice.controller = controller(mqttData.masterid)
+          } else {
+            logger.error("""Could not find Controller with masterId: "%s" for switch: %s with ID: %s""", mqttData.masterid, d.name, d.id)
+          }
+
+          devices += ((d.id, newDevice))
           if (d.keepstate) {
             devices(d.id).on(d.state)
           }
         case "433Mhz" =>
-          val m = Mhz.syntax("m")
+          val m = mhz.syntax("m")
           val data = withSQL {
-            select.from(Mhz as m).where.eq(m.id, d.id)
-          }.map(rs => Mhz(rs)).single().apply().get
+            select.from(mhz as m).where.eq(m.id, d.id)
+          }.map(rs => mhz(rs)).single().apply().get
           devices += ((d.id, mhzSwitch(d.id, d.keepstate, d.name, data.systemcode, data.unitcode)))
           mhzId += ((data.systemcode + data.unitcode, d.id))
           if (d.keepstate) {
@@ -138,67 +260,81 @@ object data {
   /**
    * Adds an Switch to the DB witch all needed under Tables
    *
-   * @param device The device that should be added
+   * @param newDevice The device that should be added
    */
-  def addDevice(device: Switch): Unit = {
-    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(device.id, device.getClass))
+  def addDevice(newDevice: Switch): Unit = {
+    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:%s because switch of unknown type %s has no save definition""".format(newDevice.id, newDevice.getClass))
     withSQL {
-      insertInto(Device).values(device.id, device.name, device.switchtype, if (device.keepStatus) device.status else 0, device.keepStatus, device.controlType)
+      insertInto(device).values(newDevice.id, newDevice.name, newDevice.switchtype, if (newDevice.keepStatus) newDevice.status else 0, newDevice.keepStatus, newDevice.controlType)
     }.update.apply
-    device match {
+    newDevice match {
       case device: mhzSwitch => withSQL {
-        insertInto(Mhz).values(device.id, device.systemCode, device.unitCode)
+        insertInto(mhz).values(device.id, device.systemCode, device.unitCode)
       }.update().apply()
         mhzId += ((device.systemCode + device.unitCode, device.id))
-      case _: mqttSwitch =>
+      case device: mqttSwitch => withSQL {
+        insertInto(mqtt).values(device.id, device.masterId, device.pin())
+      }.update().apply()
       case _ => throw wrongclass
     }
-    devices = devices.concat(Map((device.id, device)))
+    devices = devices.concat(Map((newDevice.id, newDevice)))
     implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
-    websocket.broadcastMsg(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(device))))
+    websocket.broadcastMsg(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(newDevice))))
   }
 
-  def updateDevice(oldid: String, pDevice: Switch): Unit = {
+
+  def updateDevice(oldid: String, pDevice: commandUpdateDevice): Unit = {
     logger.debug("update Start with new switch data: {}", pDevice)
-    val wrongclass = new IllegalArgumentException("""Can not add Switch ID:{} because switch of unknown type {} has no save definition""".format(pDevice.id, pDevice.getClass))
-    if (pDevice.switchtype == devices(oldid).switchtype) {
-      val oldDevice = devices(oldid)
-      devices(oldid).id = pDevice.id
+    val wrongClass = new IllegalArgumentException("""Can not add Switch ID:%s because switch of unknown type %s has no save definition""".format(pDevice.newId, pDevice.getClass))
+    if (pDevice.switchType == devices(oldid).switchtype) {
+      devices(oldid).id = pDevice.newId
       devices(oldid).name = pDevice.name
-      devices(oldid).keepStatus = pDevice.keepStatus
+      devices(oldid).keepStatus = pDevice.keepState
       devices(oldid).controlType = pDevice.controlType
     } else {
-      devices(oldid) = pDevice
+      devices(oldid) = Switch(pDevice)
     }
 
-    logger.debug(s"devices({}) is now {}", oldid, devices(oldid))
 
     withSQL {
-      update(Device).set(
-        Device.column.id -> pDevice.id,
-        Device.column.name -> pDevice.name,
-        Device.column.keepstate -> pDevice.keepStatus,
-        Device.column.switchtype -> pDevice.switchtype,
-        Device.column.controltype -> pDevice.controlType,
-        Device.column.state -> pDevice.status
-      ).where.eq(Device.column.id, pDevice.id)
+      update(device).set(
+        device.column.id -> pDevice.newId,
+        device.column.name -> pDevice.name,
+        device.column.keepstate -> pDevice.keepState,
+        device.column.switchtype -> pDevice.switchType,
+        device.column.controltype -> pDevice.controlType
+      ).where.eq(device.column.id, pDevice.newId)
     }.update.apply()
-    if (oldid != pDevice.id) {
-      devices += (pDevice.id -> devices(oldid))
+    if (oldid != pDevice.newId) {
+      devices += (pDevice.newId -> devices(oldid))
       devices -= oldid
     }
 
-    pDevice match {
-      case device: mhzSwitch => withSQL {
-        update(Mhz).set(
-          Mhz.column.id -> device.id,
-          Mhz.column.systemcode -> device.systemCode,
-          Mhz.column.unitcode -> device.unitCode).where.eq(Device.column.id, oldid)
-      }.update().apply()
-        mhzId(device.systemCode + device.unitCode) = device.id
-      case _: mqttSwitch =>
-      case _ => throw wrongclass
+    devices(pDevice.newId) = devices(pDevice.newId) match {
+      case newDevice: mhzSwitch =>
+        newDevice.systemCode = pDevice.systemCode
+        newDevice.unitCode = pDevice.unitCode
+        withSQL {
+          update(mhz).set(
+            mhz.column.id -> newDevice.id,
+            mhz.column.systemcode -> newDevice.systemCode,
+            mhz.column.unitcode -> newDevice.unitCode).where.eq(mhz.column.id, oldid)
+        }.update().apply()
+        mhzId(newDevice.systemCode + newDevice.unitCode) = newDevice.id
+        newDevice
+      case newDevice: mqttSwitch =>
+        newDevice.changePinAndController(pDevice.pin, pDevice.masterId)
+        withSQL {
+          update(mqtt).set(
+            mqtt.column.id -> newDevice.id,
+            mqtt.column.masterid -> newDevice.masterId,
+            mqtt.column.port -> newDevice.pin
+          ).where.eq(mqtt.column.id, oldid)
+        }.update().apply()
+        newDevice
+      case _ => throw wrongClass
     }
+    logger.debug(s"devices({}) is now {}", oldid, devices(pDevice.newId))
   }
 
 
@@ -209,10 +345,13 @@ object data {
    */
   def deleteDevice(id: String): Unit = {
     withSQL {
-      delete.from(Device).where.eq(Device.column.id, id)
+      delete.from(device).where.eq(device.column.id, id)
     }.update.apply()
     withSQL {
-      delete.from(Mhz).where.eq(Device.column.id, id)
+      delete.from(mhz).where.eq(mhz.column.id, id)
+    }.update().apply()
+    withSQL {
+      delete.from(mqtt).where.eq(mqtt.column.id, id)
     }.update().apply()
     devices -= id
   }
@@ -235,6 +374,7 @@ object data {
    * Gets the argon2 hash for the Username
    *
    * @param username the username for which to get the hash
+   *
    * @return the hash of the User of there is no User with this name returns "no_Username"
    */
   def getUserHash(username: String): String = {
@@ -261,7 +401,7 @@ object data {
    */
   def saveStatus(id: String, state: Float): Unit = {
     withSQL {
-      update(Device).set(Device.column.state -> state).where.eq(Device.column.id, id)
+      update(device).set(device.column.state -> state).where.eq(device.column.id, id)
     }.update().apply()
   }
 
@@ -275,6 +415,7 @@ object data {
    * An better access to the devices Map
    *
    * @param deviceID The ID of the switch you want
+   *
    * @return the Switch object the you requested
    */
   def getDevice(deviceID: String): Switch = {
@@ -298,7 +439,7 @@ object data {
    * @param keepstate   Boolean that indicates if the State should be restored at turn on
    * @param controltype either slider or button
    */
-  case class Device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controltype: String)
+  case class device(id: String, name: String, switchtype: String, state: Float, keepstate: Boolean, controltype: String)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -307,7 +448,7 @@ object data {
    * @param systemcode Systemcode for the Mhzreciever
    * @param unitcode   Unitcode for the Mhzreciever
    */
-  case class Mhz(id: String, systemcode: String, unitcode: String)
+  case class mhz(id: String, systemcode: String, unitcode: String)
 
   /**
    * Message class for user Table
@@ -317,23 +458,35 @@ object data {
    */
   case class user(username: String, passhash: String)
 
+  case class mqtt(id: String, masterid: String, port: Int)
+
+  case class mqttControllerData(masterid: String, name: String, key: Array[Byte])
+
   /**
    * Syntax support Object for devices table
    */
-  object Device extends SQLSyntaxSupport[Device] {
+  object device extends SQLSyntaxSupport[device] {
     override val tableName = "devices"
 
-    def apply(rs: WrappedResultSet) = new Device(
-      rs.string("id"), rs.string("name"), rs.string("switchtype"), rs.float("state"), rs.boolean("keepstate"), rs.string("controltype"))
+    def apply(rs: WrappedResultSet) = new device(
+      rs.string("id"),
+      rs.string("name"),
+      rs.string("switchtype"),
+      rs.float("state"),
+      rs.boolean("keepstate"),
+      rs.string("controltype"))
   }
 
   /**
    * Syntax support Object for Mhz table
    */
-  object Mhz extends SQLSyntaxSupport[Mhz] {
+  object mhz extends SQLSyntaxSupport[mhz] {
     override val tableName = "Mhz"
 
-    def apply(rs: WrappedResultSet): Mhz = new Mhz(rs.string("id"), rs.string("systemcode"), rs.string("unitcode"))
+    def apply(rs: WrappedResultSet): mhz = new mhz(
+      rs.string("id"),
+      rs.string("systemcode"),
+      rs.string("unitcode"))
   }
 
   /**
@@ -342,8 +495,27 @@ object data {
   object user extends SQLSyntaxSupport[user] {
     override val tableName = "User"
 
-    def apply(rs: WrappedResultSet): user = new user(rs.string("username"), rs.string("passhash"))
+    def apply(rs: WrappedResultSet): user = new user(
+      rs.string("username"),
+      rs.string("passhash"))
+  }
+
+  object mqtt extends SQLSyntaxSupport[mqtt] {
+    override val tableName = "mqtt"
+
+    def apply(rs: WrappedResultSet): mqtt = new mqtt(
+      rs.string("id"),
+      rs.string("masterid"),
+      rs.int("port"))
+  }
+
+  object mqttControllerData extends SQLSyntaxSupport[mqttControllerData] {
+    override val tableName = "mqttController"
+
+    def apply(rs: WrappedResultSet): mqttControllerData = new mqttControllerData(
+      rs.string("masterid"),
+      rs.string("name"),
+      rs.bytes("key"))
   }
 
 }
-

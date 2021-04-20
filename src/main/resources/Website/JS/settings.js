@@ -19,7 +19,21 @@ ws.onmessage = function(event) {
       window.location.search = "id=${msg.answer.id}"
       break;
     }
+    case "getController": {
+      setController(msg.answer)
+      break;
+    }
     default: { console.log(msg.error.toString() + ": " + msg.exception);}
+  }
+}
+
+function setController(args) {
+  x = document.getElementById("switchform").masterId
+  for (controller of args) {
+    var option = document.createElement("option");
+    option.value = controller.masterId;
+    option.text = controller.masterId + ": " + controller.name;
+    x.add(option);
   }
 }
 
@@ -30,17 +44,28 @@ function fillForm(args) {
   form.keepState.checked = answer.keepState;
   form.name.value = answer.name;
   form.controlType.checked = answer.controlType == "slider";
+  form.switchType.disabled = form.controlType.checked;
   form.switchType.value = answer.switchType;
-  disable433 = answer.switchType != "433Mhz"
+
+  disable433 = answer.switchType != "433Mhz";
   form.unitCode.disabled = disable433;
   form.systemCode.disabled = disable433;
-  form.switchType.disabled = form.controlType.checked;
   if (!disable433) {
     form.systemCode.value = answer.systemCode;
     form.unitCode.value = answer.unitCode;
   } else {
     form.systemCode.value = "";
     form.unitCode.value = "";
+  }
+
+  disableMqtt = answer.switchType != "mqtt";
+  form.pin.disabled = disableMqtt;
+  form.masterId.disabled = disableMqtt;
+  if (disableMqtt) {
+    form.masterId.value = "";
+  } else {
+    form.pin.value = answer.pin
+    form.masterId.value = answer.masterId
   }
 }
 
@@ -49,10 +74,12 @@ ws.onopen = function (event) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   if(urlParams.has("id")) {
+    ws.send(JSON.stringify({Command:"getController"}));
     ws.send(JSON.stringify({Command:"getDevice",Args:{id:urlParams.get("id")}}));
   }
 
 }
+var argus
 
 function sendNewData() {
   form = document.getElementById("switchform")
@@ -67,11 +94,20 @@ function sendNewData() {
   } else {
     arguments.controlType = "button";
     arguments.switchType = form.switchType.value;
-    arguments.systemCode = form.systemCode.value;
-    arguments.unitCode = form.unitCode.value;
-  }
+    }
+    if (arguments.switchType == "mqtt") {
+      arguments.pin = parseInt(form.pin.value);
+      arguments.masterId = form.masterId.value
+    } else {
+      arguments.systemCode = form.systemCode.value;
+      arguments.unitCode = form.unitCode.value;
+    }
+
   console.log(JSON.stringify(arguments));
-  ws.send(JSON.stringify({Command:"updateDevice",Args:arguments}));
+  var message = new Object();
+  message.Args = arguments;
+  message.Command = "updateDevice";
+  ws.send(JSON.stringify(message));
 }
 
 
@@ -93,13 +129,16 @@ function registerHandler() {
     }
   });
   form.switchType.addEventListener("change", function (event) {
-    disable = form.switchType.value != "433Mhz";
-    form.systemCode.disabled = disable;
-    form.unitCode.disabled = disable;
-    if (disable) {
+    disable433 = form.switchType.value != "433Mhz";
+    form.systemCode.disabled = disable433;
+    form.unitCode.disabled = disable433;
+    if (disable433) {
       form.unitCode.value = "";
       form.systemCode.value = "";
     }
+    disableMqtt = answer.switchType != "mqtt";
+    form.pin.disabled = disableMqtt;
+    form.masterId.disabled = disableMqtt;
   });
 }
 
