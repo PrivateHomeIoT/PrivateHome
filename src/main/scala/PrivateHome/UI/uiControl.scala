@@ -76,7 +76,7 @@ object uiControl {
               masterId += chars(parseInt(t, 2) % 62)
             })
           } while (data.masterIdExists(masterId))
-          val key: Array[Byte] = new BigInteger(16*8,new SecureRandom()).toByteArray
+          val key: Array[Byte] = new BigInteger(16*8,new SecureRandom()).toByteArray.slice(0,16)
           data.addController(new mqttController(masterId,key,c.name),key)
       }
     } catch {
