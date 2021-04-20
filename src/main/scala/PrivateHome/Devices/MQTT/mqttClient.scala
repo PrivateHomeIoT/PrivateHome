@@ -23,6 +23,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttMessage, _}
 import org.slf4j.LoggerFactory
 
+import java.nio.charset.Charset
+
 object mqttClient {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -49,26 +51,29 @@ object mqttClient {
      * @param message is the message which was recieved. You can also get it from lastMsg.
      */
     override def messageArrived(topic: String, message: MqttMessage): Unit = {
-      logger.debug("Received message in Topic {}: length: {} {} ", topic, message.getPayload.length, message.getPayload.map("%02X" format _))
+
       try {
+      val payloadString = new String(message.getPayload, Charset.forName("ASCII"))
+      val payload: Array[Byte] = payloadString.split(",").map(_.toInt).map(_.toByte)
+      logger.trace("Received message in Topic {}: length: {} {}", topic, payload.length, payload.map("%02X" format _))
+
         if (topic.startsWith(stat.topicString)) {
           val randomCode = topic.substring(topic.length - 10)
           val controller = data.getControllerRandomCode(randomCode)
-          controller.receiveStatuschange(message.getPayload)
+          controller.receiveStatuschange(payload)
         }
         //else if (topic.startsWith(publishTopic.cmnd)) logger.trace("Received own command {} for \"{}\"", topic.substring(topic.length-5),message.toString)
         else if (topic.startsWith(setupRequest.topicString)) {
           val masterID = topic.substring(topic.length - 5)
           if (data.masterIdExists(masterID)) {
             val controller = data.getControllerMasterId(masterID)
-            if (controller.checkSetup(message.getPayload)) {
+            if (controller.checkSetup(payload)) {
               logger.debug("Doing Setup for {}", masterID)
               controller.setupClient()
             } else {
               logger.debug("A setup for {} was requested but not granted because the message wasn't correctly encrypted.", masterID)
             }
-
-          }
+          } else logger.debug("A setup for {} was requested but not granted because the masterID was unknown.", masterID)
         }
         else logger.warn("Received message in unknown Topic: {} and Message: {}", topic, message.toString)
       } catch {
@@ -111,7 +116,8 @@ object mqttClient {
   }
 
   def publish(topic: publishTopic,message: Array[Byte]): Unit = {
-    val msg = new MqttMessage(message)
+    val messageConverted = message.map(_ & 0xFF).mkString(",")
+    val msg = new MqttMessage(messageConverted.getBytes("ASCII"))
     val topicswit = client.getTopic(topic.topicString)
     topicswit.publish(msg)
     logger.debug("Send message in topic {} length: {}", topic.topicString, message.length)
