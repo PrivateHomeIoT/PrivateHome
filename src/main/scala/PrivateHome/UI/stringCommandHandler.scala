@@ -19,12 +19,7 @@
 package PrivateHome.UI
 
 import PrivateHome.data
-import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
-
-import java.lang.Integer.parseInt
-import java.math.BigInteger
-import java.security.SecureRandom
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -55,7 +50,7 @@ object stringCommandHandler {
       }
       uiCommand match {
         case c: Command => uiControl.receiveCommand(c)
-        //case s: String => s
+        case s: String => s
         case _ => ""
       }
 
