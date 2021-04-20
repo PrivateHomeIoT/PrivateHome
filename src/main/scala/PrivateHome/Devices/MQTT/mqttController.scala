@@ -35,7 +35,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val formats: DefaultFormats.type = DefaultFormats
-  val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+  val cipher = Cipher.getInstance("AES/CBC/NoPadding")
   private val key = new SecretKeySpec(_key, "AES")
 
   def keyArray: Array[Byte] = _key
@@ -94,8 +94,15 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   private def encryptMessage(message: Array[Byte]): Array[Byte] = {
     val IV = new Array[Byte](16)
     new SecureRandom().nextBytes(IV)
+    val paddedMessage = new Array[Byte]((message.length/16+1)*16)
+    for (i <- message.indices) {
+      paddedMessage(i) = message(i)
+    }
+    val padding: Byte = (16 - (message.length % 16)).toByte
+    for (i <- message.length until paddedMessage.length)
+      paddedMessage(i) = padding
     cipher.init(Cipher.ENCRYPT_MODE, key, new SecureRandom())
-    cipher.getIV ++ cipher.doFinal(message)
+    cipher.getIV ++ cipher.doFinal(paddedMessage)
   }
 
   def receiveStatuschange(message: Array[Byte]): Unit = {
@@ -108,8 +115,13 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   }
 
   def checkSetup(message: Array[Byte]): Boolean = {
-    cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(message.slice(0, 16)))
-    val messageString = new String(cipher.doFinal(message.slice(16, message.length)), "ASCII")
+    val iv = message.slice(0, 16)
+    println(message.map("%02x" format _).mkString(","))
+    cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv))
+    var messageDecrypted = cipher.doFinal(message.slice(16, message.length))
+    println(messageDecrypted.map("%02X" format _).mkString("Message: ",",",""))
+    messageDecrypted = messageDecrypted.slice(0,messageDecrypted.length-messageDecrypted.last)
+    val messageString = new String(messageDecrypted, "ASCII")
     val valid = messageString.equals(masterID)
     if (!valid) logger.info("Setup requested for {} with message {}", masterID, messageString)
     valid
