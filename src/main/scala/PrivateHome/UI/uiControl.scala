@@ -37,7 +37,6 @@ object uiControl {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def receiveCommand(command: Command): Any = {
     try {
@@ -60,7 +59,7 @@ object uiControl {
           true
         case c: commandRecreateDatabase => data.create(true); true
         case _: commandSafeCreateDatabase => data.create(); true
-        case c: commandUpdateDevice => data.updateDevice(c.oldId,Switch(c)); true
+        case c: commandUpdateDevice => data.updateDevice(c.oldId,c); true
         case _: commandGetRandomId =>
 
           var id: String = null

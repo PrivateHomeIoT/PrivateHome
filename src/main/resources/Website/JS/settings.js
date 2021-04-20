@@ -33,7 +33,10 @@ ws.onmessage = function(event) {
 }
 
 function setController(args) {
-  x = document.getElementById("switchform").masterId
+  x = document.getElementById("masterId");
+  while (x.length > 0){
+    x.remove(0)
+  }
   for (controller of args) {
     var option = document.createElement("option");
     option.value = controller.masterId;

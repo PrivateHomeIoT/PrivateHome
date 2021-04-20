@@ -1,3 +1,21 @@
+<!--
+  ~ Privatehome
+  ~     Copyright (C) 2021  RaHoni honisuess@gmail.com
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -91,6 +109,7 @@
                 <td class="list01"><input class="listcontent" id="controlType" type="checkbox" name="dimmable"></td>
             </tr>
             <tr>
+                <td class="list01"><b>Control Type of Device</b></td>
                 <td class="list01">
                     <select class="listcontent" id="switchType" name="switchType">
                         <option value="433Mhz">433MHz</option>
@@ -106,36 +125,18 @@
                 <td class="list01"><b>433 MHz unitcode</b></td>
                 <td class="list01"><input class="listcontent" id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"></td>
             </tr>
+            <tr>
+                <td class="list01"><b>Pin on Controller</b></td>
+                <td class="list01"><input class="listcontent" id="pin" name="pin" type="number" min="0" max="63"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Wich Controller should be used</b></td>
+                <td class="list01"><select class="listcontent" id="masterId" name="masterId"></select></td>
+            </tr>
             </table>
         <input type="submit" style="align-content: center" id="submit01">
         </form>
-    <body class="content">
 
-
-    <form id="switchform">
-        <label for="idtext">New ID for the Switch</label>
-        <input type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="Fünf Zeichen a-Z-_"><br>
-        <input type="checkbox" id="keepState" name="keepState">
-        <label for="keepState">Should keepState at reboot</label><br>
-        <label for="name">New Name</label>
-        <input id="name" name="name" type="text" size="64" minlength="1" maxlength="64"><br>
-        <label for="controlType">Dimmable</label>
-        <input id="controlType" type="checkbox" name="dimmable"><br>
-        <label for="switchType">What technic does the Switch use</label>
-        <select id="switchType" name="switchType">
-            <option value="433Mhz">433MHz</option>
-            <option value="mqtt">MQTT</option>
-        </select><br>
-        <label for="systemCode">Systemcode:</label>
-        <input id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"><br>
-        <label for="unitCode">Unitcode:</label>
-        <input id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"><br>
-        <label for="pin">Pin on Controller</label>
-        <input id="pin" name="pin" type="number" min="0" max="63"><br>
-        <label for="masterId">Wich Contoller should be used</label>
-        <select id="masterId" name="masterId"></select><br>
-        <input type="submit">
-    </form>
 
     </body>
 </html>
