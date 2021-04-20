@@ -99,10 +99,11 @@ function sendNewData() {
   } else {
     arguments.controlType = "button";
     arguments.switchType = form.switchType.value;
+    }
     if (arguments.switchType == "mqtt") {
       arguments.pin = parseInt(form.pin.value);
       arguments.masterId = form.masterId.value
-    } else {}
+    } else {
       arguments.systemCode = form.systemCode.value;
       arguments.unitCode = form.unitCode.value;
     }
