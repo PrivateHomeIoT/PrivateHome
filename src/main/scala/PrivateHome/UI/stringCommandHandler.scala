@@ -19,6 +19,7 @@
 package PrivateHome.UI
 
 import PrivateHome.data
+import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
 
 object stringCommandHandler {

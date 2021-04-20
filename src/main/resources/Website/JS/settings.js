@@ -67,7 +67,6 @@ function fillForm(args) {
   }
 
   disableMqtt = answer.switchType != "mqtt";
-  console.log(disableMqtt)
   form.pin.disabled = disableMqtt;
   form.masterId.disabled = disableMqtt;
   if (disableMqtt) {
@@ -133,6 +132,21 @@ function registerHandler() {
     form.switchType.value = "mqtt";
     }
     controlTypeCheck();
+    form.unitCode.value = "";
+    form.systemCode.value = "";
+    }
+  });
+  form.switchType.addEventListener("change", function (event) {
+    disable433 = form.switchType.value != "433Mhz";
+    form.systemCode.disabled = disable433;
+    form.unitCode.disabled = disable433;
+    if (disable433) {
+      form.unitCode.value = "";
+      form.systemCode.value = "";
+    }
+    disableMqtt = answer.switchType != "mqtt";
+    form.pin.disabled = disableMqtt;
+    form.masterId.disabled = disableMqtt;
   });
   form.switchType.addEventListener("change", controlTypeCheck);
 }

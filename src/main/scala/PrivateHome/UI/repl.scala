@@ -22,11 +22,8 @@ package PrivateHome.UI
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
-import java.io.{BufferedReader, File, IOException, InputStreamReader, PrintWriter}
-import java.math.BigInteger
-import java.nio.file.{Path, Paths}
-import java.security.SecureRandom
-import scala.concurrent.Future
+import java.io._
+
 
 
 object repl {
