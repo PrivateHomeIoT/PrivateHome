@@ -65,13 +65,15 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
   }
 
   def pin_=(pPin: Int): Unit = {
-    if (_controller == null) {
-      _pin = pPin
-    } else {
-      if (_controller.changePin(_pin, pPin))
+    if (pin != _pin) {
+      if (_controller == null) {
         _pin = pPin
-      else {
-        throw new IllegalArgumentException("pin is already used")
+      } else {
+        if (_controller.changePin(_pin, pPin))
+          _pin = pPin
+        else {
+          throw new IllegalArgumentException("pin is already used")
+        }
       }
     }
   }

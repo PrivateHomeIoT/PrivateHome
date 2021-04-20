@@ -89,7 +89,7 @@ object data {
   try
   fillDevices()
   catch {
-    case _:Exception => logger.error("Could not load Database settings You should repair or reset the database.")
+    case e:Exception => logger.error("Could not load Database settings You should repair or reset the database.",e)
   }
 
   /**
