@@ -1,12 +1,12 @@
 body {
     font-family: sans-serif;
-    font: "Futura";
+    font: "Verdana";
     clear: both;
     overflow: auto;
     padding-left: 0%;
 }
 
-#content {
+.content {
     font-family: sans-serif;
     clear: both;
     overflow: auto;

@@ -6,6 +6,7 @@ package PrivateHome
 
 import scala.xml._
 
+@deprecated("Will be removed soon", "0.3.1")
 class editXML {
 
   /**

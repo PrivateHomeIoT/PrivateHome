@@ -8,3 +8,4 @@ build.properties
 *.db
 *.html~
 *.js~
+*.log

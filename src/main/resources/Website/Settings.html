@@ -1,3 +1,21 @@
+<!--
+  ~ Privatehome
+  ~     Copyright (C) 2021  RaHoni honisuess@gmail.com
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -7,10 +25,15 @@
         <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+        <link rel="icon" type="image/x-icon" href=""/>
 
         <link rel="stylesheet" href="CSS/menu.css">
-        
+        <link rel="stylesheet" href="CSS/general.css">
+        <link rel="stylesheet" href="CSS/button.css">
+
+        <script src="JS/websocket.js"></script>
+        <script src="JS/settings.js"></script>
+
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
         <div id="mySidenav" class="sidenav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -18,12 +41,12 @@
             <a href="Devices.html">Devices</a>
             <a href="Rooms.html">Rooms</a>
             <a href="Sensors.html">Sensors</a>
-            <a href="Settings.html" style="background-color: green; color: ghostwhite">Settings</a>
             <a href="Setup.html">Setup</a>
         </div>
-        <div class="content" id="content">
+        <div id="title">
             <h1>Settings</h1>
         </div>
+
         <script>
             var sidebar = false;
             closeNav();
@@ -34,34 +57,84 @@
                 else{
                     sidebar = true;
                     document.getElementById("mySidenav").style.width = "30%";
-                    document.getElementById("content").style.paddingLeft = "31%";
+                    document.getElementById("body").style.paddingLeft = "31%";
                 }
             }
             function closeNav() {
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
-                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
+
             }
         </script>
-        <script src="JS/websocket.js"></script>
 
         <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
         <link rel="stylesheet" href="CSS/login.css">
-        <button onclick="document.getElementById('login01').style.display='block'" style="width:auto;">Login</button>
         <div id="login01" class="modal">
-            <form class="modal-content animate" action="" method="POST">
-                <div class="container">
-                    <label for="uname"><b>Username</b></label>
-                    <input type="text" placeholder="Enter Username" name="uname" id="un01" required>
-                    <label for="psw"><b>Password</b></label>
-                    <input type="password" placeholder="Enter Password" name="psw" id="pw01" required>
-                    <button id="sub01" type="submit" onclick="sendLoginData(document.getElementById('un01'), document.getElementById('pw01'))">Login</button>
-                </div>
-            </form>
+        <form id="login01Form" class="modal-content animate">
+            <div class="container">
+                <label for="un01"><b>Username</b></label>
+                <input class="loginData" type="text" placeholder="Enter Username" name="uname" id="un01" required>
+                <label for="pw01"><b>Password</b></label>
+                <input class="loginData" type="password" placeholder="Enter Password" name="psw" id="pw01" required>
+                <button id="sub01" type="submit">Login</button>
+            </div>
+        </form>
         </div>
     </head>
-    <body class="content">
-      
+    <body id="body">
+        <form id="form">
+        <table>
+            <tr>
+                <th>1</th>
+                <th>2</th>
+            </tr>
+            <tr>
+                <td class="list01"><b>Internal ID of the Device</b></td>
+                <td class="list01"><input class="listcontent" type="text" id="idtext" name="id" size="5" pattern="[-_a-zA-Z0-9]{5}" title="5 characters a-Z-_"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Should the device restore its previous status after a reboot?</b></td>
+                <td class="list01"><input class="listcontent" type="checkbox" id="keepState" name="keepState"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Visible name of the Device</b></td>
+                <td class="list01"><input class="listcontent" id="name" name="name" type="text" size="64" minlength="1" maxlength="64"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Is the Device dimmable?</b></td>
+                <td class="list01"><input class="listcontent" id="controlType" type="checkbox" name="dimmable"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Control Type of Device</b></td>
+                <td class="list01">
+                    <select class="listcontent" id="switchType" name="switchType">
+                        <option value="433Mhz">433MHz</option>
+                        <option value="mqtt">MQTT</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="list01"><b>433 MHz systemcode</b></td>
+                <td class="list01"><input class="listcontent" id="systemCode" name="systemCode" type="text" size="5" pattern="[01]{5}"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>433 MHz unitcode</b></td>
+                <td class="list01"><input class="listcontent" id="unitCode" name="unitCode" type="text" size="5" pattern="[01]{5}"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Pin on Controller</b></td>
+                <td class="list01"><input class="listcontent" id="pin" name="pin" type="number" min="0" max="63"></td>
+            </tr>
+            <tr>
+                <td class="list01"><b>Wich Controller should be used</b></td>
+                <td class="list01"><select class="listcontent" id="masterId" name="masterId"></select></td>
+            </tr>
+            </table>
+        <input type="submit" style="align-content: center" id="submit01">
+        </form>
+
     </body>
 </html>

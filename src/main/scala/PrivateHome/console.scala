@@ -1,25 +1,39 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome
 
 import PrivateHome.UI._
-import akka.actor.ActorSystem
-import akka.stream.alpakka.unixdomainsocket.scaladsl.UnixDomainSocket
-import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.util.ByteString
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
+import org.scalasbt.ipcsocket.UnixDomainSocket
 
-import java.io.Console
-import java.nio.file.{Path, Paths}
+import java.io.{BufferedReader, Console, InputStreamReader, PrintWriter}
+import java.nio.file.{Files, Path}
 import java.util.Base64
-import scala.concurrent.Future
 import scala.io.StdIn.readLine
 
 object console {
-
-  implicit val actorSystem: ActorSystem = ActorSystem("system")
   val StdInJava: Console = System.console()
-  val path: Path = Paths.get("/tmp/privatehome.sock") //here we need to use Java wich isn't that beautiful but outgoingConnection only accepts java.nio.file.Path
-  val outConnection: Flow[ByteString, ByteString, Future[UnixDomainSocket.OutgoingConnection]] = UnixDomainSocket().outgoingConnection(path)
+  val socket = new UnixDomainSocket("/tmp/privatehome2.sock")
+  val out = new PrintWriter(socket.getOutputStream)
+  val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
+
   private val commands = Map(
     "help" -> REPLCommand(_ => help(), "Prints all available commands"),
     "addUser" -> REPLCommand(_ => addUser(), "Adds a new User for the WebGui"),
@@ -28,7 +42,10 @@ object console {
     "dimm" -> REPLCommand(_ => dimm(), "Set the dimming value of a dimmable Switch"),
     //"status" -> REPLCommand(_ => status(), "Show the status of Switches"),
     "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
-    "safeCreate" -> REPLCommand(_ => safeCreate(),"Adds missing tables to the database")
+    "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
+    "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
+    "getKey" -> REPLCommand(_ => getControllerKey(), "Displays the Key of a given Controller."),
+    "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller")
   )
 
   def recreate(): Unit = {
@@ -36,7 +53,16 @@ object console {
     send(command)
   }
 
-  def safeCreate() = send(new commandSafeCreateDatabase)
+  def getControllerKey(): Unit = {
+    val controllerId = getControllerId()
+    while (in.ready()) println(in.readLine())
+    send(s"getControllerKey($controllerId)")
+    val tmpId: String = in.readLine()
+    while (in.ready()) println(in.readLine())
+    println(tmpId)
+  }
+
+  def safeCreate(): Unit = send(new commandSafeCreateDatabase)
 
   def main(args: Array[String]): Unit = {
 
@@ -79,33 +105,129 @@ object console {
   }
 
   private def addSwitch(dimmable: Boolean): Unit = {
-    val result = Source.single(ByteString("getRandomId")).via(outConnection).runWith(Sink.fold(ByteString("")) { case (acc, b) => acc ++ b })
-    while (!result.isCompleted) {}
-    result.value.get.get.utf8String
-    var id: String = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) id = readLine("id> ")
+    while (in.ready()) println(in.readLine())
+    send("getRandomId")
+    val tmpId: String = in.readLine()
+    while (in.ready()) println(in.readLine())
+    var id = ""
+    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
+      id = readLine(s"id[$tmpId]> ")
+      if (id == "") id = tmpId
+    }
     val name = readLine("name> ").replace(',', ' ')
     val keepStateChar = readLine("Keep State (y/n)")(0).toLower
     val keepState = keepStateChar == 'y' || keepStateChar == 'j'
     var switchType: String = null
     var systemCode: String = "null"
     var unitCode: String = "null"
-    if (dimmable) switchType = "mqtt"
-    else {
-      while (switchType == null) {
-        switchType = readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+    var chosenController: String = null
+    var pin = -1
+
+      do {
+        switchType = if (dimmable) "mqtt" else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
         switchType = switchType match {
-          case "mqtt" => "mqtt"
+          case "mqtt" =>
+            chosenController = getControllerId()
+            while (!(pin > -1 && pin < 64)) {
+              try pin = readLine("Pin number 0-63> ").toInt
+              catch {
+                case _: NumberFormatException =>
+              }
+            }
+
+            "mqtt"
           case "433mhz" =>
             while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
             while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
             "433Mhz"
           case _ => null
         }
+      } while (switchType == null)
+
+    send(s"commandAddDevice($id,$switchType,$name,$systemCode,$unitCode,${if (dimmable) "slider" else "button"},$keepState,$pin,$chosenController)")
+
+  }
+
+  private def getControllerId(): String = {
+    var chosenController: String = null
+    while (in.ready()) println(in.readLine())
+    send(new commandGetController)
+    val answer: String = in.readLine()
+    while (in.ready()) println(in.readLine())
+    var controller: Map[String, String] = Map[String, String]()
+    answer.split(",").foreach(tmp => {
+      val controllerIdName = tmp.split(":")
+      if (controllerIdName.length == 1)
+        println(answer)
+      controller += ((controllerIdName(0), controllerIdName(1)))
+    })
+    println("Available Controller:")
+    var counter = 0
+
+    for (x <- controller) {
+      print(s"$counter ${x._1} ${x._2} ")
+      counter += 1
+    }
+    println()
+
+    while (chosenController == null) {
+      chosenController = readLine("Chose Controller by number or ID \n> ")
+      try {
+        chosenController = controller.keys.to(Array)(chosenController.toInt)
+      } catch {
+        case _: ArrayIndexOutOfBoundsException =>
+        case _: NumberFormatException =>
+      }
+      if (!controller.contains(chosenController)) chosenController = null
+    }
+    chosenController
+  }
+
+  def programController(): Unit = {
+    val standardPath = "/dev/ttyUSB0"
+    val masterId = getControllerId()
+    var ssid = ""
+    var pass = ""
+    var path = ""
+    var loop = true
+    println("Next you can enter your SSID/WiFi name and Wifi Password if you just press enter they won't get set")
+    while (loop) {
+      loop = false
+      ssid = readLine("ssid >")
+      if (ssid.length > 32) {
+        println("SSID has a max length of 32")
+        loop = true
+      }else if (ssid.isEmpty) ssid = ""
+    }
+
+    loop = true
+    while (loop) {
+      loop = false
+      pass = readLine("pass >")
+      if (pass.length > 64) {
+        println("Password has a max length of 64")
+        loop = true
+      } else if (pass.isEmpty) pass = ""
+    }
+
+    while (path.isBlank) {
+      path = readLine("interface path [%s]>", standardPath)
+      if (path.isBlank) path = standardPath
+      else {
+        if (!Files.isRegularFile(Path.of(path))) {
+          println("Path is not a File")
+          path = ""
+        }
       }
     }
-    send(s"commandAddDevice($id,$switchType,$name,$systemCode,$unitCode,${if (dimmable) "slider" else "button"},$keepState)")
 
+
+    send(commandProgramController(path, masterId, ssid, pass))
+  }
+
+  def addController(): Unit = {
+    val name = readLine("Name> ")
+    send(commandAddController(name))
   }
 
   private def dimm(): Unit = {
@@ -130,7 +252,8 @@ object console {
   }
 
   private def send(msg: String): Unit = {
-    Source.single(ByteString(msg + "\n")).via(outConnection).runWith(Sink.ignore)
+    out.println(msg)
+    out.flush()
   }
 
   private def status(): Unit = {

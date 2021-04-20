@@ -1,30 +1,53 @@
+<!--
+  ~ Privatehome
+  ~     Copyright (C) 2021  RaHoni honisuess@gmail.com
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>PrivateHome - Setup</title>
-        <meta name="author" content="PrivateHomeIoT" >
-        <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <title>PrivateHome - Settings</title>
+    <meta name="author" content="PrivateHomeIoT">
+    <meta name="description" content="The best PrivateHome solution! For everyone! For free!">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="icon" type="image/x-icon" href="" alt="icon" />
+    <link rel="icon" type="image/x-icon" href=""/>
 
-        <link rel="stylesheet" href="CSS/menu.css">
-        
-        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
-        <div id="mySidenav" class="sidenav">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-            <a href="HomeEN.html">Home</a>
-            <a href="Devices.html">Devices</a>
-            <a href="Rooms.html">Rooms</a>
-            <a href="Sensors.html">Sensors</a>
-            <a href="Settings.html">Settings</a>
-            <a href="Setup.html" style="background-color: green; color: ghostwhite">Setup</a>
-        </div>
-        <div class="content" id="content">
-            <h1>Setup</h1>
-        </div>
-        <script>
+    <link rel="stylesheet" href="CSS/menu.css">
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/button.css">
+
+    <script src="JS/websocket.js"></script>
+    <script src="JS/setup.js"></script>
+
+    <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="HomeEN.html">Home</a>
+        <a href="Devices.html">Devices</a>
+        <a href="Rooms.html">Rooms</a>
+        <a href="Sensors.html">Sensors</a>
+        <a href="Setup.html" style="background-color: green; color: ghostwhite">Setup</a>
+    </div>
+    <div id="title">
+        <h1>Setup</h1>
+    </div>
+
+    <script>
             var sidebar = false;
             closeNav();
             function openNav() {
@@ -34,34 +57,102 @@
                 else{
                     sidebar = true;
                     document.getElementById("mySidenav").style.width = "30%";
-                    document.getElementById("content").style.paddingLeft = "31%";
+                    document.getElementById("body").style.paddingLeft = "31%";
                 }
             }
             function closeNav() {
                 sidebar=false;
                 document.getElementById("mySidenav").style.width = "0%";
-                setTimeout(function(){document.getElementById("content").style.paddingLeft = "0%";},500)
-                
-            }
-        </script>
-        <script src="JS/websocket.js"></script>
+                setTimeout(function(){
+                    document.getElementById("body").style.paddingLeft = "0%";
+                },300)
 
-        <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
-        <link rel="stylesheet" href="CSS/login.css">
-        <button onclick="document.getElementById('login01').style.display='block'" style="width:auto;">Login</button>
-        <div id="login01" class="modal">
-            <form class="modal-content animate" action="" method="POST">
-                <div class="container">
-                    <label for="uname"><b>Username</b></label>
-                    <input type="text" placeholder="Enter Username" name="uname" id="un01" required>
-                    <label for="psw"><b>Password</b></label>
-                    <input type="password" placeholder="Enter Password" name="psw" id="pw01" required>
-                    <button id="sub01" type="submit" onclick="sendLoginData(document.getElementById('un01'), document.getElementById('pw01'))">Login</button>
-                </div>
-            </form>
-        </div>
-    </head>
-    <body class="content">
-        
-    </body>
+            }
+
+    </script>
+
+    <!-- Login Form - Modified from W3Schools. See https://www.w3schools.com/howto/howto_css_login_form.asp -->
+    <link rel="stylesheet" href="CSS/login.css">
+    <div id="login01" class="modal">
+        <form id="login01Form" class="modal-content animate">
+            <div class="container">
+                <label for="un01"><b>Username</b></label>
+                <input class="loginData" type="text" placeholder="Enter Username" name="uname" id="un01" required>
+                <label for="pw01"><b>Password</b></label>
+                <input class="loginData" type="password" placeholder="Enter Password" name="psw" id="pw01" required>
+                <button id="sub01" type="submit">Login</button>
+            </div>
+        </form>
+    </div>
+</head>
+<body id="body">
+<h4>On this site you can setup new Devices.</h4>
+<form id="form">
+    <table>
+        <tr>
+            <th>1</th>
+            <th>2</th>
+        </tr>
+        <tr>
+            <td class="list01"><b>Internal ID of the device</b></td>
+            <td class="list01"><input class="listcontent" type="text" id="idtext" name="id" size="5"
+                                      pattern="[-_a-zA-Z0-9]{5}" title="5 characters a-Z-_" required></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Please set the visible name of the device</b></td>
+            <td class="list01"><input class="listcontent" id="name" name="name" type="text" size="64" minlength="1"
+                                      maxlength="64" required></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Should the device restore its previous state after a reboot?</b></td>
+            <td class="list01"><input class="listcontent" type="checkbox" id="keepState" name="keepState"></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Is the device dimmable?</b></td>
+            <td class="list01"><input class="listcontent" id="controlType" type="checkbox" name="dimmable"></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Please select the way of communication with the device</b></td>
+            <td class="list01">
+                <select class="listcontent" id="switchType" name="switchType">
+                    <option value="433Mhz">433MHz</option>
+                    <option value="mqtt">MQTT</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Please enter the 433-MHz systemcode</b></td>
+            <td class="list01"><input class="listcontent" id="systemCode" name="systemCode" type="text" size="5"
+                                      pattern="[01]{5}" required></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Please enter the 433-MHz unitcode</b></td>
+            <td class="list01"><input class="listcontent" id="unitCode" name="unitCode" type="text" size="5"
+                                      pattern="[01]{5}" required></td>
+        </tr>
+        <tr>
+        <td class="list01"><b>Pin on Controller</b></td>
+        <td class="list01"><input class="listcontent" id="pin" name="pin" type="number" min="0" max="63"></td>
+        </tr>
+        <tr>
+            <td class="list01"><b>Wich Controller should be used</b></td>
+            <td class="list01"><select class="listcontent" id="masterId" name="masterId"></select></td>
+        </tr>
+    </table>
+    <input type="submit" style="align-content: center" id="submit01">
+</form>
+<!-- <details>
+    <summary><h3>Add 433 MHz-Device</h2></summary>
+    <form>
+        <input type="submit" style="align-content: center" id="submit01">
+    </form>
+</details>
+<br>
+<details>
+    <summary><h3>Add MQTT-Device</h2></summary>
+    <form>
+        <input type="submit" style="align-content: center" id="submit01">
+    </form>
+</details> -->
+</body>
 </html>

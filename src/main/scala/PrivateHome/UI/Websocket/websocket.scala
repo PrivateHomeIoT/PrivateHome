@@ -1,3 +1,21 @@
+/*
+ * Privatehome
+ *     Copyright (C) 2021  RaHoni honisuess@gmail.com
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package PrivateHome.UI.Websocket
 
 import PrivateHome.UI._
@@ -13,12 +31,14 @@ import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.slf4j.LoggerFactory
 
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.util.Calendar
 
 object websocket {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val formats: DefaultFormats.type = DefaultFormats
 
@@ -50,11 +70,18 @@ object websocket {
               case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
               case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
               case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
+              case "getRandomId" => JObject(JField("id",uiControl.receiveCommand(commandGetRandomId()).asInstanceOf[String]))
+              case "updateDevice" => uiControl.receiveCommand(args.extract[commandUpdateDevice])
+              case "getController" => uiControl.receiveCommand(commandGetController())
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
             }
             answer match {
               case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
-              case _ => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+              case exception: Exception => sendMsg(websocketId,("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
+              case list: List[(String,String)] => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> JArray(list.map(tupel => ("masterId" -> tupel._1) ~ ("name" -> tupel._2)))))
+              case false => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Fail"))
+              case true => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
+              case c:Any => logger.warn("Unknown answer type from uiControl.receiveCommand Class:{} element: {}",c.getClass,c)
             }
 
 
@@ -89,9 +116,8 @@ object websocket {
 
       }
       catch {
-        case exception: JsonParseException => println(exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
-        case exception: Throwable => println(exception)
-          exception.printStackTrace()
+        case exception: JsonParseException => logger.warn("Can not parse the command send over Websocket", exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+        case exception: Throwable => logger.error("UnknownError",exception)
           sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
     })

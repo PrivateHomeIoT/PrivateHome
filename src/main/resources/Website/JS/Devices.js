@@ -47,22 +47,22 @@ This function test if a switch with this id exist and than changes the status of
 
 //TODO: should rename this function
 function switchGenerator(id,name,status,type) {
-  if (document.getElementById(id)) {
-    if (type=="button") {
-      if (status == 0) {
-        offGraph(id);
-      } else {
-        onGraph(id);
-      }
+    if (document.getElementById(id)) {
+        if (type=="button") {
+            if (status == 0) {
+                offGraph(id);
+            } else {
+                onGraph(id);
+             }
+        } else {
+            setSlider(id,status);
+        }
     } else {
-      setSlider(id,status);
+        if (type == "button") {generateButton(id,name,status)}
+        else {
+            generateSlider(id,name,status)
+        }
     }
-  } else {
-    if (type == "button") {generateButton(id,name,status)}
-    else {
-      generateSlider(id,name,status)
-    }
-  }
 }
 
 /**
@@ -80,7 +80,7 @@ function generateButton(id, name, status){
   <button id="${id}off" class="button" style="display: ${(status == "OFF") ? "inline-block" : "none"}" onclick="turnOn('${id}')">
     <img src="Pictures/off.png" alt="OFF" class="pic">
   </button>
-  <a href="Settings/${id}.html" class="aButton">
+  <a href="Settings.html?id=${id}" class="aButton">
     <p id="${id}Name">${name}</p>
     <p id="${id}Status">${status}</p>
   </a>
@@ -97,7 +97,7 @@ function generateSlider(id, name, status){
   text =
   `<td class="switch" id="${id}">
   <input id="${id}slider" class="slider button" onchange="slider('${id}')" max="100" min="0" type="range" value="${status}">
-  <a href="Settings/${id}.html" class="aButton">
+  <a href="Settings.html?id=${id}" class="aButton">
     <p id="${id}Name">${name}</p>
     <p id="${id}Status">${status} %</p>
   </a>
