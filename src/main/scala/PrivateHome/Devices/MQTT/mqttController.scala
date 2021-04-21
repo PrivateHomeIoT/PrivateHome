@@ -108,21 +108,27 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
   def receiveStatuschange(message: Array[Byte]): Unit = {
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(message.slice(0, 16)))
-    val messageString = new String(cipher.doFinal(message.slice(16, message.length)), "ASCII")
+    val messageString = decrypt(message)
+    logger.debug("Trying to parse {}", messageString)
     val messageJson = parse(messageString)
+    logger.debug("got parsed to {}",messageJson)
     val pin = (messageJson \ "pin").extract[Int]
     val value: Float = (messageJson \ "value").extract[String].toFloat / 1024
+    logger.debug("Setting pin {} to {}", pin, value)
     pins(pin).status = value
   }
 
-  def checkSetup(message: Array[Byte]): Boolean = {
+  def decrypt(message: Array[Byte]): String = {
     val iv = message.slice(0, 16)
-    println(message.map("%02x" format _).mkString(","))
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv))
     var messageDecrypted = cipher.doFinal(message.slice(16, message.length))
     println(messageDecrypted.map("%02X" format _).mkString("Message: ",",",""))
     messageDecrypted = messageDecrypted.slice(0,messageDecrypted.length-messageDecrypted.last)
-    val messageString = new String(messageDecrypted, "ASCII")
+    new String(messageDecrypted, "ASCII")
+  }
+
+  def checkSetup(message: Array[Byte]): Boolean = {
+    val messageString = decrypt(message)
     val valid = messageString.equals(masterID)
     if (!valid) logger.info("Setup requested for {} with message {}", masterID, messageString)
     valid

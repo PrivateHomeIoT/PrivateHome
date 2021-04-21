@@ -139,7 +139,7 @@ object mqttClient {
 
   class subscribeTopic(topic: String) extends topic(topic)
 
-  object stat extends subscribeTopic(home + "stat/")
+  object stat extends subscribeTopic(home + "status/")
 
   object setupRequest extends subscribeTopic(home + "setupRequest/")
 
