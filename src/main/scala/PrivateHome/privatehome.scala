@@ -41,7 +41,7 @@ object privatehome {
   if (portable)
     System.setProperty("log.logpath","./logs/")
   else
-    System.setProperty("log.logpath","/var/log/")
+    System.setProperty("log.logpath","/var/log/privatehome/")
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
