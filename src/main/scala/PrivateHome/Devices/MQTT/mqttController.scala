@@ -18,7 +18,7 @@
 
 package PrivateHome.Devices.MQTT
 
-import PrivateHome.Devices.MQTT.mqttClient.{cmnd, setup}
+import PrivateHome.Devices.MQTT.mqttClient.{cmd, setup}
 import PrivateHome.{data, settings}
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -135,7 +135,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
   def sendCommand(pin: Int, value: Int): Unit = {
     if (!(value >= 0 && value < 1024)) throw new IllegalArgumentException("Value should be between 0 and 1023")
-    mqttClient.publish(new cmnd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
+    mqttClient.publish(new cmd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
     logger.debug("Send message pin: {} value: {}", pin, value)
   }
 
