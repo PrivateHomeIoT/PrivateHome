@@ -65,7 +65,7 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
   }
 
   def pin_=(pPin: Int): Unit = {
-    if (pin != _pin) {
+    if (pPin != _pin) {
       if (_controller == null) {
         _pin = pPin
       } else {
