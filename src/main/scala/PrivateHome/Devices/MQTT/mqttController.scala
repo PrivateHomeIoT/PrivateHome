@@ -113,7 +113,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
     val messageJson = parse(messageString)
     logger.debug("got parsed to {}",messageJson)
     val pin = (messageJson \ "pin").extract[Int]
-    val value: Float = (messageJson \ "value").extract[String].toFloat / 1024
+    val value: Float = (messageJson \ "value").extract[String].toFloat / 1023
     logger.debug("Setting pin {} to {}", pin, value)
     pins(pin).status = value
   }
