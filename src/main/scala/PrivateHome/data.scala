@@ -38,7 +38,7 @@ import java.security.SecureRandom
 import java.sql.PreparedStatement
 import scala.collection.mutable
 
-object data {
+private[PrivateHome] object data {
   def masterIds: List[String] = controller.keys.toList
 
 
@@ -345,15 +345,15 @@ object data {
    */
   def deleteDevice(id: String): Unit = {
     withSQL {
-      delete.from(device).where.eq(device.column.id, id)
-    }.update.apply()
-    withSQL {
       delete.from(mhz).where.eq(mhz.column.id, id)
     }.update().apply()
     withSQL {
       delete.from(mqtt).where.eq(mqtt.column.id, id)
     }.update().apply()
     devices -= id
+    withSQL {
+      delete.from(device).where.eq(device.column.id, id)
+    }.update.apply()
   }
 
 
@@ -425,7 +425,7 @@ object data {
   /**
    * closes the database connections
    */
-  def shutdown: Unit = {
+  def shutdown(): Unit = {
     session.close()
   }
 
