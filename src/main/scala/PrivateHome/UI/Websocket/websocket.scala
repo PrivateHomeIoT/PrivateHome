@@ -18,6 +18,7 @@
 
 package PrivateHome.UI.Websocket
 
+import PrivateHome.Devices.switchSerializer
 import PrivateHome.UI._
 import PrivateHome.data
 import akka.NotUsed
@@ -31,6 +32,8 @@ import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization.write
+import org.json4s.jackson.{JsonMethods, Serialization}
 import org.slf4j.LoggerFactory
 
 import java.math.BigInteger
@@ -40,7 +43,7 @@ import java.util.Calendar
 object websocket {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  implicit val formats: DefaultFormats.type = DefaultFormats
+  implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
 
   private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
   private var sessionMap: Map[String, session] = Map()
@@ -62,26 +65,27 @@ object websocket {
           if (currentSession.resetValidUntil) {
             val commandType = (json \ "Command").extract[String]
             val args = json \ "Args"
-            val answer = commandType match {
-              case "on" => uiControl.receiveCommand(args.extract[commandOn])
-              case "off" => uiControl.receiveCommand(args.extract[commandOff])
-              case "getDevices" => uiControl.receiveCommand(args.extract[commandGetDevices])
-              case "settingsMain" => uiControl.receiveCommand(args.extract[commandSettingsMain])
-              case "settingsDevice" => uiControl.receiveCommand(args.extract[commandSettingsDevice])
-              case "addDevice" => uiControl.receiveCommand(args.extract[commandAddDevice])
-              case "getDevice" => uiControl.receiveCommand(args.extract[commandGetDevice])
-              case "getRandomId" => JObject(JField("id",uiControl.receiveCommand(commandGetRandomId()).asInstanceOf[String]))
-              case "updateDevice" => uiControl.receiveCommand(args.extract[commandUpdateDevice])
-              case "getController" => uiControl.receiveCommand(commandGetController())
+            var answer = commandType match {
+              case "on" =>
+                val command = args.extract[commandOn]
+                uiControl.on(command.id, command.percentFloat)
+              case "off" => uiControl.off(args.extract[commandOff].id)
+              case "getDevices" =>
+                JObject(JField("devices", uiControl.getDevices.map(switch => JsonMethods.parse(write(switch._2)))))
+              case "addDevice" => uiControl.addDevice(args.extract[commandAddDevice])
+              case "getDevice" => uiControl.getDevice(args.extract[commandGetDevice].id)
+              case "getRandomId" => JObject(JField("id",uiControl.randomNewId))
+              case "updateDevice" => uiControl.updateDevice(args.extract[commandUpdateDevice])
+              case "getController" => JArray(uiControl.getController.map(tupel => ("masterId" -> tupel._1) ~ ("name" -> tupel._2)).toList)
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
             }
+            if (answer == ()) answer = true
             answer match {
               case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
               case exception: Exception => sendMsg(websocketId,("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
-              case list: List[(String,String)] => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> JArray(list.map(tupel => ("masterId" -> tupel._1) ~ ("name" -> tupel._2)))))
               case false => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Fail"))
               case true => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
-              case c:Any => logger.warn("Unknown answer type from uiControl.receiveCommand Class:{} element: {}",c.getClass,c)
+              case c:Any => logger.warn("Unknown answer type from uiControl Class:{} element: {}",c.getClass,c)
             }
 
 
