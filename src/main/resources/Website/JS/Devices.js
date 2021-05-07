@@ -4,7 +4,7 @@ ws.onmessage = function(event) {
   var msg = JSON.parse(event.data);
   switch (msg.Command) {
     case "statusChange":
-    if (msg.answer.type == "button") {
+    if (msg.answer.type == "Button") {
       if (msg.answer.status == 1) {
         onGraph(msg.answer.id);
       } else if (msg.answer.status == 0) {
@@ -16,13 +16,12 @@ ws.onmessage = function(event) {
     break;
     case "getDevices": {
       var devices = msg.answer.devices
-
       for (act of devices) {
         var id = act.id;
         var name = act.name;
         var status = act.status * 100;
-        var type = act.controlType;
-        switchGenerator(id,name,status,type);
+        var dimmable = act.dimmable;
+        switchGenerator(id,name,status,dimmable);
 
       }
       break;
@@ -46,9 +45,9 @@ This function test if a switch with this id exist and than changes the status of
 */
 
 //TODO: should rename this function
-function switchGenerator(id,name,status,type) {
+function switchGenerator(id,name,status,dimmable) {
     if (document.getElementById(id)) {
-        if (type=="button") {
+        if (!dimmable) {
             if (status == 0) {
                 offGraph(id);
             } else {
@@ -58,7 +57,7 @@ function switchGenerator(id,name,status,type) {
             setSlider(id,status);
         }
     } else {
-        if (type == "button") {generateButton(id,name,status)}
+        if (!dimmable) {generateButton(id,name,status)}
         else {
             generateSlider(id,name,status)
         }

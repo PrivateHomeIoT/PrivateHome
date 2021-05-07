@@ -19,8 +19,9 @@
 package PrivateHome.UI
 
 import PrivateHome.data
-import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
+
+import java.util.Base64
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -33,21 +34,20 @@ object stringCommandHandler {
 
       val uiCommand = command(0) match {
         case "commandAddUserBase64" =>
-          commandAddUserBase64(args(0), args(1))
-        case "commandRecreateDatabase" => commandRecreateDatabase()
-        case "commandSafeCreateDatabase" => commandSafeCreateDatabase()
-        case "getRandomId" => commandGetRandomId()
-        case "commandOn" => commandOn(args(0), args(1))
-        case "commandOff" => commandOff(args(0))
-        case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8))
-        case "commandAddController" => commandAddController(args(0))
-        case "commandGetController" => commandGetController()
+          uiControl.addUser(args(0), new String(Base64.getDecoder.decode(args(1))))
+        case "commandRecreateDatabase" => uiControl.recreateDatabase()
+        case "commandSafeCreateDatabase" => uiControl.safeCreateDatabase()
+        case "getRandomId" => uiControl.randomNewId
+        case "commandOn" => uiControl.on(args(0), args(1).toFloat)
+        case "commandOff" => uiControl.off(args(0))
+        case "commandAddDevice" => uiControl.addDevice(commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8)))
+        case "commandAddController" => uiControl.addController(args(0))
+        case "commandGetController" => uiControl.getController.map(tupel => s"${tupel._1}:${tupel._2}").mkString(",")
         case "getControllerKey" => data.getControllerMasterId(args(0)).keyArray.map(_ & 0xFF).mkString(",")  //"%02x" format _
         case "commandProgramController" =>
-          commandProgramController(args(0), args(1), args(2), args(3))
+          uiControl.programController(args(0), args(1), args(2), args(3))
 
         case _ => logger.warn("Unknown Command")
-          new Command
       }
       uiCommand match {
         case c: Command => uiControl.receiveCommand(c)
