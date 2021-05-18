@@ -18,7 +18,7 @@
 
 package PrivateHome.Devices.MQTT
 
-import PrivateHome.Devices.MQTT.mqttClient.{cmnd, setup}
+import PrivateHome.Devices.MQTT.mqttClient.{cmd, setup}
 import PrivateHome.{data, settings}
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -108,21 +108,27 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
   def receiveStatuschange(message: Array[Byte]): Unit = {
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(message.slice(0, 16)))
-    val messageString = new String(cipher.doFinal(message.slice(16, message.length)), "ASCII")
+    val messageString = decrypt(message)
+    logger.debug("Trying to parse {}", messageString)
     val messageJson = parse(messageString)
+    logger.debug("got parsed to {}",messageJson)
     val pin = (messageJson \ "pin").extract[Int]
-    val value: Float = (messageJson \ "value").extract[String].toFloat / 1024
+    val value: Float = (messageJson \ "value").extract[String].toFloat / 1023
+    logger.debug("Setting pin {} to {}", pin, value)
     pins(pin).status = value
   }
 
-  def checkSetup(message: Array[Byte]): Boolean = {
+  def decrypt(message: Array[Byte]): String = {
     val iv = message.slice(0, 16)
-    println(message.map("%02x" format _).mkString(","))
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv))
     var messageDecrypted = cipher.doFinal(message.slice(16, message.length))
     println(messageDecrypted.map("%02X" format _).mkString("Message: ",",",""))
     messageDecrypted = messageDecrypted.slice(0,messageDecrypted.length-messageDecrypted.last)
-    val messageString = new String(messageDecrypted, "ASCII")
+    new String(messageDecrypted, "ASCII")
+  }
+
+  def checkSetup(message: Array[Byte]): Boolean = {
+    val messageString = decrypt(message)
     val valid = messageString.equals(masterID)
     if (!valid) logger.info("Setup requested for {} with message {}", masterID, messageString)
     valid
@@ -135,7 +141,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
 
   def sendCommand(pin: Int, value: Int): Unit = {
     if (!(value >= 0 && value < 1024)) throw new IllegalArgumentException("Value should be between 0 and 1023")
-    mqttClient.publish(new cmnd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
+    mqttClient.publish(new cmd(randomCode), encryptMessage(compact(render(("pin" -> pin) ~ ("value" -> value)))))
     logger.debug("Send message pin: {} value: {}", pin, value)
   }
 

@@ -135,7 +135,7 @@ function registerHandler() {
     form.unitCode.value = "";
     form.systemCode.value = "";
     }
-  });
+  );
   form.switchType.addEventListener("change", function (event) {
     disable433 = form.switchType.value != "433Mhz";
     form.systemCode.disabled = disable433;

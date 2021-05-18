@@ -1,5 +1,5 @@
-import DebianConstants._
-import ReleaseTransformations._
+import com.typesafe.sbt.packager.debian.DebianPlugin.autoImport.DebianConstants._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 name := "PrivateHome"
 
 //version := "0.1"
@@ -17,7 +17,8 @@ debianPackageRecommends := Seq("wiringpi","pi4j")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") ->s"/etc/mosquitto/conf.d/privatehome.conf"),
-  packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value)
+  packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value),
+  packageTemplateMapping(s"/var/log/${normalizedName.value}")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
 releaseIgnoreUntrackedFiles := true
 Global / onChangedBuildSource := ReloadOnSourceChanges

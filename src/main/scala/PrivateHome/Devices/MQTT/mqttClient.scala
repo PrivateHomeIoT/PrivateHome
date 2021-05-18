@@ -131,7 +131,7 @@ object mqttClient {
 
   class setup(code: String) extends publishTopic(home + "setup/" + code)
 
-  class cmnd(code: String) extends publishTopic(home + "switch/cmnd/" + code)
+  class cmd(code: String) extends publishTopic(home + "switch/cmd/" + code)
 
   case class topic(topicString: String)
 
@@ -139,7 +139,7 @@ object mqttClient {
 
   class subscribeTopic(topic: String) extends topic(topic)
 
-  object stat extends subscribeTopic(home + "stat/")
+  object stat extends subscribeTopic(home + "status/")
 
   object setupRequest extends subscribeTopic(home + "setupRequest/")
 
