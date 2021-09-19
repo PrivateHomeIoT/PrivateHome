@@ -117,15 +117,15 @@ object console {
     val name = readLine("name> ").replace(',', ' ')
     val keepStateChar = readLine("Keep State (y/n)")(0).toLower
     val keepState = keepStateChar == 'y' || keepStateChar == 'j'
-    var switchType: String = null
+    var switchType: switchType = null
     var systemCode: String = "null"
     var unitCode: String = "null"
     var chosenController: String = null
     var pin = -1
 
       do {
-        switchType = if (dimmable) "mqtt" else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
-        switchType = switchType match {
+        val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+        switchType = switchTypeString match {
           case "mqtt" =>
             chosenController = getControllerId()
             while (!(pin > -1 && pin < 64)) {
@@ -135,11 +135,11 @@ object console {
               }
             }
 
-            "mqtt"
+            Mqtt
           case "433mhz" =>
             while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
             while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
-            "433Mhz"
+            Mhz
           case _ => null
         }
       } while (switchType == null)
@@ -261,6 +261,7 @@ object console {
   }
 
 }
+
 
 /**
  * A REPL Command holds a method that can be executed and a description.

@@ -19,6 +19,8 @@
 package PrivateHome.Devices.MHz
 
 import PrivateHome.Devices.Switch
+import PrivateHome.Devices.controlType.Button
+import PrivateHome.Devices.switchType._
 import org.slf4j.{LoggerFactory, MarkerFactory}
 
 import scala.xml.Node
@@ -31,7 +33,7 @@ import scala.xml.Node
  * @param _systemCode The SystemCode used for the Switch
  * @param _unitCode   The UnitCode used for the Switch
  */
-case class mhzSwitch(setupID: String, _keepStatus: Boolean, _name: String, private var _systemCode: String, private var _unitCode: String) extends Switch(setupID, _keepStatus,_name,"button") {
+case class mhzSwitch(setupID: String, _keepStatus: Boolean, _name: String, private var _systemCode: String, private var _unitCode: String) extends Switch(setupID, _keepStatus,_name, Button) {
   if (_systemCode.length != 5) throw new IllegalArgumentException(s"System code ${_systemCode} should be 5 Char long")
   if (_unitCode.length != 5) throw new IllegalArgumentException(s"Unit Code ${_unitCode} should be 5 Char long")
 
@@ -96,7 +98,7 @@ case class mhzSwitch(setupID: String, _keepStatus: Boolean, _name: String, priva
    */
   def systemCode: String = _systemCode
 
-  override def switchtype = "433Mhz"
+  override def switchtype = Mhz
 
   /**
    *
