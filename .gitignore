@@ -9,3 +9,6 @@ build.properties
 *.html~
 *.js~
 *.log
+gc.properties
+/.gradle
+sbt.json
