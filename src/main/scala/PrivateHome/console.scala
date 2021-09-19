@@ -18,53 +18,60 @@
 
 package PrivateHome
 
+import PrivateHome.Devices.controlType._
+import PrivateHome.Devices.switchType._
 import PrivateHome.UI._
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
 import org.scalasbt.ipcsocket.UnixDomainSocket
 
-import java.io.{BufferedReader, Console, InputStreamReader, PrintWriter}
+import java.io._
 import java.nio.file.{Files, Path}
-import java.util.Base64
 import scala.io.StdIn.readLine
 
 object console {
   val StdInJava: Console = System.console()
-  val socket = new UnixDomainSocket("/tmp/privatehome2.sock")
-  val out = new PrintWriter(socket.getOutputStream)
-  val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
-
   private val commands = Map(
     "help" -> REPLCommand(_ => help(), "Prints all available commands"),
+    "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
     "addUser" -> REPLCommand(_ => addUser(), "Adds a new User for the WebGui"),
     "addSwitch" -> REPLCommand(_ => addSwitch(false), "Adds a new Switch"),
     "addDimmer" -> REPLCommand(_ => addSwitch(true), "Adds a new dimmable Switch"),
-    "dimm" -> REPLCommand(_ => dimm(), "Set the dimming value of a dimmable Switch"),
-    //"status" -> REPLCommand(_ => status(), "Show the status of Switches"),
+    "dim" -> REPLCommand(_ => dim(), "Set the dimming value of a dimmable Switch"),
+    "status" -> REPLCommand(_ => status(), "Show the status of Switches"),
     "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
     "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
-    "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
-    "getKey" -> REPLCommand(_ => getControllerKey(), "Displays the Key of a given Controller."),
+    "getKey" -> REPLCommand(_ => printControllerKey(), "Displays the Key of a given Controller."),
     "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller")
   )
+  var socket: UnixDomainSocket = _
+  var out: ObjectOutputStream = _
+  var in: ObjectInputStream = _
 
   def recreate(): Unit = {
-    val command = new commandRecreateDatabase
+    val command = ipcRecreateDatabase()
     send(command)
   }
 
-  def getControllerKey(): Unit = {
-    val controllerId = getControllerId()
-    while (in.ready()) println(in.readLine())
-    send(s"getControllerKey($controllerId)")
-    val tmpId: String = in.readLine()
-    while (in.ready()) println(in.readLine())
+  def printControllerKey(): Unit = {
+    val controllerId = getControllerId
+    while (in.available() > 0) println(in.readObject())
+    send(ipcGetControllerKeyCommand(controllerId))
+    var tmpId: String = ""
+    while (tmpId.isBlank) {
+      tmpId = read(ipcGetControllerKeyResponse.getClass).asInstanceOf[ipcGetControllerKeyResponse].key.map(_ & 0xFF).mkString(",")
+    }
     println(tmpId)
   }
 
-  def safeCreate(): Unit = send(new commandSafeCreateDatabase)
+  def safeCreate(): Unit = send(new ipcSafeCreateDatabase)
 
   def main(args: Array[String]): Unit = {
+    try
+      connect()
+    catch {
+      case e: Throwable => e.printStackTrace()
+    }
 
     while (true) {
       val userInput = readLine("> ")
@@ -77,115 +84,9 @@ object console {
     }
   }
 
-  private def help(): Unit = {
-    println("Available commands:\n")
-    commands.foreach(cmd => println(s"${cmd._1}:\t${cmd._2.description}"))
-  }
-
-  private def addUser(): Unit = {
-    println("Please provide Username and Password (does not get echoed)")
-    val username = readLine("Username> ")
-    var passwd: Array[Char] = null
-    if (StdInJava != null) {
-      passwd = StdInJava.readPassword("Password> ")
-    }
-    else {
-      println("Because the System.console() object does not exist we use a simple readLine so the password will be echoed")
-      passwd = readLine("Password> ").toCharArray
-    }
-    val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
-    val passHash = Base64.getEncoder.encodeToString(argon2.hash(10, 64, 4, passwd).getBytes)
-    val command = commandAddUserBase64(username, passHash)
-    send(command)
-
-  }
-
-  private def send(command: Command): Unit = {
-    send(command.toString)
-  }
-
-  private def addSwitch(dimmable: Boolean): Unit = {
-    while (in.ready()) println(in.readLine())
-    send("getRandomId")
-    val tmpId: String = in.readLine()
-    while (in.ready()) println(in.readLine())
-    var id = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
-      id = readLine(s"id[$tmpId]> ")
-      if (id == "") id = tmpId
-    }
-    val name = readLine("name> ").replace(',', ' ')
-    val keepStateChar = readLine("Keep State (y/n)")(0).toLower
-    val keepState = keepStateChar == 'y' || keepStateChar == 'j'
-    var switchType: switchType = null
-    var systemCode: String = "null"
-    var unitCode: String = "null"
-    var chosenController: String = null
-    var pin = -1
-
-      do {
-        val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
-        switchType = switchTypeString match {
-          case "mqtt" =>
-            chosenController = getControllerId()
-            while (!(pin > -1 && pin < 64)) {
-              try pin = readLine("Pin number 0-63> ").toInt
-              catch {
-                case _: NumberFormatException =>
-              }
-            }
-
-            Mqtt
-          case "433mhz" =>
-            while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
-            while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
-            Mhz
-          case _ => null
-        }
-      } while (switchType == null)
-
-    send(s"commandAddDevice($id,$switchType,$name,$systemCode,$unitCode,${if (dimmable) "slider" else "button"},$keepState,$pin,$chosenController)")
-
-  }
-
-  private def getControllerId(): String = {
-    var chosenController: String = null
-    while (in.ready()) println(in.readLine())
-    send(new commandGetController)
-    val answer: String = in.readLine()
-    while (in.ready()) println(in.readLine())
-    var controller: Map[String, String] = Map[String, String]()
-    answer.split(",").foreach(tmp => {
-      val controllerIdName = tmp.split(":")
-      if (controllerIdName.length == 1)
-        println(answer)
-      controller += ((controllerIdName(0), controllerIdName(1)))
-    })
-    println("Available Controller:")
-    var counter = 0
-
-    for (x <- controller) {
-      print(s"$counter ${x._1} ${x._2} ")
-      counter += 1
-    }
-    println()
-
-    while (chosenController == null) {
-      chosenController = readLine("Chose Controller by number or ID \n> ")
-      try {
-        chosenController = controller.keys.to(Array)(chosenController.toInt)
-      } catch {
-        case _: ArrayIndexOutOfBoundsException =>
-        case _: NumberFormatException =>
-      }
-      if (!controller.contains(chosenController)) chosenController = null
-    }
-    chosenController
-  }
-
   def programController(): Unit = {
     val standardPath = "/dev/ttyUSB0"
-    val masterId = getControllerId()
+    val masterId = getControllerId
     var ssid = ""
     var pass = ""
     var path = ""
@@ -197,7 +98,7 @@ object console {
       if (ssid.length > 32) {
         println("SSID has a max length of 32")
         loop = true
-      }else if (ssid.isEmpty) ssid = ""
+      } else if (ssid.isEmpty) ssid = ""
     }
 
     loop = true
@@ -222,42 +123,227 @@ object console {
     }
 
 
-    send(commandProgramController(path, masterId, ssid, pass))
+    send(ipcProgramControllerCommand(path, masterId, ssid, pass))
+  }
+
+  private def getControllerId: String = {
+    var chosenController: String = null
+    send(new ipcGetControllerCommand)
+    val response = read(ipcGetControllerResponse.getClass).asInstanceOf[ipcGetControllerResponse]
+    val controller: Map[String, String] = response.controller
+
+    println("Available Controller:")
+    var counter = 0
+
+    for (x <- controller) {
+      println(s"$counter ${x._1} ${x._2} ")
+      counter += 1
+    }
+    println()
+
+    while (chosenController == null) {
+      chosenController = readLine("Chose Controller by number or ID \n> ")
+      try {
+        chosenController = controller.keys.to(Array)(chosenController.toInt)
+      } catch {
+        case _: ArrayIndexOutOfBoundsException =>
+        case _: NumberFormatException =>
+      }
+      if (!controller.contains(chosenController)) chosenController = null
+    }
+    chosenController
+  }
+
+  private def read(wanted: Class[_]): IPCResponse = {
+    val wantedString = wanted.toString.replaceAll("\\$", "")
+    if (socket.isClosed) {
+      println(
+        """Connection is closed.
+Reconnecting
+          |""".stripMargin)
+      connect()
+    }
+    var answer: IPCResponse = new IPCResponse {};
+    while (answer.getClass.toString != wantedString) {
+      answer = in.readObject().asInstanceOf[IPCResponse]
+      answer match {
+        case e: ipcErrorResponse => println(s"Error with Command: ${e.command}")
+          e.exception.printStackTrace()
+          if (wanted == ipcSuccessResponse.getClass) return ipcSuccessResponse(false)
+        case _ =>
+      }
+    }
+    answer
   }
 
   def addController(): Unit = {
     val name = readLine("Name> ")
-    send(commandAddController(name))
+    send(ipcAddControllerCommand(name))
   }
 
-  private def dimm(): Unit = {
-    var id: String = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) id = readLine("id> ")
+  private def send(command: IPCCommand): Unit = {
+    try {
+      if (socket.isClosed) {
+        println(("Connection is closed.\n" +
+          "Reconnecting").stripMargin)
+        connect()
+      }
+      out.writeObject(command)
+      out.flush()
+    } catch {
+      case e: Throwable => e.printStackTrace()
+    }
+  }
+
+  private def connect() {
+    socket = new UnixDomainSocket("/tmp/privatehome2.sock")
+    in = new ObjectInputStream(socket.getInputStream())
+    out = new ObjectOutputStream(socket.getOutputStream())
+    out.flush()
+  }
+
+  private def help(): Unit = {
+    println("Available commands:\n")
+    commands.toList.foreach(cmd => println(s"${cmd._1}:\t${cmd._2.description}"))
+  }
+
+  private def addUser(): Unit = {
+    println("Please provide Username and Password (does not get echoed)")
+    val username = readLine("Username> ")
+    var passwd: Array[Char] = null
+    if (StdInJava != null) {
+      passwd = StdInJava.readPassword("Password> ")
+    }
+    else {
+      println("Because the System.console() object does not exist we use a simple readLine so the password will be echoed")
+      passwd = readLine("Password> ").toCharArray
+    }
+    val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
+    val passHash = argon2.hash(10, 64, 4, passwd)
+    val command = ipcAddUserCommand(username, passHash)
+    send(command)
+
+  }
+
+  private def read(wanted: String): IPCResponse = {
+    if (socket.isClosed) {
+      println(
+        """Connection is closed.
+Reconnecting
+          |""".stripMargin)
+      connect()
+    }
+    var answer: IPCResponse = new IPCResponse {};
+    while (answer.getClass.toString != wanted) {
+      answer = in.readObject().asInstanceOf[IPCResponse]
+      println(s"Received Message $answer ${answer.getClass} equals ${wanted}: ${answer.getClass.toString == wanted}")
+      answer match {
+        case e: ipcErrorResponse => println(s"Error with Command: ${e.command}")
+          e.exception.printStackTrace()
+          if (wanted == ipcSuccessResponse.getClass.toString) return ipcSuccessResponse(false)
+        case _ =>
+      }
+    }
+    answer
+  }
+
+  private def addSwitch(dimmable: Boolean): Unit = {
+    send(ipcGetRandomId())
+    val response = read(ipcGetRandomIdResponse.getClass)
+    val tmpId = response.asInstanceOf[ipcGetRandomIdResponse].id
+    var id = ""
+    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
+      id = readLine(s"id[$tmpId]> ")
+      if (id == "") id = tmpId
+    }
+    val name = readLine("name> ").replace(',', ' ')
+    val keepStateChar = readLine("Keep State (y/n)")(0).toLower
+    val keepState = keepStateChar == 'y' || keepStateChar == 'j'
+    var switchType: switchType = null
+    var systemCode: String = "null"
+    var unitCode: String = "null"
+    var chosenController: String = null
+    var pin = -1
+
+      do {
+        val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+        switchType = switchTypeString match {
+          case "mqtt" =>
+            chosenController = getControllerId
+            while (!(pin > -1 && pin < 64)) {
+              try pin = readLine("Pin number 0-63> ").toInt
+              catch {
+                case _: NumberFormatException =>
+              }
+            }
+
+            Mqtt
+          case "433mhz" =>
+            while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
+            while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
+            Mhz
+          case _ => null
+        }
+      } while (switchType == null)
+
+    send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
+      if (dimmable) Slider else Button
+    }, keepState, pin, chosenController))
+
+  }
+
+  private def dim(tmpId: String = ""): Unit = {
+    val id = getDeviceID(tmpId)
     var run: Boolean = true
     while (run) {
       val percentString = readLine("Command (0.0...1)> ")
       try {
-        if (percentString.toFloat == 0) {
-          send(s"commandOff($id)")
+        val percent = percentString.toFloat
+        if (percent == 0) {
+          send(ipcOffCommand(id))
           run = false
-        } else if (1 >= percentString.toFloat && percentString.toFloat > 0) {
-          send(s"commandOn($id,$percentString)")
+        } else if (1 >= percent && percent > 0) {
+          send(ipcOnCommand(id, percent))
           run = false
         }
       } catch {
         case _: Throwable =>
       }
+      read(ipcSuccessResponse.getClass)
 
     }
   }
 
-  private def send(msg: String): Unit = {
-    out.println(msg)
-    out.flush()
+  private def getDeviceID(tmpID: String = ""): String = {
+    var id = tmpID
+    send(ipcGetDevicesCommand())
+    val devices = read(ipcGetDevicesResponse.getClass).asInstanceOf[ipcGetDevicesResponse]
+    val deviceMap = devices.DeviceList
+    val deviceIds = deviceMap.keys.to(List)
+    var counter = 0
+    if (!deviceMap.contains(id))
+      deviceMap.foreach(s => {
+        println(s"$counter: id: ${s._1} name: ${s._2.name}");
+        counter += 1
+      })
+    while (!deviceMap.contains(id)) {
+      id = readLine("id/Index> ")
+      try {
+        id = deviceIds(id.toInt)
+      } catch {
+        case _: ArrayIndexOutOfBoundsException =>
+        case _: NumberFormatException =>
+      }
+    }
+    id
   }
 
-  private def status(): Unit = {
 
+  private def status(): Unit = {
+    val id = getDeviceID()
+    send(ipcGetDeviceCommand(id))
+    val response = read(ipcGetDeviceResponse.getClass).asInstanceOf[ipcGetDeviceResponse]
+    println(response.device.status * 100)
   }
 
 }
