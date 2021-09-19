@@ -32,28 +32,44 @@ object repl {
   val serverSocket = new UnixDomainServerSocket(socketPath)
 
   class readThread extends Thread {
+    var out: ObjectOutputStream = _
+    var in: ObjectInputStream = _
     setName("replReadThread")
+
     override def run(): Unit = {
       while (true) {
         val clientSocket = serverSocket.accept()
         try {
-          val out = new PrintWriter(clientSocket.getOutputStream, true)
-          val in =
-            new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
-          var line: String = null
+          out = new ObjectOutputStream(new BufferedOutputStream(clientSocket.getOutputStream))
+          out.flush()
+          in = new ObjectInputStream(clientSocket.getInputStream)
+          var line: IPCCommand = null
           do {
-            line = in.readLine()
+            line = in.readObject().asInstanceOf[IPCCommand]
             if (line != null) {
-              val answer = stringCommandHandler.interpretMessage(line)
-              answer match {
-                case _: Exception => logger.warn("Will drop the exception")
-                case list: List[(String,String)] => out.println(list.map(tupel => s"${tupel._1}:${tupel._2}").mkString(","))
-                case ans => out.println(ans)
+              var answer = stringCommandHandler.interpretMessage(line)
+              if (answer == null) {
+                answer = ipcSuccessResponse(true)
               }
+              out.writeObject(answer)
+              out.flush()
+              logger.debug("Wrote Answer")
+              //              answer match {
+              //                case _: Exception => logger.warn("Will drop the exception")
+              //                case list: List[(String,String)] => out.writeChars(list.map(tupel => s"${tupel._1}:${tupel._2}").mkString(","))
+              //                case ans:IPCResponse => out.writeObject(ans)
+              //              }
             }
-          } while (line != null && !line.trim().equals("bye"))
+          } while (line != null && !line.isInstanceOf[ipcCloseCommand])
+          println("Exit")
         } catch {
-          case _: IOException =>
+          case e: IOException =>
+          case e: ClassNotFoundException => in.readAllBytes()
+            logger.warn("Class send by console not known.", e)
+          case e: InvalidClassException => in.readAllBytes()
+            logger.warn("Error while reading object from console.", e)
+          case e: OptionalDataException => in.readAllBytes()
+            logger.warn("Error while reading Objekt because it was no Object.", e)
         }
       }
 

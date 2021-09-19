@@ -18,16 +18,16 @@
 
 package PrivateHome.UI
 
+import PrivateHome.Devices.controlType.Slider
 import PrivateHome.data
 import org.slf4j.LoggerFactory
-
-import java.util.Base64
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def interpretMessage(msg: String): Any = {
+  def interpretMessage(msg: IPCCommand): IPCResponse = {
     try {
+      /*
       val command: Array[String] = msg.stripSuffix(")").split('(')
       val args = if ((command.length == 2) && (command(1) != null)) command(1).split(',') else null
       logger.debug("command = {}", command(0))
@@ -55,9 +55,46 @@ object stringCommandHandler {
         case _ => ""
       }
 
+
+       */
+      logger.debug("Received command: {}", msg)
+      val answer: IPCResponse = msg match {
+        case c: ipcAddControllerCommand => uiControl.addController(c.name)
+          ipcSuccessResponse()
+        case c: ipcAddDeviceCommand => uiControl.addDevice(commandAddDevice(c.id, c.switchType, c.name, c.systemCode, c.unitCode, c.controlType, c.keepState, c.pin, c.masterId))
+          ipcSuccessResponse()
+        case c: ipcAddUserCommand => uiControl.addUser(c.username, c.passHash)
+          ipcSuccessResponse()
+        case _: ipcGetControllerCommand => ipcGetControllerResponse(uiControl.getController)
+        case c: ipcGetControllerKeyCommand => ipcGetControllerKeyResponse(data.getControllerMasterId(c.id).keyArray)
+        case c: ipcGetDeviceCommand =>
+          val switch = uiControl.getDevice(c.id)
+          val switchData = ipcLongSwitchData(switch.id, switch.controlType == Slider, switch.name, switch.status, switch.switchtype)
+          ipcGetDeviceResponse(switchData)
+        case _: ipcGetDevicesCommand => val data = ipcGetDevicesResponse(uiControl.getDevices)
+          println("Got list")
+          data
+        case _: ipcGetRandomId => ipcGetRandomIdResponse(uiControl.randomNewId)
+        case c: ipcOffCommand => uiControl.off(c.id);
+          ipcSuccessResponse()
+        case c: ipcOnCommand => uiControl.on(c.id, c.percent);
+          ipcSuccessResponse()
+        case c: ipcProgramControllerCommand => uiControl.programController(c.masterId, c.path, c.ssid, c.pass);
+          ipcSuccessResponse()
+        case _: ipcRecreateDatabase => uiControl.recreateDatabase();
+          ipcSuccessResponse()
+        case _: ipcSafeCreateDatabase => uiControl.safeCreateDatabase();
+          ipcSuccessResponse()
+        case c: ipcUpdateDeviceCommand => uiControl.updateDevice(commandUpdateDevice(c.oldId, c.newId, c.keepState, c.name, c.controlType, c.switchType, c.systemCode, c.unitCode, c.pin, c.masterId));
+          ipcSuccessResponse()
+        case c => logger.error("IPCCommand with class {} not implemented in stringCommandHandler", msg.getClass.toString)
+          ipcErrorResponse(c, new Exception("Command not Implemented"))
+      }
+
+      answer
     } catch {
       case e: Throwable => logger.error("Unknown Error while interpreting Console command", e)
-        e + e.getStackTrace.mkString("\n")
+        ipcErrorResponse(msg, e)
     }
   }
 }

@@ -19,6 +19,7 @@
 package PrivateHome.UI
 
 import PrivateHome.Devices.MQTT.mqttController
+import PrivateHome.Devices.controlType.Slider
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.data
 import PrivateHome.data.{chars, devices}
@@ -57,10 +58,11 @@ object uiControl {
 
   /**
    * Get a List of all Switches
+   *
    * @return A List containing all the switch objects that ar known to data
    */
-  def getDevices: List[Switch] = {
-    data.devices.values.toList
+  def getDevices: Map[String, ipcShortSwitchData] = {
+    data.devices.values.toList.map(s => s.id -> ipcShortSwitchData(s.id, s.controlType == Slider, s.name, s.status)).toMap
   }
 
   /**
@@ -151,12 +153,15 @@ object uiControl {
 
   /**
    * Get a List of all the controllerIDs and their names
+   *
    * @return a simple List containing Tupels of (id, name)
    */
-  def getController: List[(String, String)] = {
-    data.masterIds.map(t => {
-      t -> data.getControllerMasterId(t).name
+  def getController: Map[String, String] = {
+    var answer: Map[String, String] = Map()
+    data.masterIds.foreach(t => {
+      answer += (t -> data.getControllerMasterId(t).name)
     })
+    answer
   }
 
   /**
