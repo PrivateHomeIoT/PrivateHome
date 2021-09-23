@@ -4,7 +4,7 @@ name := "PrivateHome"
 
 //version := "0.1"
 
-scalaVersion := "2.13.0"
+scalaVersion := "2.13.6"
 
 maintainer := "RaHoni <honi2002suess@gmail.com>"
 
@@ -34,7 +34,7 @@ releaseProcess := Seq[ReleaseStep](
 
 //version in Debian := "0.1-20201211-8"
 
-maintainerScripts in Debian := maintainerScriptsAppendFromFile((maintainerScripts in Debian).value)(
+Debian / maintainerScripts  := maintainerScriptsAppendFromFile((Debian/maintainerScripts ).value)(
   Postinst ->  sourceDirectory.value / "debian" / "postinst"
 )
 
@@ -78,6 +78,10 @@ libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
 libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
 
 libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
+
+// library for test-coverage reports
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)

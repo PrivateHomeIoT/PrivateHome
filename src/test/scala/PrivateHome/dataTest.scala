@@ -18,14 +18,12 @@
 
 package PrivateHome
 
-import PrivateHome.Devices.MQTT.{mqttController, mqttSwitch}
 import PrivateHome.Devices.Switch
 import org.scalatest.funsuite.AnyFunSuite
 
-
 class dataTest extends AnyFunSuite {
   settings.database.path = "mem:devices"
-  val key = Array[Byte](0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+  val key: Array[Byte] = Array[Byte](0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
 
   test("testCreate") {
@@ -68,22 +66,22 @@ class dataTest extends AnyFunSuite {
   }
    */
 
-  test("Save State") {
-    data.create(true)
-    data.addController(new mqttController("aaaaa",key),key)
-    data.addDevice(mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa"))
-    var expected: Map[String, Switch] = Map()
-    expected = expected + (("abcde", mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa")))
-    data.fillDevices()
-  }
-
-  test("Test: getDevice") {
-    data.create(true)
-    data.addController(new mqttController("aaaaa",key),key)
-    val switch = mqttSwitch("abcde", _keepStatus = false, "Test", "slider",1,"aaaaa")
-    data.addDevice(switch)
-    assertResult(data.getDevice("abcde"))(switch)
-  }
+//  test("Save State") {
+//    data.create(true)
+//    data.addController(new mqttController("aaaaa",key),key)
+//    data.addDevice(mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa"))
+//    var expected: Map[String, Switch] = Map()
+//    expected = expected + (("abcde", mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa")))
+//    data.fillDevices()
+//  }
+//
+//  test("Test: getDevice") {
+//    data.create(true)
+//    data.addController(new mqttController("aaaaa",key),key)
+//    val switch = mqttSwitch("abcde", _keepStatus = false, "Test", "slider",1,"aaaaa")
+//    data.addDevice(switch)
+//    assertResult(data.getDevice("abcde"))(switch)
+//  }
 
 
 }
