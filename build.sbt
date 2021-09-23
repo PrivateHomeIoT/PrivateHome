@@ -79,14 +79,7 @@ libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
 
 libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
 
-// library for test-coverage reports
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-jacocoReportSettings := JacocoReportSettings(
-  "Jacoco Coverage Report",
-  None,
-  JacocoThresholds(),
-  Seq(JacocoReportFormats.ScalaHTML, JacocoReportFormats.XML), // note XML formatter
-  "utf-8")
+coverageEnabled := true
 
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
