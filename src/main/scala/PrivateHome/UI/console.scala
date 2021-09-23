@@ -16,11 +16,11 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package PrivateHome
+package PrivateHome.UI
 
 import PrivateHome.Devices.controlType._
 import PrivateHome.Devices.switchType._
-import PrivateHome.UI._
+import PrivateHome.UI
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
 import org.scalasbt.ipcsocket.UnixDomainSocket
@@ -58,9 +58,7 @@ object console {
     while (in.available() > 0) println(in.readObject())
     send(ipcGetControllerKeyCommand(controllerId))
     var tmpId: String = ""
-    while (tmpId.isBlank) {
-      tmpId = read(ipcGetControllerKeyResponse.getClass).asInstanceOf[ipcGetControllerKeyResponse].key.map(_ & 0xFF).mkString(",")
-    }
+    while (tmpId.isBlank) tmpId = read[ipcGetControllerKeyResponse]().key.map(_ & 0xFF).mkString(",")
     println(tmpId)
   }
 
@@ -129,7 +127,7 @@ object console {
   private def getControllerId: String = {
     var chosenController: String = null
     send(new ipcGetControllerCommand)
-    val response = read(ipcGetControllerResponse.getClass).asInstanceOf[ipcGetControllerResponse]
+    val response = read[ipcGetControllerResponse]()
     val controller: Map[String, String] = response.controller
 
     println("Available Controller:")
@@ -154,8 +152,10 @@ object console {
     chosenController
   }
 
-  private def read(wanted: Class[_]): IPCResponse = {
-    val wantedString = wanted.toString.replaceAll("\\$", "")
+  private def read[Response](): Response = {
+
+
+    //    val wantedString = wanted.toString.replaceAll("\\$", "")
     if (socket.isClosed) {
       println(
         """Connection is closed.
@@ -163,17 +163,15 @@ Reconnecting
           |""".stripMargin)
       connect()
     }
-    var answer: IPCResponse = new IPCResponse {};
-    while (answer.getClass.toString != wantedString) {
-      answer = in.readObject().asInstanceOf[IPCResponse]
-      answer match {
-        case e: ipcErrorResponse => println(s"Error with Command: ${e.command}")
-          e.exception.printStackTrace()
-          if (wanted == ipcSuccessResponse.getClass) return ipcSuccessResponse(false)
-        case _ =>
+    var run = true
+    while (run) {
+      in.readObject() match {
+        case response: Response =>
+          return response
+        case r => println(r)
       }
     }
-    answer
+    ipcSuccessResponse(ipcPingCommand(), success = false).asInstanceOf[Response] //should never be returned
   }
 
   def addController(): Unit = {
@@ -197,8 +195,8 @@ Reconnecting
 
   private def connect() {
     socket = new UnixDomainSocket("/tmp/privatehome2.sock")
-    in = new ObjectInputStream(socket.getInputStream())
-    out = new ObjectOutputStream(socket.getOutputStream())
+    in = new ObjectInputStream(socket.getInputStream)
+    out = new ObjectOutputStream(socket.getOutputStream)
     out.flush()
   }
 
@@ -225,32 +223,11 @@ Reconnecting
 
   }
 
-  private def read(wanted: String): IPCResponse = {
-    if (socket.isClosed) {
-      println(
-        """Connection is closed.
-Reconnecting
-          |""".stripMargin)
-      connect()
-    }
-    var answer: IPCResponse = new IPCResponse {};
-    while (answer.getClass.toString != wanted) {
-      answer = in.readObject().asInstanceOf[IPCResponse]
-      println(s"Received Message $answer ${answer.getClass} equals ${wanted}: ${answer.getClass.toString == wanted}")
-      answer match {
-        case e: ipcErrorResponse => println(s"Error with Command: ${e.command}")
-          e.exception.printStackTrace()
-          if (wanted == ipcSuccessResponse.getClass.toString) return ipcSuccessResponse(false)
-        case _ =>
-      }
-    }
-    answer
-  }
 
   private def addSwitch(dimmable: Boolean): Unit = {
     send(ipcGetRandomId())
-    val response = read(ipcGetRandomIdResponse.getClass)
-    val tmpId = response.asInstanceOf[ipcGetRandomIdResponse].id
+    val response = read[ipcGetRandomIdResponse]()
+    val tmpId = response.id
     var id = ""
     while (!id.matches("[-_a-zA-Z0-9]{5}")) {
       id = readLine(s"id[$tmpId]> ")
@@ -265,26 +242,26 @@ Reconnecting
     var chosenController: String = null
     var pin = -1
 
-      do {
-        val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
-        switchType = switchTypeString match {
-          case "mqtt" =>
-            chosenController = getControllerId
-            while (!(pin > -1 && pin < 64)) {
-              try pin = readLine("Pin number 0-63> ").toInt
-              catch {
-                case _: NumberFormatException =>
-              }
+    do {
+      val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+      switchType = switchTypeString match {
+        case "mqtt" =>
+          chosenController = getControllerId
+          while (!(pin > -1 && pin < 64)) {
+            try pin = readLine("Pin number 0-63> ").toInt
+            catch {
+              case _: NumberFormatException =>
             }
+          }
 
-            Mqtt
-          case "433mhz" =>
-            while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
-            while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
-            Mhz
-          case _ => null
-        }
-      } while (switchType == null)
+          Mqtt
+        case "433mhz" =>
+          while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
+          while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
+          Mhz
+        case _ => null
+      }
+    } while (switchType == null)
 
     send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
       if (dimmable) Slider else Button
@@ -309,7 +286,7 @@ Reconnecting
       } catch {
         case _: Throwable =>
       }
-      read(ipcSuccessResponse.getClass)
+      read[ipcSuccessResponse]()
 
     }
   }
@@ -317,7 +294,7 @@ Reconnecting
   private def getDeviceID(tmpID: String = ""): String = {
     var id = tmpID
     send(ipcGetDevicesCommand())
-    val devices = read(ipcGetDevicesResponse.getClass).asInstanceOf[ipcGetDevicesResponse]
+    val devices = read[ipcGetDevicesResponse]()
     val deviceMap = devices.DeviceList
     val deviceIds = deviceMap.keys.to(List)
     var counter = 0
@@ -342,7 +319,7 @@ Reconnecting
   private def status(): Unit = {
     val id = getDeviceID()
     send(ipcGetDeviceCommand(id))
-    val response = read(ipcGetDeviceResponse.getClass).asInstanceOf[ipcGetDeviceResponse]
+    val response = read[ipcGetDeviceResponse]()
     println(response.device.status * 100)
   }
 
