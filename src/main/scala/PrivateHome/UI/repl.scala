@@ -49,7 +49,7 @@ object repl {
             if (line != null) {
               var answer = stringCommandHandler.interpretMessage(line)
               if (answer == null) {
-                answer = ipcSuccessResponse(true)
+                answer = ipcSuccessResponse(line)
               }
               out.writeObject(answer)
               out.flush()

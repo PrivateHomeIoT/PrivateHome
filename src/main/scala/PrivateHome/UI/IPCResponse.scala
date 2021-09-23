@@ -24,8 +24,6 @@ trait IPCResponse extends Serializable {
 
 }
 
-case class ipcErrorResponse(command: IPCCommand, exception: Throwable) extends IPCResponse
-
 case class ipcGetDevicesResponse(DeviceList: Map[String, ipcShortSwitchData]) extends IPCResponse
 
 case class ipcGetDeviceResponse(device: ipcLongSwitchData) extends IPCResponse
@@ -36,8 +34,8 @@ case class ipcGetRandomIdResponse(id: String) extends IPCResponse
 
 case class ipcGetControllerKeyResponse(key: Array[Byte]) extends IPCResponse
 
-case class ipcSuccessResponse(success: Boolean = true) extends IPCResponse
+case class ipcSuccessResponse(command: IPCCommand, exception: Throwable = new Throwable, success: Boolean = true) extends IPCResponse
 
 case class ipcShortSwitchData(id: String, dimmable: Boolean, name: String, status: Float)
 
-case class ipcLongSwitchData(id: String, dimable: Boolean, name: String, status: Float, switchType: switchType)
+case class ipcLongSwitchData(id: String, dimmable: Boolean, name: String, status: Float, switchType: switchType)
