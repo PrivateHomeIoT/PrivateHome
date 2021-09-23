@@ -40,9 +40,13 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: Get Coverage Report
-      run: sbt coverage coverageReport
+    - name: sbt coverage
+      run: sbt coverage
+    - name: sbt test
+      run: sbt test
+    - name: sbt coverageReport
+      run: sbt coverageReport
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
-#      with:
-#        files: ./target/test-reports/TEST-PrivateHome.dataTest.xml
+      with:
+        fail_ci_if_error: true

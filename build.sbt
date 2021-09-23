@@ -4,7 +4,7 @@ name := "PrivateHome"
 
 //version := "0.1"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.1"
 
 maintainer := "RaHoni <honi2002suess@gmail.com>"
 
