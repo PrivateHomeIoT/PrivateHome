@@ -60,11 +60,11 @@ object stringCommandHandler {
       logger.debug("Received command: {}", msg)
       val answer: IPCResponse = msg match {
         case c: ipcAddControllerCommand => uiControl.addController(c.name)
-          ipcSuccessResponse()
+          ipcSuccessResponse(c)
         case c: ipcAddDeviceCommand => uiControl.addDevice(commandAddDevice(c.id, c.switchType, c.name, c.systemCode, c.unitCode, c.controlType, c.keepState, c.pin, c.masterId))
-          ipcSuccessResponse()
+          ipcSuccessResponse(c)
         case c: ipcAddUserCommand => uiControl.addUser(c.username, c.passHash)
-          ipcSuccessResponse()
+          ipcSuccessResponse(c)
         case _: ipcGetControllerCommand => ipcGetControllerResponse(uiControl.getController)
         case c: ipcGetControllerKeyCommand => ipcGetControllerKeyResponse(data.getControllerMasterId(c.id).keyArray)
         case c: ipcGetDeviceCommand =>
@@ -75,26 +75,26 @@ object stringCommandHandler {
           println("Got list")
           data
         case _: ipcGetRandomId => ipcGetRandomIdResponse(uiControl.randomNewId)
-        case c: ipcOffCommand => uiControl.off(c.id);
-          ipcSuccessResponse()
-        case c: ipcOnCommand => uiControl.on(c.id, c.percent);
-          ipcSuccessResponse()
-        case c: ipcProgramControllerCommand => uiControl.programController(c.masterId, c.path, c.ssid, c.pass);
-          ipcSuccessResponse()
-        case _: ipcRecreateDatabase => uiControl.recreateDatabase();
-          ipcSuccessResponse()
-        case _: ipcSafeCreateDatabase => uiControl.safeCreateDatabase();
-          ipcSuccessResponse()
-        case c: ipcUpdateDeviceCommand => uiControl.updateDevice(commandUpdateDevice(c.oldId, c.newId, c.keepState, c.name, c.controlType, c.switchType, c.systemCode, c.unitCode, c.pin, c.masterId));
-          ipcSuccessResponse()
+        case c: ipcOffCommand => uiControl.off(c.id)
+          ipcSuccessResponse(c)
+        case c: ipcOnCommand => uiControl.on(c.id, c.percent)
+          ipcSuccessResponse(c)
+        case c: ipcProgramControllerCommand => uiControl.programController(c.masterId, c.path, c.ssid, c.pass)
+          ipcSuccessResponse(c)
+        case c: ipcRecreateDatabase => uiControl.recreateDatabase()
+          ipcSuccessResponse(c)
+        case c: ipcSafeCreateDatabase => uiControl.safeCreateDatabase()
+          ipcSuccessResponse(c)
+        case c: ipcUpdateDeviceCommand => uiControl.updateDevice(commandUpdateDevice(c.oldId, c.newId, c.keepState, c.name, c.controlType, c.switchType, c.systemCode, c.unitCode, c.pin, c.masterId))
+          ipcSuccessResponse(c)
         case c => logger.error("IPCCommand with class {} not implemented in stringCommandHandler", msg.getClass.toString)
-          ipcErrorResponse(c, new Exception("Command not Implemented"))
+          ipcSuccessResponse(c, new Exception("Command not Implemented"), success = false)
       }
 
       answer
     } catch {
       case e: Throwable => logger.error("Unknown Error while interpreting Console command", e)
-        ipcErrorResponse(msg, e)
+        ipcSuccessResponse(msg, e, success = false)
     }
   }
 }
