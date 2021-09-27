@@ -40,10 +40,8 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: sbt coverage
-      run: sbt coverage
-    - name: sbt test
-      run: sbt test
+    - name: sbt coverage generate
+      run: sbt coverage test
     - name: sbt coverageReport
       run: sbt coverageReport
     - name: Codecov
