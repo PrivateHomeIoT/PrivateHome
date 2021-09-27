@@ -51,4 +51,4 @@ jobs:
       with:
         fail_ci_if_error: true
         verbose: true
-        files: /home/runner/work/PrivateHome/PrivateHome/target/scala-2.13/scoverage-data/scoverage.coverage
+        directory: /home/runner/work/PrivateHome/PrivateHome/target/scala-2.13/scoverage-data/
