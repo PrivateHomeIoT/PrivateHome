@@ -44,13 +44,8 @@ jobs:
       run: sbt coverage test
     - name: sbt coverageReport
       run: sbt coverageReport
-    - name: pwd
-      run: pwd
-    - name: ls target scala
-      run: du -a target/scala-2.13/
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
       with:
         fail_ci_if_error: true
         verbose: true
-        directory: /home/runner/work/PrivateHome/PrivateHome/target/scala-2.13/scoverage-data/
