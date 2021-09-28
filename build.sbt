@@ -88,6 +88,10 @@ libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
+
+//scallop libary for cmdline parsing
+libraryDependencies += "org.rogach" %% "scallop" % "4.0.4"
+
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)

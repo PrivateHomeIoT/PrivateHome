@@ -47,6 +47,7 @@ object console {
   var socket: UnixDomainSocket = _
   var out: ObjectOutputStream = _
   var in: ObjectInputStream = _
+  var interactive: Boolean = _
 
   def recreate(): Unit = {
     val command = ipcRecreateDatabase()
@@ -65,19 +66,46 @@ object console {
   def safeCreate(): Unit = send(new ipcSafeCreateDatabase)
 
   def main(args: Array[String]): Unit = {
+
+    val arguments = new cliParser(this.getClass.getSimpleName, args)
     try
       connect()
     catch {
       case e: Throwable => e.printStackTrace()
     }
+    if (arguments.subcommand.isDefined) {
+      interactive = arguments.interactive()
 
-    while (true) {
-      val userInput = readLine("> ")
+      arguments.subcommand.get match {
+        case s: UI.status => status(s.id.getOrElse(""))
+        case on: UI.on =>
+          val id = getDeviceID(on.id.getOrElse(""))
+          val percentFloat: Float = {
+            if (on.percentage.isSupplied) on.percentage() / 100f
+            else if (on.percentFloat.isSupplied) on.percentFloat()
+            else 1f
+          }
+          send(ipcOnCommand(id, percentFloat))
+        case off: UI.off => val id = getDeviceID(off.id())
+          send(ipcOffCommand(id))
+        case t: toggleSwitch =>
+          val id = getDeviceID(t.id())
+          send(ipcGetDeviceCommand(id))
+          val state: Float = if (read[ipcGetDeviceResponse]().device.status == 0) 1 else 0
+          send(ipcOnCommand(id, state))
+      }
+    } else {
+      interactive = true
 
-      if (commands.contains(userInput)) {
-        commands(userInput).methodToCall.apply()
-      } else {
-        println("Unrecognized command. Please try again.")
+
+      while (true) {
+        val userInput = readLine("> ")
+
+        if (commands.contains(userInput)) {
+          commands(userInput).methodToCall.apply()
+        } else {
+          println("Unrecognized command. Please try again.")
+        }
       }
     }
   }
@@ -291,6 +319,13 @@ Reconnecting
     }
   }
 
+  private def status(tmpId: String = ""): Unit = {
+    val id = getDeviceID(tmpId)
+    send(ipcGetDeviceCommand(id))
+    val response = read[ipcGetDeviceResponse]()
+    println(response.device.status * 100)
+  }
+
   private def getDeviceID(tmpID: String = ""): String = {
     var id = tmpID
     send(ipcGetDevicesCommand())
@@ -298,29 +333,23 @@ Reconnecting
     val deviceMap = devices.DeviceList
     val deviceIds = deviceMap.keys.to(List)
     var counter = 0
-    if (!deviceMap.contains(id))
-      deviceMap.foreach(s => {
-        println(s"$counter: id: ${s._1} name: ${s._2.name}");
-        counter += 1
-      })
-    while (!deviceMap.contains(id)) {
-      id = readLine("id/Index> ")
-      try {
-        id = deviceIds(id.toInt)
-      } catch {
-        case _: ArrayIndexOutOfBoundsException =>
-        case _: NumberFormatException =>
+    if (interactive) {
+      if (!deviceMap.contains(id))
+        deviceMap.foreach(s => {
+          println(s"$counter: id: ${s._1} name: ${s._2.name}")
+          counter += 1
+        })
+      while (!deviceMap.contains(id)) {
+        id = readLine("id/Index> ")
+        try {
+          id = deviceIds(id.toInt)
+        } catch {
+          case _: ArrayIndexOutOfBoundsException =>
+          case _: NumberFormatException =>
+        }
       }
-    }
+    } else if (!deviceMap.contains(id)) throw new IllegalArgumentException
     id
-  }
-
-
-  private def status(): Unit = {
-    val id = getDeviceID()
-    send(ipcGetDeviceCommand(id))
-    val response = read[ipcGetDeviceResponse]()
-    println(response.device.status * 100)
   }
 
 }
