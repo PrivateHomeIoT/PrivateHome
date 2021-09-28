@@ -23,6 +23,13 @@ linuxPackageMappings ++= Seq(
 releaseIgnoreUntrackedFiles := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "PrivateHome"
+  )
+
 releaseProcess := Seq[ReleaseStep](
   inquireVersions,
   setReleaseVersion,
