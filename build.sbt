@@ -4,16 +4,16 @@ name := "PrivateHome"
 
 //version := "0.1"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.6"
 
-maintainer := "RaHoni <honi2002suess@gmail.com>"
+maintainer := "RaHoni <honisuess@gmail.com>"
 
 packageSummary := "This is a SmartHome system"
 
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
-debianPackageRecommends := Seq("wiringpi","pi4j")
+debianPackageRecommends := Seq("wiringpi","pi4j (<< 2.0.0)")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
   packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") ->s"/etc/mosquitto/conf.d/privatehome.conf"),
@@ -47,7 +47,7 @@ libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
 
 //logback logger used by Akka and scalikejdbc and the whole project
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.6"
 
 //Akka library for Webserver with Websockets Support
 libraryDependencies ++= Seq(
