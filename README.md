@@ -1,4 +1,5 @@
 # PrivateHome
+[![Scala CI](https://github.com/PrivateHomeIoT/PrivateHome/actions/workflows/scala.yml/badge.svg)](https://github.com/PrivateHomeIoT/PrivateHome/actions/workflows/scala.yml) [![codecov](https://codecov.io/gh/PrivateHomeIoT/PrivateHome/branch/master/graph/badge.svg)](https://codecov.io/gh/PrivateHomeIoT/PrivateHome)
 
 ## Description
 
