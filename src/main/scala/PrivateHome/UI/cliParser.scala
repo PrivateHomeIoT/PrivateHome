@@ -38,18 +38,11 @@ class cliParser(programName: String, arguments: Seq[String]) extends ScallopConf
 
 }
 
-class status(interactive: ScallopOption[Boolean]) extends Subcommand("status") with validateInteractiveId {
-  val id: ScallopOption[String] = opt[String]()
-  validateOpt(interactive, id) { (i, id) => validateInteractiveId(i, id) }
-}
+class status(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "status")
 
-class toggleSwitch(interactive: ScallopOption[Boolean]) extends Subcommand("toggle") with validateInteractiveId {
-  val id: ScallopOption[String] = opt[String]()
-  validateOpt(interactive, id) { (i, id) => validateInteractiveId(i, id) }
-}
+class toggleSwitch(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "toggle")
 
-class on(interactive: ScallopOption[Boolean]) extends Subcommand("on") with validateInteractiveId {
-  val id: ScallopOption[String] = opt[String]()
+class on(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "on") {
   val percentage: ScallopOption[Int] = opt[Int](validate = per => {
     per > 0 && per < 100
   })
@@ -57,21 +50,20 @@ class on(interactive: ScallopOption[Boolean]) extends Subcommand("on") with vali
     float > 0 && float <= 1
   })
   mutuallyExclusive(percentage, percentFloat)
-  validateOpt(interactive, id) { (i, id) => validateInteractiveId(i, id) }
 }
 
-class off(interactive: ScallopOption[Boolean]) extends Subcommand("off") with validateInteractiveId {
+class off(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "off") {
+}
+
+abstract class subcommandWithId(interactive: ScallopOption[Boolean], subcommandName: String) extends Subcommand(subcommandName) {
   val id: ScallopOption[String] = opt[String]()
-  validateOpt(interactive, id) { (i, id) => validateInteractiveId(i, id) }
-}
 
-trait validateInteractiveId {
-  def validateInteractiveId(i: Option[Boolean], id: Option[String]): Either[String, Unit] = {
-    if (!i.getOrElse(false)) {
-      if (id.isDefined) Right()
-      else Left("When the command is not run interactive you mus specify the id")
+  validateOpt(interactive, id) { (i, id) => {
+    if (!i.get || id.isDefined) {
+      Left("When the command is not run interactive you mus specify the id")
     } else {
       Right()
     }
+  }
   }
 }
