@@ -28,12 +28,12 @@ import java.util.Base64
 class Command() extends Serializable {
   def testArgumentsSwitch(switchType: switchType, masterId: String, pin: Int, systemCode: String, unitCode: String): Boolean = {
     switchType match {
-      case Mqtt =>
+      case MQTT =>
         if (masterId.length != 5) throw new IllegalArgumentException("""Length of masterId is not 5""")
         if (!masterId.matches("[0-9a-zA-Z]{5}")) throw new IllegalArgumentException("""masterId Contains not Allowed Characters""")
         if (!data.masterIdExists(masterId)) throw new IllegalArgumentException("""This masterId is not known""")
         if (!(pin >= 0 && pin < 64)) throw new IllegalArgumentException("""pin is not in range from 0-64""")
-      case Mhz =>
+      case MHZ =>
         if (systemCode.length != 5) throw new IllegalArgumentException("""Length of systemCode is not 5""")
         if (!systemCode.matches("[01]{5}")) throw new IllegalArgumentException("""systemCode Contains not Allowed Characters""")
         if (unitCode.length != 5) throw new IllegalArgumentException("""Length of unitCode is not 5""")

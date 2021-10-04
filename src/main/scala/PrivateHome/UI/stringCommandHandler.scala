@@ -18,7 +18,7 @@
 
 package PrivateHome.UI
 
-import PrivateHome.Devices.controlType.Slider
+import PrivateHome.Devices.controlType.SLIDER
 import PrivateHome.data
 import org.slf4j.LoggerFactory
 
@@ -69,7 +69,7 @@ object stringCommandHandler {
         case c: ipcGetControllerKeyCommand => ipcGetControllerKeyResponse(data.getControllerMasterId(c.id).keyArray)
         case c: ipcGetDeviceCommand =>
           val switch = uiControl.getDevice(c.id)
-          val switchData = ipcLongSwitchData(switch.id, switch.controlType == Slider, switch.name, switch.status, switch.switchtype)
+          val switchData = ipcLongSwitchData(switch.id, switch.controlType == SLIDER, switch.name, switch.status, switch.switchtype)
           ipcGetDeviceResponse(switchData)
         case _: ipcGetDevicesCommand => val data = ipcGetDevicesResponse(uiControl.getDevices)
           println("Got list")
