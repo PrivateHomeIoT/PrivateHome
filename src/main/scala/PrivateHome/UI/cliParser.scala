@@ -59,7 +59,7 @@ abstract class subcommandWithId(interactive: ScallopOption[Boolean], subcommandN
   val id: ScallopOption[String] = opt[String]()
 
   validateOpt(interactive, id) { (i, id) => {
-    if (!i.get || id.isDefined) {
+    if (!i.get && id.isEmpty) {
       Left("When the command is not run interactive you mus specify the id")
     } else {
       Right()
