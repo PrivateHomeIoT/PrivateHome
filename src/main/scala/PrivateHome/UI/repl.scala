@@ -25,11 +25,22 @@ import org.slf4j.LoggerFactory
 import java.io._
 
 
-
 object repl {
-  private val logger = LoggerFactory.getLogger(this.getClass)
   val socketPath = "/tmp/privatehome2.sock"
   val serverSocket = new UnixDomainServerSocket(socketPath)
+  val replReadThread = new readThread
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  def shutdown(): Unit = {
+    logger.info("Shutting down repl")
+    val socketfile = new File(socketPath)
+    serverSocket.close()
+    socketfile.delete()
+    logger.info("REPL shut down")
+  }
+
+  replReadThread.start()
+  logger.info("Started repl handler thread")
 
   class readThread extends Thread {
     var out: ObjectOutputStream = _
@@ -40,8 +51,7 @@ object repl {
       while (true) {
         val clientSocket = serverSocket.accept()
         try {
-          out = new ObjectOutputStream(new BufferedOutputStream(clientSocket.getOutputStream))
-          out.flush()
+          out = new ObjectOutputStream(clientSocket.getOutputStream)
           in = new ObjectInputStream(clientSocket.getInputStream)
           var line: IPCCommand = null
           do {
@@ -52,7 +62,6 @@ object repl {
                 answer = ipcSuccessResponse(line)
               }
               out.writeObject(answer)
-              out.flush()
               logger.debug("Wrote Answer")
               //              answer match {
               //                case _: Exception => logger.warn("Will drop the exception")
@@ -74,19 +83,6 @@ object repl {
       }
 
     }
-  }
-
-  val replReadThread = new readThread
-
-  replReadThread.start()
-  logger.info("Started repl handler thread")
-
-  def shutdown(): Unit ={
-    logger.info("Shutting down repl")
-    val socketfile = new File(socketPath)
-    serverSocket.close()
-    socketfile.delete()
-    logger.info("REPL shut down")
   }
 }
 
