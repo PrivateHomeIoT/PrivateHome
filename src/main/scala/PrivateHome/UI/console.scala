@@ -20,7 +20,7 @@ package PrivateHome.UI
 
 import PrivateHome.Devices.controlType._
 import PrivateHome.Devices.switchType._
-import PrivateHome.UI
+import PrivateHome.{BuildInfo, UI}
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
 import org.scalasbt.ipcsocket.UnixDomainSocket
@@ -48,6 +48,7 @@ object console {
   var out: ObjectOutputStream = _
   var in: ObjectInputStream = _
   var interactive: Boolean = _
+  var socketPath = s"/tmp/${BuildInfo.name}.sock"
 
   def recreate(): Unit = {
     val command = ipcRecreateDatabase()

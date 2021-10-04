@@ -19,6 +19,7 @@
 package PrivateHome.UI
 
 
+import PrivateHome.BuildInfo
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
@@ -26,7 +27,7 @@ import java.io._
 
 
 object repl {
-  val socketPath = "/tmp/privatehome2.sock"
+  val socketPath = s"/tmp/${BuildInfo.name}.sock"
   val serverSocket = new UnixDomainServerSocket(socketPath)
   val replReadThread = new readThread
   private val logger = LoggerFactory.getLogger(this.getClass)
