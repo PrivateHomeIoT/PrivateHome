@@ -195,7 +195,7 @@ object console {
     var pin = -1
 
     do {
-      val switchTypeString = if (dimmable) Mqtt else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+      val switchTypeString = if (dimmable) MQTT else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
       switchType = switchTypeString match {
         case "mqtt" =>
           chosenController = getControllerId
@@ -206,17 +206,17 @@ object console {
             }
           }
 
-          Mqtt
+          MQTT
         case "433mhz" =>
           while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
           while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
-          Mhz
+          MHZ
         case _ => null
       }
     } while (switchType == null)
 
     send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
-      if (dimmable) Slider else Button
+      if (dimmable) SLIDER else BUTTON
     }, keepState, pin, chosenController))
 
   }

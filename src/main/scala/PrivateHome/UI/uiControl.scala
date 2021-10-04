@@ -19,7 +19,7 @@
 package PrivateHome.UI
 
 import PrivateHome.Devices.MQTT.mqttController
-import PrivateHome.Devices.controlType.Slider
+import PrivateHome.Devices.controlType.SLIDER
 import PrivateHome.Devices.{Switch, switchSerializer}
 import PrivateHome.data
 import PrivateHome.data.{chars, devices}
@@ -62,7 +62,7 @@ object uiControl {
    * @return A List containing all the switch objects that ar known to data
    */
   def getDevices: Map[String, ipcShortSwitchData] = {
-    data.devices.values.toList.map(s => s.id -> ipcShortSwitchData(s.id, s.controlType == Slider, s.name, s.status)).toMap
+    data.devices.values.toList.map(s => s.id -> ipcShortSwitchData(s.id, s.controlType == SLIDER, s.name, s.status)).toMap
   }
 
   /**

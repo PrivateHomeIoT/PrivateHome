@@ -225,7 +225,7 @@ private[PrivateHome] object data {
       select.from(device as m)
     }.map(rs => device(rs)).list().apply().foreach(d => {
       d.switchtype match {
-        case Mqtt =>
+        case MQTT =>
           val mq = mqtt.syntax("mq")
           val mqttData = withSQL {
             select.from(mqtt as mq).where.eq(mq.id, d.id)
@@ -243,7 +243,7 @@ private[PrivateHome] object data {
           if (d.keepstate) {
             devices(d.id).on(d.state)
           }
-        case Mhz =>
+        case MHZ =>
           val m = mhz.syntax("m")
           val data = withSQL {
             select.from(mhz as m).where.eq(m.id, d.id)
