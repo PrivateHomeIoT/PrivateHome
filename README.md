@@ -22,4 +22,4 @@ This is still a work in progress. The following list represents our current stat
 - [ ] Google Assistant
 - [ ] Setup assistent
 - [x] Setup assistent for devices
-- [ ] Admin cli
+- [ ] Admin CLI
