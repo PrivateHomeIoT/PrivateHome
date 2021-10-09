@@ -1,4 +1,5 @@
 # PrivateHome
+[![Scala CI](https://github.com/PrivateHomeIoT/PrivateHome/actions/workflows/scala.yml/badge.svg)](https://github.com/PrivateHomeIoT/PrivateHome/actions/workflows/scala.yml) [![codecov](https://codecov.io/gh/PrivateHomeIoT/PrivateHome/branch/master/graph/badge.svg)](https://codecov.io/gh/PrivateHomeIoT/PrivateHome)
 
 ## Description
 
@@ -21,3 +22,4 @@ This is still a work in progress. The following list represents our current stat
 - [ ] Google Assistant
 - [ ] Setup assistent
 - [x] Setup assistent for devices
+- [ ] Admin CLI

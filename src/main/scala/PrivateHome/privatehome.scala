@@ -29,7 +29,7 @@ import sun.misc.{Signal, SignalHandler}
 object privatehome {
   val portable: Boolean = !getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath.startsWith("/usr/share/privatehome/")
 
-  val logCommands = System.getProperty("logCommands","notSpecified")
+  val logCommands: String = System.getProperty("logCommands","notSpecified")
 
   if (logCommands.equals("ALLOW") || logCommands.equals("NATURAL") || logCommands.equals("DENY")) {
 
@@ -63,7 +63,7 @@ object privatehome {
 
   def shutdown(exitCode: Int = 0): Unit = {
     logger.info("Shutting down Server")
-    repl.shutdown
+    repl.shutdown()
     gui.shutdown
     data.shutdown
     sendMhz.shutdown
