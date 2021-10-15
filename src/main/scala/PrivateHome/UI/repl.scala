@@ -73,13 +73,13 @@ object repl {
           } while (line != null && !line.isInstanceOf[ipcCloseCommand])
           println("Exit")
         } catch {
-          case e: IOException =>
           case e: ClassNotFoundException => in.readAllBytes()
             logger.warn("Class send by console not known.", e)
           case e: InvalidClassException => in.readAllBytes()
             logger.warn("Error while reading object from console.", e)
           case e: OptionalDataException => in.readAllBytes()
             logger.warn("Error while reading Objekt because it was no Object.", e)
+          case e: IOException =>
         }
       }
 
