@@ -109,17 +109,14 @@ class subcommandWithIdTest[toTest](command: String) extends AnyFunSuite {
 
   test("Test id verify") {
     val conf = new cliParser("", List(command, "--id", "aaaaa"))
-    val tog: toTest = conf.subcommand.get match {
-      case s: toTest => s
-      case _ => cancel("This should not be reached")
-    }
+    val tog: toTest = conf.subcommand.get.asInstanceOf[toTest]
 
     //    this test will only work with classes inheriting from subcommandWithId
     tog match {
       case s: subcommandWithId =>
         assert(s.id.isSupplied)
         assertResult("aaaaa")(s.id())
-      case _ => fail("The supplied command does not support id or is")
+      case _ => fail("The supplied command does not support id")
     }
   }
 
