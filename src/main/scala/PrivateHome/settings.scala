@@ -29,6 +29,15 @@ import org.slf4j.LoggerFactory
 import java.io.{File, FileNotFoundException, PrintWriter}
 import scala.io.Source
 
+object settingsPath {
+  var _path = "/etc/privatehome/settings.json"
+
+  if (portable)
+    _path = "settings.json"
+
+  def path: String = _path
+  def path_=(newPath:String): Unit = _path = newPath
+}
 
 case object settings {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -37,17 +46,14 @@ case object settings {
   var database = new databaseSetting(userName = "user", pass = "pass", "/etc/privatehome/data/Devices")
   var mqtt: mqttBrokerSetting = mqttBrokerSetting("localhost", 1500)
   var keystore = new keystoreSetting("/Users/maximilian/Dokumente/GitHub/PrivateHome/src/main/resources/keystore.pkcs12","password")
-  var settingspath = "/etc/privatehome/settings.json"
+  def Path:String = {settingsPath.path }
 
-
-  if (portable)
-    settingspath = "settings.json"
 
   load()
 
   def load(): Unit = {
     try {
-      val fSource = Source.fromFile(settingspath)
+      val fSource = Source.fromFile(Path)
     }
     catch {
       case e: FileNotFoundException => logger.warn("settings.json doesn't exist. Saving standard to create a new one.")
@@ -55,7 +61,7 @@ case object settings {
       case e: Throwable => throw e
     }
 
-    val fSource = Source.fromFile(settingspath)
+    val fSource = Source.fromFile(Path)
     var ftext: String = ""
     for (line <- fSource.getLines())
       ftext = ftext + line
@@ -79,7 +85,7 @@ case object settings {
   }
 
   def save(): Unit = {
-    val writer = new PrintWriter(new File(settingspath))
+    val writer = new PrintWriter(new File(Path))
     writer.write(pretty(render(("websocket" -> websocket.serialized) ~ ("http" -> http.serialized) ~ ("database" -> database.serialized) ~ ("mqtt" -> mqtt.serialized) ~ ("keystore" -> keystore.serialized))))
     writer.close()
   }
