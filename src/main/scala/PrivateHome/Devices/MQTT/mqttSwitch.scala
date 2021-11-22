@@ -51,7 +51,7 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
 
   def masterId: String = if (_controller != null) _controller.masterID else ""
 
-  def pin(): Int = _pin
+  def pin: Int = _pin
 
   def changePinAndController(pPin: Int, masterId: String): Unit = {
     val newController = data.getControllerMasterId(masterId)
