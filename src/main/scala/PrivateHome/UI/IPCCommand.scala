@@ -44,44 +44,58 @@ trait IPCCommand extends Serializable {
     if (id.length != 5) throw new IllegalArgumentException("""Length of ID is not 5""")
     if (!id.matches("[-_a-zA-Z0-9]{5}")) throw new IllegalArgumentException("""ID Contains not Allowed Characters""")
   }
+
+  type response <: IPCResponse
 }
 
-case class ipcAddControllerCommand(name: String) extends IPCCommand
+case class ipcAddControllerCommand(name: String) extends IPCCommand {
+  override type response = ipcSuccessResponse}
 
 case class ipcAddDeviceCommand(id: String, switchType: switchType, name: String, systemCode: String = "", unitCode: String = "", controlType: controlType, keepState: Boolean, pin: Int = 0, masterId: String = "") extends IPCCommand {
   idTestIpc(id)
   testArgumentsSwitch(switchType, masterId, pin, systemCode, unitCode)
+  override type response = ipcSuccessResponse
 }
 
-case class ipcAddUserCommand(username: String, passHash: String) extends IPCCommand
+case class ipcAddUserCommand(username: String, passHash: String) extends IPCCommand {override type response = ipcSuccessResponse}
 
 case class ipcAddUserBase64Command(userName: String, passHashBase64: String) extends IPCCommand {
   def passHash: String = {
     new String(Base64.getDecoder.decode(passHashBase64))
   }
+  override type response = ipcSuccessResponse
 }
 
-case class ipcGetControllerCommand() extends IPCCommand
+case class ipcGetControllerCommand() extends IPCCommand {
+  type response = ipcGetControllerResponse
+}
 
-case class ipcGetControllerKeyCommand(id: String) extends IPCCommand
+case class ipcGetControllerKeyCommand(id: String) extends IPCCommand {
+  type response = ipcGetControllerKeyResponse
+}
 
 case class ipcGetDeviceCommand(id: String) extends IPCCommand {
   idTestIpc(id)
+  type response = ipcGetDeviceResponse
 }
 
-case class ipcGetDevicesCommand() extends IPCCommand
+case class ipcGetDevicesCommand() extends IPCCommand {
+  type response = ipcGetDevicesResponse
+}
 
-case class ipcGetRandomId() extends IPCCommand
+case class ipcGetRandomId() extends IPCCommand {
+  type response = ipcGetRandomIdResponse
+}
 
-case class ipcOffCommand(id: String) extends IPCCommand
+case class ipcOffCommand(id: String) extends IPCCommand {override type response = ipcSuccessResponse}
 
-case class ipcOnCommand(id: String, percent: Float) extends IPCCommand
+case class ipcOnCommand(id: String, percent: Float) extends IPCCommand{override type response = ipcSuccessResponse}
 
-case class ipcProgramControllerCommand(path: String, masterId: String, ssid: String, pass: String) extends IPCCommand
+case class ipcProgramControllerCommand(path: String, masterId: String, ssid: String, pass: String) extends IPCCommand{override type response = ipcSuccessResponse}
 
-case class ipcRecreateDatabase() extends IPCCommand
+case class ipcRecreateDatabase() extends IPCCommand{override type response = ipcSuccessResponse}
 
-case class ipcSafeCreateDatabase() extends IPCCommand
+case class ipcSafeCreateDatabase() extends IPCCommand{override type response = ipcSuccessResponse}
 
 case class ipcUpdateDeviceCommand(oldId: String, newId: String, keepState: Boolean, name: String, controlType: controlType, switchType: switchType, systemCode: String = "", unitCode: String = "", pin: Int = 0, masterId: String = "") extends IPCCommand {
 
@@ -89,8 +103,11 @@ case class ipcUpdateDeviceCommand(oldId: String, newId: String, keepState: Boole
   idTestIpc(oldId)
   testArgumentsSwitch(switchType, masterId, pin, systemCode, unitCode)
 
+  override type response = ipcSuccessResponse
 }
 
 case class ipcCloseCommand() extends IPCCommand
 
-case class ipcPingCommand() extends IPCCommand
+case class ipcPingCommand() extends IPCCommand {
+  type response = ipcPingResponse
+}
