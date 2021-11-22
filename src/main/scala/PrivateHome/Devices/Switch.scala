@@ -88,25 +88,6 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
 }
 
 object Switch {
-  @deprecated("Switch constructor only working with XML.", "0.3.1")
-  def apply(data: Node): Switch = {
-
-    val switchType = (data \ "type").head.text
-    switchType match {
-      case "433MHz" => val systemCode = (data \ "systemCode").head.text
-        val unitCode = (data \ "unitCode").head.text
-        val name = (data \ "name").head.text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val ID = (data \ "@id").text
-        mhzSwitch(ID, KeepStatus, name, systemCode, unitCode);
-      case "MQTT" => val id = (data \ "@id").text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val name = (data \ "name").head.text
-        mqttSwitch(id, KeepStatus, name, BUTTON, 1)
-      case _ => throw new IllegalArgumentException("Wrong Switch Type")
-    }
-  }
-
   def apply(data: commandAddDevice): Switch = {
     data.switchType match {
       case MHZ => mhzSwitch(data.id, data.keepState, data.name, data.systemCode, data.unitCode)
