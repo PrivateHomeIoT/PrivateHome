@@ -76,7 +76,7 @@ private[PrivateHome] object data {
   var mhzId: mutable.Map[String, String] = mutable.Map()
   val tablesWanted: List[String] = List("DEVICES", "MHZ", "MQTT", "MQTTCONTROLLER", "USER")
   try {
-    val tables = sql"""show tables;""".map(rs => rs.string(1)).list.apply()
+    val tables = sql"""show tables;""".map(rs => rs.string(1)).list().apply()
     var allTablesExisting = true
     tablesWanted.foreach(t => allTablesExisting = tables.contains(t) && allTablesExisting)
     if (tables.isEmpty || !allTablesExisting) {
@@ -119,7 +119,7 @@ private[PrivateHome] object data {
                     `keepstate` boolean NOT NULL,
                     `controltype` int NOT NULL,
                     PRIMARY KEY (`id`))
-         """.execute.apply()
+         """.execute().apply()
 
 
     sql"""
@@ -268,14 +268,14 @@ private[PrivateHome] object data {
     val wrongclass = new IllegalArgumentException("""Can not add Switch ID:%s because switch of unknown type %s has no save definition""".format(newDevice.id, newDevice.getClass))
     withSQL {
       insertInto(device).values(newDevice.id, newDevice.name, newDevice.switchtype.id, if (newDevice.keepStatus) newDevice.status else 0, newDevice.keepStatus, newDevice.controlType.id)
-    }.update.apply
+    }.update().apply()
     newDevice match {
       case device: mhzSwitch => withSQL {
         insertInto(mhz).values(device.id, device.systemCode, device.unitCode)
       }.update().apply()
         mhzId += ((device.systemCode + device.unitCode, device.id))
       case device: mqttSwitch => withSQL {
-        insertInto(mqtt).values(device.id, device.masterId, device.pin())
+        insertInto(mqtt).values(device.id, device.masterId, device.pin)
       }.update().apply()
       case _ => throw wrongclass
     }
@@ -306,7 +306,7 @@ private[PrivateHome] object data {
         device.column.switchTypeInt -> pDevice.switchType.id,
         device.column.controlTypeInt -> pDevice.controlType.id
       ).where.eq(device.column.id, pDevice.newId)
-    }.update.apply()
+    }.update().apply()
     if (oldid != pDevice.newId) {
       devices += (pDevice.newId -> devices(oldid))
       devices -= oldid
@@ -355,7 +355,7 @@ private[PrivateHome] object data {
     devices -= id
     withSQL {
       delete.from(device).where.eq(device.column.id, id)
-    }.update.apply()
+    }.update().apply()
   }
 
 
