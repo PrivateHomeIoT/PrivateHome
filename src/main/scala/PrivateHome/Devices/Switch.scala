@@ -135,7 +135,7 @@ object Switch {
 class switchSerializer extends CustomSerializer[Switch](ser = format => ( {
   case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", BUTTON, 0)
 }, {
-  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin()) ~ ("masterId" -> switch.masterId)
+  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin) ~ ("masterId" -> switch.masterId)
   case switch: mhzSwitch => switch.serializer ~ ("systemCode" -> switch.systemCode) ~ ("unitCode" -> switch.unitCode)
 }))
 
