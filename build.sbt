@@ -45,7 +45,7 @@ Debian / maintainerScripts  := maintainerScriptsAppendFromFile((Debian/maintaine
   Postinst ->  sourceDirectory.value / "debian" / "postinst"
 )
 
-lazy val akkaVersion = "2.6.8"
+lazy val akkaVersion = "2.6.17"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
 libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-parent" % "1.2")
