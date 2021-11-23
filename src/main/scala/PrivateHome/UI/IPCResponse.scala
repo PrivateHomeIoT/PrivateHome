@@ -36,6 +36,8 @@ case class ipcGetControllerKeyResponse(key: Array[Byte]) extends IPCResponse
 
 case class ipcSuccessResponse(command: IPCCommand, exception: Throwable = new Throwable, success: Boolean = true) extends IPCResponse
 
+case class ipcPingResponse() extends IPCResponse
+
 case class ipcShortSwitchData(id: String, dimmable: Boolean, name: String, status: Float)
 
 case class ipcLongSwitchData(id: String, dimmable: Boolean, name: String, status: Float, switchType: switchType)
