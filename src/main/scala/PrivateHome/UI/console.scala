@@ -184,6 +184,11 @@ object console {
     send(ipcProgramControllerCommand(path, masterId, ssid, pass))
   }
 
+  def addController(): Unit = {
+    val name = readLine("Name> ")
+    send(ipcAddControllerCommand(name))
+  }
+
   def help(): Unit = {
     println("Available commands:\n")
     commands.toList.foreach(cmd => println(s"${cmd._1}:\t${cmd._2.description}"))
