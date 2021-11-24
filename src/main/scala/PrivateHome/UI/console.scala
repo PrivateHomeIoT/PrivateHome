@@ -1,5 +1,5 @@
 /*
- * Privatehome
+ * PrivateHome
  *     Copyright (C) 2021  RaHoni honisuess@gmail.com
  *
  *     This program is free software: you can redistribute it and/or modify
@@ -258,6 +258,33 @@ object console {
       if (dimmable) SLIDER else BUTTON
     }, keepState, pin, chosenController))
 
+  }
+
+  def getControllerId: String = {
+    var chosenController: String = null
+    val response = send(new ipcGetControllerCommand)
+    val controller: Map[String, String] = response.controller
+
+    println("Available Controller:")
+    var counter = 0
+
+    for (x <- controller) {
+      println(s"$counter ${x._1} ${x._2} ")
+      counter += 1
+    }
+    println()
+
+    while (chosenController == null) {
+      chosenController = readLine("Chose Controller by number or ID \n> ")
+      try {
+        chosenController = controller.keys.to(Array)(chosenController.toInt)
+      } catch {
+        case _: ArrayIndexOutOfBoundsException =>
+        case _: NumberFormatException =>
+      }
+      if (!controller.contains(chosenController)) chosenController = null
+    }
+    chosenController
   }
 
   private def dim(tmpId: String = ""): Unit = {
