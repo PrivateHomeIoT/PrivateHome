@@ -142,6 +142,15 @@ object console {
     }
   }
 
+  def readPassword(prompt: String): Array[Char] = {
+    if (StdInJava == null) {
+      println("Because System.console does not exist the password will get echoed.")
+      readLine(prompt).toCharArray
+    } else {
+      StdInJava.readPassword(prompt)
+    }
+  }
+
   def programController(): Unit = {
     val standardPath = "/dev/ttyUSB0"
     val masterId = getControllerId
@@ -194,19 +203,14 @@ object console {
     commands.toList.foreach(cmd => println(s"${cmd._1}:\t${cmd._2.description}"))
   }
 
-  private def addUser(): Unit = {
+  def addUser(): Unit = {
+    console.StdInJava = StdInJava
     println("Please provide Username and Password (does not get echoed)")
     val username = readLine("Username> ")
-    var passwd: Array[Char] = null
-    if (StdInJava != null) {
-      passwd = StdInJava.readPassword("Password> ")
-    }
-    else {
-      println("Because the System.console() object does not exist we use a simple readLine so the password will be echoed")
-      passwd = readLine("Password> ").toCharArray
-    }
+    val passwd: Array[Char] = readPassword("Password> ")
     val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
     val passHash = argon2.hash(10, 64, 4, passwd)
+    argon2.wipeArray(passwd)
     val command = ipcAddUserCommand(username, passHash)
     send(command)
 
