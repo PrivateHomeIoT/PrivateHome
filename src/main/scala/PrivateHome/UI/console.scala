@@ -314,22 +314,22 @@ object console {
     val deviceMap = devices.DeviceList
     val deviceIds = deviceMap.keys.to(List)
     var counter = 0
-    if (interactive) {
-      if (!deviceMap.contains(id))
+    if (!deviceMap.contains(id))
+      if (interactive) {
         deviceMap.foreach(s => {
           println(s"$counter: id: ${s._1} name: ${s._2.name}")
           counter += 1
         })
-      while (!deviceMap.contains(id)) {
-        id = readLine("id/Index> ")
-        try {
-          id = deviceIds(id.toInt)
-        } catch {
-          case _: ArrayIndexOutOfBoundsException =>
-          case _: NumberFormatException =>
+        while (!deviceMap.contains(id)) {
+          id = readLine("id/Index> ")
+          try {
+            id = deviceIds(id.toInt)
+          } catch {
+            case _: IndexOutOfBoundsException =>
+            case _: NumberFormatException =>
+          }
         }
-      }
-    } else if (!deviceMap.contains(id)) throw new IllegalArgumentException
+      } else throw new IllegalArgumentException
     id
   }
 
