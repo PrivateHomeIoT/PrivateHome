@@ -45,6 +45,7 @@ object console {
     "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller")
   )
   var socket: UnixDomainSocket = _
+  var triedConnecting = false
   var out: ObjectOutputStream = _
   var in: ObjectInputStream = _
   var interactive: Boolean = _
@@ -57,14 +58,45 @@ object console {
 
   def printControllerKey(): Unit = {
     val controllerId = getControllerId
-    while (in.available() > 0) println(in.readObject())
-    send(ipcGetControllerKeyCommand(controllerId))
     var tmpId: String = ""
-    while (tmpId.isBlank) tmpId = read[ipcGetControllerKeyResponse]().key.map(_ & 0xFF).mkString(",")
+    while (tmpId.isBlank) tmpId = send(ipcGetControllerKeyCommand(controllerId)).key.map(_ & 0xFF).mkString(",")
     println(tmpId)
   }
 
   def safeCreate(): Unit = send(new ipcSafeCreateDatabase)
+
+  def send(command: IPCCommand): command.response = {
+    ensureConnection
+    out.writeObject(command)
+
+    in.readObject() match {
+      case r: ipcSuccessResponse
+        if !r.success =>
+        scala.Console.err.println(s"command: ${r.command} failed with exception:")
+        r.exception.printStackTrace(scala.Console.err)
+        throw new InvalidClassException("Server did not response with expected class")
+      case response: command.response =>
+        response
+    }
+  }
+
+  private def ensureConnection: Boolean = {
+    if (!triedConnecting)
+      throw new IllegalStateException("Not called connect before.")
+    if (socket.isClosed) {
+      println(("Connection is closed.\n" +
+        "Reconnecting").stripMargin)
+      connect()
+    }
+    true
+  }
+
+  def connect(): Unit = {
+    socket = new UnixDomainSocket(socketPath)
+    in = new ObjectInputStream(socket.getInputStream)
+    out = new ObjectOutputStream(socket.getOutputStream)
+    triedConnecting = true
+  }
 
   def main(args: Array[String]): Unit = {
 
@@ -91,8 +123,7 @@ object console {
           send(ipcOffCommand(id))
         case t: toggleSwitch =>
           val id = getDeviceID(t.id())
-          send(ipcGetDeviceCommand(id))
-          val state: Float = if (read[ipcGetDeviceResponse]().device.status == 0) 1 else 0
+          val state: Float = if (send(ipcGetDeviceCommand(id)).device.status == 0) 1 else 0
           send(ipcOnCommand(id, state))
       }
     } else {
@@ -176,10 +207,8 @@ object console {
 
   }
 
-
-  private def addSwitch(dimmable: Boolean): Unit = {
-    send(ipcGetRandomId())
-    val response = read[ipcGetRandomIdResponse]()
+  def addSwitch(dimmable: Boolean): Unit = {
+    val response = send(ipcGetRandomId())
     val tmpId = response.id
     var id = ""
     while (!id.matches("[-_a-zA-Z0-9]{5}")) {
@@ -230,31 +259,22 @@ object console {
       try {
         val percent = percentString.toFloat
         if (percent == 0) {
+          run = false
           send(ipcOffCommand(id))
-          run = false
         } else if (1 >= percent && percent > 0) {
-          send(ipcOnCommand(id, percent))
           run = false
+          send(ipcOnCommand(id, percent))
         }
       } catch {
         case _: Throwable =>
       }
-      read[ipcSuccessResponse]()
-
     }
   }
 
-  private def status(tmpId: String = ""): Unit = {
-    val id = getDeviceID(tmpId)
-    send(ipcGetDeviceCommand(id))
-    val response = read[ipcGetDeviceResponse]()
-    println(response.device.status * 100)
-  }
 
   private def getDeviceID(tmpID: String = ""): String = {
     var id = tmpID
-    send(ipcGetDevicesCommand())
-    val devices = read[ipcGetDevicesResponse]()
+    val devices = send(ipcGetDevicesCommand())
     val deviceMap = devices.DeviceList
     val deviceIds = deviceMap.keys.to(List)
     var counter = 0
@@ -275,6 +295,13 @@ object console {
       }
     } else if (!deviceMap.contains(id)) throw new IllegalArgumentException
     id
+  }
+
+
+  def status(tmpId: String = ""): Unit = {
+    val id = getDeviceID(tmpId)
+    val response = send(ipcGetDeviceCommand(id))
+    println(response.device.status * 100)
   }
 
 }
