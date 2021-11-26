@@ -27,10 +27,12 @@ import org.scalasbt.ipcsocket.UnixDomainSocket
 
 import java.io._
 import java.nio.file.{Files, Path}
+import scala.collection.immutable.ArraySeq
 import scala.io.StdIn.readLine
+import scala.reflect.ClassTag
 
 object console {
-  val StdInJava: Console = System.console()
+  var StdInJava: Console = System.console()
   private val commands = Map(
     "help" -> REPLCommand(_ => help(), "Prints all available commands"),
     "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
@@ -65,42 +67,9 @@ object console {
 
   def safeCreate(): Unit = send(new ipcSafeCreateDatabase)
 
-  def send(command: IPCCommand): command.response = {
-    ensureConnection
-    out.writeObject(command)
-
-    in.readObject() match {
-      case r: ipcSuccessResponse
-        if !r.success =>
-        scala.Console.err.println(s"command: ${r.command} failed with exception:")
-        r.exception.printStackTrace(scala.Console.err)
-        throw new InvalidClassException("Server did not response with expected class")
-      case response: command.response =>
-        response
-    }
-  }
-
-  private def ensureConnection: Boolean = {
-    if (!triedConnecting)
-      throw new IllegalStateException("Not called connect before.")
-    if (socket.isClosed) {
-      println(("Connection is closed.\n" +
-        "Reconnecting").stripMargin)
-      connect()
-    }
-    true
-  }
-
-  def connect(): Unit = {
-    socket = new UnixDomainSocket(socketPath)
-    in = new ObjectInputStream(socket.getInputStream)
-    out = new ObjectOutputStream(socket.getOutputStream)
-    triedConnecting = true
-  }
-
   def main(args: Array[String]): Unit = {
 
-    val arguments = new cliParser(this.getClass.getSimpleName, args)
+    val arguments = new cliParser(this.getClass.getSimpleName, ArraySeq.unsafeWrapArray(args))
     try
       connect()
     catch {
@@ -140,6 +109,67 @@ object console {
         }
       }
     }
+  }
+
+  private def ensureConnection: Boolean = {
+    if (!triedConnecting)
+      throw new IllegalStateException("Not called connect before.")
+    if (socket.isClosed) {
+      println(("Connection is closed.\n" +
+        "Reconnecting").stripMargin)
+      connect()
+    }
+    true
+  }
+
+  def connect(): Unit = {
+    socket = new UnixDomainSocket(socketPath)
+    in = new ObjectInputStream(socket.getInputStream)
+    out = new ObjectOutputStream(socket.getOutputStream)
+    triedConnecting = true
+  }
+
+  def addSwitch(dimmable: Boolean): Unit = {
+    val tmpId = send(ipcGetRandomId()).id
+    var id = ""
+    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
+      id = readLine(s"id[$tmpId]> ")
+      if (id == "") id = tmpId
+    }
+    val name = readLine("name> ").replace(',', ' ')
+    val keepStateChar = readLine("Keep State (y/n)> ")(0).toLower
+    val keepState = keepStateChar == 'y' || keepStateChar == 'j'
+    var switchType: switchType = null
+    var systemCode: String = "null"
+    var unitCode: String = "null"
+    var chosenController: String = null
+    var pin: Int = -1
+
+    do {
+      val switchTypeString = if (dimmable) "mqtt" else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+      switchType = switchTypeString match {
+        case "mqtt" =>
+          chosenController = getControllerId
+          while (!(pin > -1 && pin < 64)) {
+            try pin = readLine("Pin number 0-63> ").toInt
+            catch {
+              case _: NumberFormatException =>
+            }
+          }
+
+          MQTT
+        case "433mhz" =>
+          while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
+          while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
+          MHZ
+        case _ => null
+      }
+    } while (switchType == null)
+
+    send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
+      if (dimmable) SLIDER else BUTTON
+    }, keepState, pin, chosenController))
+
   }
 
   def readPassword(prompt: String): Array[Char] = {
@@ -216,48 +246,23 @@ object console {
 
   }
 
-  def addSwitch(dimmable: Boolean): Unit = {
-    val response = send(ipcGetRandomId())
-    val tmpId = response.id
-    var id = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
-      id = readLine(s"id[$tmpId]> ")
-      if (id == "") id = tmpId
+  def send(command: IPCCommand)(implicit m: ClassTag[command.response]): command.response = {
+    ensureConnection
+    out.writeObject(command)
+
+    in.readObject() match {
+      case r: ipcSuccessResponse
+        if !r.success =>
+        scala.Console.err.println(s"command: ${r.command} failed with exception:")
+        r.exception.printStackTrace(scala.Console.err)
+        throw new RuntimeException("Command failed")
+      case response =>
+        try {
+          m.runtimeClass.cast(response).asInstanceOf[command.response]
+        } catch {
+          case e: ClassCastException => throw new InvalidClassException("Server did not response with expected class")
+        }
     }
-    val name = readLine("name> ").replace(',', ' ')
-    val keepStateChar = readLine("Keep State (y/n)")(0).toLower
-    val keepState = keepStateChar == 'y' || keepStateChar == 'j'
-    var switchType: switchType = null
-    var systemCode: String = "null"
-    var unitCode: String = "null"
-    var chosenController: String = null
-    var pin = -1
-
-    do {
-      val switchTypeString = if (dimmable) MQTT else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
-      switchType = switchTypeString match {
-        case "mqtt" =>
-          chosenController = getControllerId
-          while (!(pin > -1 && pin < 64)) {
-            try pin = readLine("Pin number 0-63> ").toInt
-            catch {
-              case _: NumberFormatException =>
-            }
-          }
-
-          MQTT
-        case "433mhz" =>
-          while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
-          while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
-          MHZ
-        case _ => null
-      }
-    } while (switchType == null)
-
-    send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
-      if (dimmable) SLIDER else BUTTON
-    }, keepState, pin, chosenController))
-
   }
 
   def getControllerId: String = {
@@ -287,7 +292,7 @@ object console {
     chosenController
   }
 
-  private def dim(tmpId: String = ""): Unit = {
+  def dim(tmpId: String = ""): Unit = {
     val id = getDeviceID(tmpId)
     var run: Boolean = true
     while (run) {
@@ -302,13 +307,13 @@ object console {
           send(ipcOnCommand(id, percent))
         }
       } catch {
-        case _: Throwable =>
+        case _: NumberFormatException =>
       }
     }
   }
 
 
-  private def getDeviceID(tmpID: String = ""): String = {
+  def getDeviceID(tmpID: String = ""): String = {
     var id = tmpID
     val devices = send(ipcGetDevicesCommand())
     val deviceMap = devices.DeviceList
