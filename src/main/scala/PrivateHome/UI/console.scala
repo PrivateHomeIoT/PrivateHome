@@ -33,6 +33,10 @@ import scala.reflect.ClassTag
 
 object console {
   var StdInJava: Console = System.console()
+
+  /**
+   * This map contains the commands their function and a help description
+   */
   private val commands = Map(
     "help" -> REPLCommand(_ => help(), "Prints all available commands"),
     "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
@@ -53,11 +57,17 @@ object console {
   var interactive: Boolean = _
   var socketPath = s"/tmp/${BuildInfo.name}.sock"
 
+  /**
+   * This send the server the command to recreate the whole database
+   */
   def recreate(): Unit = {
     val command = ipcRecreateDatabase()
     send(command)
   }
 
+  /**
+   * This prints the encryption key for a mqtt controller to stdout formatted as decimal numbers separated by ","
+   */
   def printControllerKey(): Unit = {
     val controllerId = getControllerId
     var tmpId: String = ""
@@ -65,8 +75,16 @@ object console {
     println(tmpId)
   }
 
+  /**
+   * This command tells the server to create a new database but in contrast to recreate the server won't drop any tables
+   */
   def safeCreate(): Unit = send(new ipcSafeCreateDatabase)
 
+  /**
+   * This is the main entry for console the args get used by the cliParser to provide the cli
+   *
+   * @param args the command parameters passed at execution
+   */
   def main(args: Array[String]): Unit = {
 
     val arguments = new cliParser(this.getClass.getSimpleName, ArraySeq.unsafeWrapArray(args))
@@ -111,6 +129,12 @@ object console {
     }
   }
 
+  /**
+   * This will test if the console is connected to the server and if not it will also try to reconnect
+   *
+   * @return true if connected
+   * @throws IllegalStateException If the console wasn't connected before
+   */
   private def ensureConnection: Boolean = {
     if (!triedConnecting)
       throw new IllegalStateException("Not called connect before.")
@@ -122,6 +146,11 @@ object console {
     true
   }
 
+  /**
+   * This will connect the console to the server
+   *
+   * It must be called before calling ensureConnection which will be called send
+   */
   def connect(): Unit = {
     socket = new UnixDomainSocket(socketPath)
     in = new ObjectInputStream(socket.getInputStream)
@@ -129,6 +158,11 @@ object console {
     triedConnecting = true
   }
 
+  /**
+   * This will add a switch to the server which parameters get asked interactively
+   *
+   * @param dimmable if the switch should be dimmable this gets set by the command that you chose
+   */
   def addSwitch(dimmable: Boolean): Unit = {
     val tmpId = send(ipcGetRandomId()).id
     var id = ""
@@ -172,6 +206,13 @@ object console {
 
   }
 
+  /**
+   * THis is a convinents helper that will try to use the Java readPassword methode but will also switch to the normal
+   * readLine in case the Java console with readPassword isn't available and warn the user that the password will get echoed
+   *
+   * @param prompt The Promp that gets displayed to Inform the user what to enter
+   * @return The password the user entered
+   */
   def readPassword(prompt: String): Array[Char] = {
     if (StdInJava == null) {
       println("Because System.console does not exist the password will get echoed.")
@@ -181,6 +222,10 @@ object console {
     }
   }
 
+  /**
+   * This is meant to program a mqtt-controller running ESPFirmware but right now there is an error where the ESP won't
+   * interpret it fast enough
+   */
   def programController(): Unit = {
     val standardPath = "/dev/ttyUSB0"
     val masterId = getControllerId
@@ -223,16 +268,28 @@ object console {
     send(ipcProgramControllerCommand(path, masterId, ssid, pass))
   }
 
+  /**
+   * This will add a mqtt controller at the server so that the server generates the encryption config and you can
+   * configure mqtt switches to use this controller
+   */
   def addController(): Unit = {
     val name = readLine("Name> ")
     send(ipcAddControllerCommand(name))
   }
 
+  /**
+   * This will print the commands and their respective help strings
+   */
   def help(): Unit = {
     println("Available commands:\n")
     commands.toList.foreach(cmd => println(s"${cmd._1}:\t${cmd._2.description}"))
   }
 
+  /**
+   * Adds an user to the server with the specified password
+   *
+   * Note that currently you cant change the password of a user or delete one
+   */
   def addUser(): Unit = {
     console.StdInJava = StdInJava
     println("Please provide Username and Password (does not get echoed)")
@@ -246,7 +303,16 @@ object console {
 
   }
 
-  def send(command: IPCCommand)(implicit m: ClassTag[command.response]): command.response = {
+  /**
+   * This will send a command to the server and read the answer
+   *
+   * @param command The command to send to the server
+   * @param c       An implicit handler that is used to cast the answer with the ability to catch a cast exception
+   * @return Will return the ipcResponse that corresponds with the command
+   * @throws RuntimeException      If the response is a ipcSuccessResponse with fail
+   * @throws InvalidClassException If the response is neither ipcSuccessResponse nor the expected one
+   */
+  def send(command: IPCCommand)(implicit c: ClassTag[command.response]): command.response = {
     ensureConnection
     out.writeObject(command)
 
@@ -258,13 +324,18 @@ object console {
         throw new RuntimeException("Command failed")
       case response =>
         try {
-          m.runtimeClass.cast(response).asInstanceOf[command.response]
+          c.runtimeClass.cast(response).asInstanceOf[command.response]
         } catch {
           case e: ClassCastException => throw new InvalidClassException("Server did not response with expected class")
         }
     }
   }
 
+  /**
+   * This is a helper to get the id of an mqtt controller
+   *
+   * @return The id as a String
+   */
   def getControllerId: String = {
     var chosenController: String = null
     val response = send(new ipcGetControllerCommand)
@@ -292,6 +363,15 @@ object console {
     chosenController
   }
 
+  /**
+   * Dim a Switch
+   *
+   * Because the button switches also support an on command with a float to with degree they are supposed to be turned
+   * on but will simply ignore the dimming
+   *
+   * @param tmpId the id of the switch that you want to dim.
+   *              Gets passed to getDeviceId for verification
+   */
   def dim(tmpId: String = ""): Unit = {
     val id = getDeviceID(tmpId)
     var run: Boolean = true
@@ -312,7 +392,16 @@ object console {
     }
   }
 
-
+  /**
+   * This is convenience helper that returns a valid id of a switch.
+   *
+   * This works by asking the server for all switches and then testing if the currently selected id is in the list of
+   * used ids. You are able to select the id by entering a id or the index into the array of ids
+   *
+   * @param tmpID This is a way to provide an id as a default that if it is valid not further selection gets shown
+   * @return The valid id
+   * @throws IllegalArgumentException If interactive mode is disabled and the provided id isn't valid this will get thrown
+   */
   def getDeviceID(tmpID: String = ""): String = {
     var id = tmpID
     val devices = send(ipcGetDevicesCommand())
@@ -338,7 +427,11 @@ object console {
     id
   }
 
-
+  /**
+   * This will print the the dimming status of a switch as a value between 0.0 and 100.0
+   * @param tmpId the id of the switch to get the status of.
+   *              Gets passed to getDeviceId for verification
+   */
   def status(tmpId: String = ""): Unit = {
     val id = getDeviceID(tmpId)
     val response = send(ipcGetDeviceCommand(id))
