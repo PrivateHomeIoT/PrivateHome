@@ -44,7 +44,7 @@ class toggleSwitch(interactive: ScallopOption[Boolean]) extends subcommandWithId
 
 class on(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "on") {
   val percentage: ScallopOption[Int] = opt[Int](validate = per => {
-    per > 0 && per < 100
+    per > 0 && per <= 100
   })
   val percentFloat: ScallopOption[Float] = opt[Float](short = 'f', validate = float => {
     float > 0 && float <= 1
