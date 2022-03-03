@@ -9,6 +9,9 @@ build.properties
 *.html~
 *.js~
 *.log
+gc.properties
+/.gradle
+sbt.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij,java,scala,sbt,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij,java,scala,sbt,macos,linux
