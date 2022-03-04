@@ -21,25 +21,41 @@ package PrivateHome.UI
 import PrivateHome.Devices.controlType._
 import PrivateHome.Devices.switchType._
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
-import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.Waiters.Waiter
 import org.scalatest.concurrent.Waiters
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
+import org.scalatest.{BeforeAndAfter, PrivateMethodTester}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, InvalidClassException, ObjectInputStream, ObjectOutputStream}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class consoleTest extends AnyFunSuite with BeforeAndAfter {
+
+class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTester {
   private val consoleStdIn = console.StdInJava
+  private val addUser = PrivateMethod[Unit](Symbol("addUser"))
   var serverSocket: UnixDomainServerSocket = _
+
+  def getInputStream(list: List[String]): ByteArrayInputStream = {
+    new ByteArrayInputStream(list.mkString("", "\n", "\n").getBytes())
+  }
 
   protected abstract class ipcThread(w: Waiters.Waiter, debugging: Boolean, t: Any*) extends Thread {
     protected var out: ObjectOutputStream = _
     protected var in: ObjectInputStream = _
+
+    def readIPCCommand: IPCCommand = readIPCCommand[IPCCommand]
+
+    def readIPCCommand[t]: t = {
+      val request = in.readObject()
+      w {
+        assert(request.isInstanceOf[IPCCommand], "Request is not an IPCCommand")
+      }
+      request.asInstanceOf[t]
+    }
 
     override def run(): Unit = {
       try {
@@ -54,8 +70,6 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
         testCode(t)
       } finally w.dismiss()
     }
-
-    protected def read: IPCCommand = in.readObject().asInstanceOf[IPCCommand]
 
     protected def testCode(args: Any*): Unit
   }
@@ -94,7 +108,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
 
   }
 
-  test("Test: send with disconnect") {
+  test("test send with disconnect") {
     val outputStream = new ByteArrayOutputStream()
 
     val w = new Waiter
@@ -128,42 +142,16 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await(Timeout(20 millis))
   }
 
-  test("Test: Send with fail") {
-    val w = new Waiter
-    val outputStream = new ByteArrayOutputStream()
-
-    class sendTest extends ipcThread(w, false) {
-      override protected def testCode(args: Any*): Unit = {
-        val request = in.readObject().asInstanceOf[ipcPingCommand]
-        val throwable = new IllegalArgumentException
-        throwable.setStackTrace(Array(new StackTraceElement("TestClass", "FailTest", "consoleTest.scala", 1)))
-        out.writeObject(ipcSuccessResponse(request, throwable, success = false))
-      }
-    }
-
-    val testThread = new sendTest
-    testThread.start()
-
-    console.connect()
-    Console.withErr(outputStream) {
-      assertThrows[RuntimeException](console.send(ipcPingCommand()))
-    }
-    println(outputStream.toString())
-    assertResult("command: ipcPingCommand() failed with exception:\njava.lang.IllegalArgumentException\n\tat TestClass.FailTest(consoleTest.scala:1)\n")(outputStream.toString())
-
-    w.await()
-  }
-
-  test("Test: getControllerID") {
+  test("test getControllerID") {
 
     val printStream = new ByteArrayOutputStream()
-    val readStream = new ByteArrayInputStream("ccccc\n2\n1\n".getBytes)
+    val readStream = new ByteArrayInputStream("ccccc\n2\n1".getBytes)
     val errStream = new ByteArrayOutputStream()
     val w = new Waiter
 
     class ControllerAnswerThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
-        val request = read
+        val request = readIPCCommand[ipcGetControllerCommand]
         w {
           assertResult(
             new ipcGetControllerCommand)(request)
@@ -190,7 +178,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: printControllerKey") {
+  test("test printControllerKey") {
 
     val printStream = new ByteArrayOutputStream()
     val readStream = new ByteArrayInputStream("0".getBytes)
@@ -230,7 +218,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: safeCreate") {
+  test("Test safeCreate") {
     val w = new Waiter
     class createTest extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
@@ -250,7 +238,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: recreate") {
+  test("Test recreate") {
     val w = new Waiter
     class createTest extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
@@ -270,7 +258,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: add User") {
+  test("Test add User") {
     val outputStream = new ByteArrayOutputStream()
     val inputStream = new ByteArrayInputStream("scalatest\nTestPassword\n".getBytes())
     val w = new Waiter
@@ -295,7 +283,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
 
     Console.withOut(outputStream) {
       Console.withIn(inputStream) {
-        console.addUser()
+        console invokePrivate addUser()
       }
     }
 
@@ -328,6 +316,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
   }
 
   test("Test: readPassword with unavailable stdin") {
+    console.testing = false
     console.StdInJava = null
 
     val prompt1 = "Password> "
@@ -346,29 +335,23 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     assertResult(s"Because System.console does not exist the password will get echoed.\n${prompt1}Because System.console does not exist the password will get echoed.\n$prompt2")(outputStream.toString())
   }
 
-  test("Test: addController") {
+  test("Test addController") {
     val w = new Waiter
 
-    val controllerName1 = "TestController1"
-    val controllerName2 = "AnotherController"
+    val controllerNames = List("TestController1", "AnotherController")
 
-    val inputStream = new ByteArrayInputStream(s"$controllerName1\n$controllerName2\n".getBytes())
+    val inputStream = getInputStream(controllerNames)
     val outputStream = new ByteArrayOutputStream()
 
     class controllerThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
-        var request = in.readObject().asInstanceOf[ipcAddControllerCommand]
-        println("Received first")
-        w {
-          assertResult(controllerName1)(request.name)
+        for (controllerName <- controllerNames) {
+          val request = readIPCCommand[ipcAddControllerCommand]
+          w {
+            assertResult(controllerName)(request.name)
+          }
+          out.writeObject(ipcSuccessResponse(request))
         }
-        out.writeObject(ipcSuccessResponse(request))
-        request = in.readObject().asInstanceOf[ipcAddControllerCommand]
-        println("Received second")
-        w {
-          assertResult(controllerName2)(request.name)
-        }
-        out.writeObject(ipcSuccessResponse(request))
       }
     }
 
@@ -387,18 +370,16 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: getDeviceID non-interactive") {
+  test("Test getDeviceID non-interactive") {
     val w = new Waiter
 
     val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
 
     class deviceThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
-        val answer = read
-        w {
-          assert(answer.isInstanceOf[ipcGetDevicesCommand])
-        }
+        readIPCCommand[ipcGetDevicesCommand]
         out.writeObject(ipcGetDevicesResponse(device))
+        readIPCCommand[ipcGetDevicesCommand]
         out.writeObject(ipcGetDevicesResponse(device))
       }
     }
@@ -418,10 +399,22 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
   test("Test: getDeviceID interactive") {
     val w = new Waiter
 
+    val inputSuccess: List[(String, String)] = List(("0", "12345"), ("ab345", "ab345"))
+    val inputFail = List("2", "-1", "12346", "_1234")
+    val inputComplete = inputFail.concat(inputSuccess.map(s => s._1))
+
     val outputStream = new ByteArrayOutputStream()
     val inputStream = new ByteArrayInputStream(s"2\nab345".getBytes())
 
     val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
+
+    var counter = -1
+    val outputForMap = device.map(s => {
+      val (id, switch) = s
+      counter += 1
+      s"$counter: id: $id name: ${switch.name}"
+    }).mkString("", "\n", "\n")
+    val expectedPrinted = outputForMap + "id/Index> " * (inputFail.length + 1) + (outputForMap + "id/Index> ") * (inputSuccess.length - 1)
 
     class deviceThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
@@ -445,6 +438,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
       }
     }
 
+    assertResult(expectedPrinted)(outputStream.toString)
     w.await()
 
   }
@@ -458,13 +452,13 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
 
     class thread extends ipcThread(w, false) {
       protected override def testCode(args: Any*): Unit = {
-        var request: IPCCommand = read
+        var request: IPCCommand = readIPCCommand[ipcGetControllerCommand]
         w {
           assertResult(
             new ipcGetControllerCommand)(request)
         }
         out.writeObject(ipcGetControllerResponse(Map("aaaaa" -> "Test 1", "bbbbb" -> "Test 2")))
-        request = read
+        request = readIPCCommand[ipcProgramControllerCommand]
         w {
           assertResult(ipcProgramControllerCommand("/dev/ttyUSB0", "aaaaa", "", ""))(request)
         }
@@ -485,28 +479,113 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
     w.await()
   }
 
-  test("Test: status") {
+  test("Test dim non-interactive") {
+    val w = new Waiter
+    val dimValues: List[Float] = List(1, 0, 0.1f, Math.random.toFloat)
+
+    val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
+
+    class deviceThread extends ipcThread(w, false) {
+      override def testCode(args: Any*): Unit = {
+        var answer: IPCCommand = ipcPingCommand()
+        for (d <- dimValues) {
+          answer = readIPCCommand[ipcGetDevicesCommand]
+          out.writeObject(ipcGetDevicesResponse(device))
+          answer = readIPCCommand
+          w {
+            if (d == 0)
+              assert(answer.isInstanceOf[ipcOffCommand])
+            else {
+              assert(answer.isInstanceOf[ipcOnCommand])
+              assertResult(d)(answer.asInstanceOf[ipcOnCommand].percent)
+            }
+          }
+          out.writeObject(ipcSuccessResponse(answer))
+        }
+        answer = readIPCCommand[ipcGetDevicesCommand]
+        out.writeObject(ipcGetDevicesResponse(device))
+      }
+    }
+
+    val testThread = new deviceThread
+    testThread.start()
+
+    console.interactive = false
+    console.connect()
+
+    for (d <- dimValues) {
+      println(s"Testing $d")
+      console.dim("12345", d)
+    }
+
+    assertThrows[IllegalArgumentException](console.dim("12345"))
+
+    w.await()
+  }
+
+  test("Test dim interactive") {
+    val w = new Waiter
+    val inputFail: List[String] = List("a", "asdf", "-0.1", "2", " 0,2")
+    val inputSuccess: List[String] = List("  1 ", "0", "0.1")
+    val completeInput = inputFail.concat(inputSuccess)
+
+    val outputStream = new ByteArrayOutputStream()
+    val inputStream = getInputStream(completeInput)
+
+    val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
+
+    class deviceThread extends ipcThread(w, false) {
+      override def testCode(args: Any*): Unit = {
+        // Including length since in the test we also test what happens when we specify a valid float
+        for (_ <- 0 to inputSuccess.length) {
+          var answer: IPCCommand = readIPCCommand[ipcGetDevicesCommand]
+          out.writeObject(ipcGetDevicesResponse(device))
+          answer = readIPCCommand[IPCCommand]
+          w {
+            assert(answer.isInstanceOf[ipcOnCommand] || answer.isInstanceOf[ipcOffCommand])
+          }
+          out.writeObject(ipcSuccessResponse(answer))
+        }
+      }
+    }
+
+
+    val testThread = new deviceThread
+    testThread.start()
+    console.connect()
+    console.interactive = true
+
+    Console.withOut(outputStream) {
+      Console.withIn(inputStream) {
+        console.dim("12345", 1)
+        for (_ <- inputSuccess) {
+          console.dim("12345")
+        }
+      }
+    }
+
+    w.await()
+  }
+
+  test("Test status") {
     val w = new Waiter
 
-    val devices = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
     val outputStream = new ByteArrayOutputStream()
+    val inputStream = getInputStream(List())
 
-    class thread extends ipcThread(w, false) {
-      override protected def testCode(args: Any*): Unit = {
-        var answer = in.readObject()
-        w {
-          assert(answer.isInstanceOf[ipcGetDevicesCommand])
-        }
-        out.writeObject(ipcGetDevicesResponse(devices))
-        answer = in.readObject()
-        w {
-          assertResult(ipcGetDeviceCommand("12345"))(answer)
-        }
+    val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
+
+    class deviceThread extends ipcThread(w, false) {
+      override def testCode(args: Any*): Unit = {
+        readIPCCommand[ipcGetDevicesCommand]
+        out.writeObject(ipcGetDevicesResponse(device))
+        val request = readIPCCommand[ipcGetDeviceCommand]
+        assertResult("12345")(request.id)
         out.writeObject(ipcGetDeviceResponse(ipcLongSwitchData("12345", dimmable = true, "Test Device1", 0.1f, MQTT)))
       }
     }
 
-    val testThread = new thread
+    val testThread = new deviceThread
     testThread.start()
 
     console.connect()
@@ -554,30 +633,23 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
       override protected def testCode(args: Any*): Unit = {
 
         // Test MQTT
-        var request = read
+        var request = readIPCCommand
         w {
           assertResult(ipcGetRandomId())(request)
         }
         out.writeObject(ipcGetRandomIdResponse("11111"))
-        request = read
-        w {
-          assertResult(
-            new ipcGetControllerCommand)(request)
-        }
+        request = readIPCCommand[ipcGetControllerCommand]
         out.writeObject(ipcGetControllerResponse(Map("maste" -> "Test 1", "bbbbb" -> "Test 2")))
-        request = read
+        request = readIPCCommand
         w {
           assertResult(ipcAddDeviceCommand("11111", MQTT, "Test Create 1", "null", "null", SLIDER, keepState = true, 16, "maste"))(request)
         }
         out.writeObject(ipcSuccessResponse(request))
 
         //Test MHZ
-        request = read
-        w {
-          assertResult(ipcGetRandomId())(request)
-        }
+        request = readIPCCommand[ipcGetRandomId]
         out.writeObject(ipcGetRandomIdResponse("22222"))
-        request = read
+        request = readIPCCommand
         w {
           assertResult(ipcAddDeviceCommand("22222", MHZ, "Test Create 2", "11111", "00000", BUTTON, keepState = false, -1, null))(request)
         }
@@ -592,59 +664,11 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter {
 
     Console.withOut(outputStream) {
       Console.withIn(inputStream) {
-        console.addSwitch(true)
-        console.addSwitch(false)
+        console.status("12345")
       }
     }
 
-
-    assertResult(expectedOutput)(outputStream.toString())
-    w.await()
-  }
-
-  test("Test: dim") {
-    val w = new Waiter
-
-    val device = List(ipcShortSwitchData("11111", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("aaaaa", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
-    val inputStream = new ByteArrayInputStream("a\n0.1\n0".getBytes())
-
-    class Thread extends ipcThread(w, false) {
-      override def testCode(args: Any*): Unit = {
-        var request = read
-        w {
-          assert(request.isInstanceOf[ipcGetDevicesCommand])
-        }
-        out.writeObject(ipcGetDevicesResponse(device))
-        request = read
-        w {
-          assertResult(ipcOnCommand("11111",0.1f))(request)
-        }
-        out.writeObject(ipcSuccessResponse(request))
-
-        request = read
-        w {
-          assert(request.isInstanceOf[ipcGetDevicesCommand])
-        }
-        out.writeObject(ipcGetDevicesResponse(device))
-        request = read
-        w {
-          assertResult(ipcOffCommand("aaaaa"))(request)
-        }
-        out.writeObject(ipcSuccessResponse(request))
-      }
-    }
-
-    val testThread = new Thread
-    testThread.start()
-
-    console.connect()
-
-    Console.withIn(inputStream) {
-      console.dim("11111")
-      console.dim("aaaaa")
-    }
-
-    w.await()
+    assertResult("10.0\n")(outputStream.toString)
   }
 }
 
