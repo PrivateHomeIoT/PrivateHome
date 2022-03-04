@@ -87,9 +87,17 @@ case class ipcGetRandomId() extends IPCCommand {
   type response = ipcGetRandomIdResponse
 }
 
-case class ipcOffCommand(id: String) extends IPCCommand {override type response = ipcSuccessResponse}
+case class ipcOffCommand(id: String) extends IPCCommand {
+  idTestIpc(id)
+  override type response = ipcSuccessResponse
+}
 
-case class ipcOnCommand(id: String, percent: Float) extends IPCCommand{override type response = ipcSuccessResponse}
+case class ipcOnCommand(id: String, percent: Float) extends IPCCommand {
+  if (percent < 0 || percent > 1) throw new IllegalArgumentException(s"percent must be between 0 and 1 was $percent")
+  idTestIpc(id)
+
+  override type response = ipcSuccessResponse
+}
 
 case class ipcProgramControllerCommand(path: String, masterId: String, ssid: String, pass: String) extends IPCCommand{override type response = ipcSuccessResponse}
 
