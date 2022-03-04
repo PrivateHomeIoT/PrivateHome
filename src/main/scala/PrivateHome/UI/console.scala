@@ -140,27 +140,48 @@ object console {
   }
 
   /**
-   * This will send a command to the server and read the answer
+   * This will add a switch to the server which parameters get asked interactively
    *
-   * @param command The command to send to the server
-   * @param c       An implicit handler that is used to cast the answer with the ability to catch a cast exception
-   * @return Will return the ipcResponse that corresponds with the command
-   * @throws RuntimeException      If the response is a ipcSuccessResponse with fail
-   * @throws InvalidClassException If the response is neither ipcSuccessResponse nor the expected one
+   * @param dimmable if the switch should be dimmable this gets set by the command that you chose
    */
-  def send(command: IPCCommand): command.response = {
-    ensureConnection
-    out.writeObject(command)
-
-    in.readObject() match {
-      case r: ipcSuccessResponse
-        if !r.success =>
-        scala.Console.err.println(s"command: ${r.command} failed with exception:")
-        r.exception.printStackTrace(scala.Console.err)
-        throw new InvalidClassException("Server did not response with expected class")
-      case response: command.response =>
-        response
+  private def addSwitch(dimmable: Boolean): Unit = {
+    val response = send(ipcGetRandomId())
+    val tmpId = response.id
+    var id = ""
+    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
+      id = readLine(s"id[$tmpId]> ")
+      if (id == "") id = tmpId
     }
+    val name = readLine("name> ").replace(',', ' ')
+    val keepStateChar = readLine("Keep State (y/n)> ")(0).toLower
+    val keepState = keepStateChar == 'y' || keepStateChar == 'j'
+    var switchType: switchType = null
+    var systemCode: String = "null"
+    var unitCode: String = "null"
+    var chosenController: String = null
+    var pin: Int = -1
+    do {
+      val switchTypeString = if (dimmable) "mqtt" else readLine("Control Type (mqtt/433mhz)> ").toLowerCase
+      switchType = switchTypeString match {
+        case "mqtt" =>
+          chosenController = getControllerId
+          while (!(pin > -1 && pin < 64)) {
+            try pin = readLine("Pin number 0-63> ").toInt
+            catch {
+              case _: NumberFormatException =>
+            }
+          }
+          MQTT
+        case "433mhz" =>
+          while (!systemCode.matches("[01]{5}")) systemCode = readLine("systemCode (00000 - 11111)> ")
+          while (!unitCode.matches("[01]{5}")) unitCode = readLine("unitCode (00000 - 11111)> ")
+          MHZ
+        case _ => null
+      }
+    } while (switchType == null)
+    send(ipcAddDeviceCommand(id, switchType, name, systemCode, unitCode, {
+      if (dimmable) SLIDER else BUTTON
+    }, keepState, pin, chosenController))
   }
 
   /**
@@ -350,21 +371,6 @@ object console {
   }
 
   /**
-   * This will add a switch to the server which parameters get asked interactively
-   *
-   * @param dimmable if the switch should be dimmable this gets set by the command that you chose
-   */
-  private def addSwitch(dimmable: Boolean): Unit = {
-    val response = send(ipcGetRandomId())
-    val tmpId = response.id
-    var id = ""
-    while (!id.matches("[-_a-zA-Z0-9]{5}")) {
-      id = readLine(s"id[$tmpId]> ")
-      if (id == "") id = tmpId
-    }
-  }
-
-  /**
    * This is a helper to get the id of an mqtt controller
    *
    * @return The id as a String
@@ -396,6 +402,34 @@ object console {
     chosenController
   }
 
+  /**
+   * This will send a command to the server and read the answer
+   *
+   * @param command The command to send to the server
+   * @param c       An implicit handler that is used to cast the answer with the ability to catch a cast exception
+   *
+   * @return Will return the ipcResponse that corresponds with the command
+   * @throws RuntimeException      If the response is a ipcSuccessResponse with fail
+   * @throws InvalidClassException If the response is neither ipcSuccessResponse nor the expected one
+   */
+  def send(command: IPCCommand)(implicit c: ClassTag[command.response]): command.response = {
+    ensureConnection
+    out.writeObject(command)
+
+    in.readObject() match {
+      case r: ipcSuccessResponse
+        if !r.success =>
+        scala.Console.err.println(s"command: ${r.command} failed with exception:")
+        r.exception.printStackTrace(scala.Console.err)
+        throw new RuntimeException("Command failed")
+      case response =>
+        try {
+          c.runtimeClass.cast(response).asInstanceOf[command.response]
+        } catch {
+          case _: ClassCastException => throw new InvalidClassException("Server did not response with expected class")
+        }
+    }
+  }
 }
 
 

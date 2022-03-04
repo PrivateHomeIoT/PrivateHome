@@ -22,8 +22,8 @@ import PrivateHome.Devices.controlType._
 import PrivateHome.Devices.switchType._
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.concurrent.Waiters.Waiter
 import org.scalatest.concurrent.Waiters
+import org.scalatest.concurrent.Waiters.Waiter
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatest.{BeforeAndAfter, PrivateMethodTester}
@@ -37,6 +37,8 @@ import scala.language.postfixOps
 class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTester {
   private val consoleStdIn = console.StdInJava
   private val addUser = PrivateMethod[Unit](Symbol("addUser"))
+  private val addSwitch = PrivateMethod[Unit](Symbol("addSwitch"))
+
   var serverSocket: UnixDomainServerSocket = _
 
   def getInputStream(list: List[String]): ByteArrayInputStream = {
@@ -108,7 +110,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
 
   }
 
-  test("test send with disconnect") {
+  test("Test: send with disconnect") {
     val outputStream = new ByteArrayOutputStream()
 
     val w = new Waiter
@@ -118,10 +120,12 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
 
     class sendThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
-        in.readObject().asInstanceOf[ipcPingCommand]
+        readIPCCommand[ipcPingCommand]
         out.writeObject(ipcPingResponse())
-        val request = in.readObject().asInstanceOf[ipcPingCommand]
+        var request = readIPCCommand[ipcPingCommand]
         out.writeObject(ipcSuccessResponse(request))
+        request = readIPCCommand[ipcPingCommand]
+        out.writeObject(ipcSuccessResponse(request, success = false))
       }
     }
 
@@ -137,6 +141,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
       assertResult(ipcPingResponse())(console.send(new ipcPingCommand))
       assertResult("Server did not response with expected class")(intercept[InvalidClassException](console.send(ipcPingCommand())).getMessage)
     }
+    assertResult("Command failed")(intercept[RuntimeException](console.send(ipcPingCommand())).getMessage)
 
     assertResult("Connection is closed.\nReconnecting\n")(outputStream.toString())
     w.await(Timeout(20 millis))
@@ -404,7 +409,7 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
     val inputComplete = inputFail.concat(inputSuccess.map(s => s._1))
 
     val outputStream = new ByteArrayOutputStream()
-    val inputStream = new ByteArrayInputStream(s"2\nab345".getBytes())
+    val inputStream = getInputStream(inputComplete)
 
     val device = List(ipcShortSwitchData("12345", dimmable = true, "Test Device1", 0.1f), ipcShortSwitchData("ab345", dimmable = false, "Test Device 2", 1)).map(s => s.id -> s).toMap
 
@@ -418,12 +423,10 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
 
     class deviceThread extends ipcThread(w, false) {
       override def testCode(args: Any*): Unit = {
-        val answer = in.readObject()
-        w {
-          assert(answer.isInstanceOf[ipcGetDevicesCommand])
+        for (_ <- inputSuccess.indices) {
+          readIPCCommand[ipcGetDevicesCommand]
+          out.writeObject(ipcGetDevicesResponse(device))
         }
-        out.writeObject(ipcGetDevicesResponse(device))
-        out.writeObject(ipcGetDevicesResponse(device))
       }
     }
 
@@ -434,7 +437,8 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
 
     Console.withOut(outputStream) {
       Console.withIn(inputStream) {
-        assertResult("ab345")(console.getDeviceID())
+        for ((_, expected) <- inputSuccess)
+          assertResult(expected)(console.getDeviceID())
       }
     }
 
@@ -633,14 +637,11 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
       override protected def testCode(args: Any*): Unit = {
 
         // Test MQTT
-        var request = readIPCCommand
-        w {
-          assertResult(ipcGetRandomId())(request)
-        }
+        readIPCCommand[ipcGetRandomId]
         out.writeObject(ipcGetRandomIdResponse("11111"))
-        request = readIPCCommand[ipcGetControllerCommand]
+        readIPCCommand[ipcGetControllerCommand]
         out.writeObject(ipcGetControllerResponse(Map("maste" -> "Test 1", "bbbbb" -> "Test 2")))
-        request = readIPCCommand
+        var request: IPCCommand = readIPCCommand[ipcAddDeviceCommand]
         w {
           assertResult(ipcAddDeviceCommand("11111", MQTT, "Test Create 1", "null", "null", SLIDER, keepState = true, 16, "maste"))(request)
         }
@@ -664,11 +665,13 @@ class consoleTest extends AnyFunSuite with BeforeAndAfter with PrivateMethodTest
 
     Console.withOut(outputStream) {
       Console.withIn(inputStream) {
-        console.status("12345")
+        console invokePrivate addSwitch(true)
+        console invokePrivate addSwitch(false)
       }
     }
 
-    assertResult("10.0\n")(outputStream.toString)
+    w.await()
+
   }
 }
 
