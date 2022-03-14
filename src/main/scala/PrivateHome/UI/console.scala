@@ -30,6 +30,7 @@ import java.nio.file.{Files, Path}
 import scala.collection.immutable.ArraySeq
 import scala.io.StdIn.readLine
 import scala.reflect.ClassTag
+import scala.sys.exit
 
 object console {
   var StdInJava: Console = System.console()
@@ -48,7 +49,8 @@ object console {
     "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
     "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
     "getKey" -> REPLCommand(_ => printControllerKey(), "Displays the Key of a given Controller."),
-    "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller")
+    "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller"),
+    "exit" → REPLCommand(_ ⇒ exit(), "This will terminate the console")
   )
   var socket: UnixDomainSocket = _
   var triedConnecting = false
@@ -98,7 +100,6 @@ object console {
       runSubcommand(arguments)
     } else {
       interactive = true
-
 
       while (true) {
         val userInput = readLine("> ")
