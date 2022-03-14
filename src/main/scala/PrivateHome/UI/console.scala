@@ -95,20 +95,7 @@ object console {
       case e: Throwable => e.printStackTrace()
     }
     if (arguments.subcommand.isDefined) {
-      interactive = arguments.interactive()
-
-      arguments.subcommand.get match {
-        case s: UI.status => status(s.id.getOrElse(""))
-        case on: UI.on =>
-          val id = getDeviceID(on.id.getOrElse(""))
-          send(ipcOnCommand(id, on.percent))
-        case off: UI.off => val id = getDeviceID(off.id())
-          send(ipcOffCommand(id))
-        case t: toggleSwitch =>
-          val id = getDeviceID(t.id())
-          val state: Float = if (send(ipcGetDeviceCommand(id)).device.status == 0) 1 else 0
-          send(ipcOnCommand(id, state))
-      }
+      runSubcommand(arguments)
     } else {
       interactive = true
 
@@ -122,6 +109,23 @@ object console {
           println("Unrecognized command. Please try again.")
         }
       }
+    }
+  }
+
+  def runSubcommand(arguments: cliParser): Unit = {
+    interactive = arguments.interactive()
+
+    arguments.subcommand.get match {
+      case s: UI.status => status(s.id.getOrElse(""))
+      case on: UI.on =>
+        val id = getDeviceID(on.id.getOrElse(""))
+        send(ipcOnCommand(id, on.percent))
+      case off: UI.off => val id = getDeviceID(off.id())
+        send(ipcOffCommand(id))
+      case t: toggleSwitch =>
+        val id = getDeviceID(t.id())
+        val state: Float = if (send(ipcGetDeviceCommand(id)).device.status == 0) 1 else 0
+        send(ipcOnCommand(id, state))
     }
   }
 
