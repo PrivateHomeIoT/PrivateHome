@@ -101,12 +101,7 @@ object console {
         case s: UI.status => status(s.id.getOrElse(""))
         case on: UI.on =>
           val id = getDeviceID(on.id.getOrElse(""))
-          val percentFloat: Float = {
-            if (on.percentage.isSupplied) on.percentage() / 100f
-            else if (on.percentFloat.isSupplied) on.percentFloat()
-            else 1f
-          }
-          send(ipcOnCommand(id, percentFloat))
+          send(ipcOnCommand(id, on.percent))
         case off: UI.off => val id = getDeviceID(off.id())
           send(ipcOffCommand(id))
         case t: toggleSwitch =>
