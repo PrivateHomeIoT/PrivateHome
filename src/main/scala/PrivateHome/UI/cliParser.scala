@@ -65,7 +65,7 @@ abstract class subcommandWithId(interactive: ScallopOption[Boolean], subcommandN
 
   validateOpt(interactive, id) { (i, id) => {
     if (!i.get && id.isEmpty) {
-      Left("When the command is not run interactive you mus specify the id")
+      Left("When the command is not run interactive you must specify the id")
     } else {
       Right()
     }
