@@ -47,8 +47,7 @@ class onTest extends subcommandWithIdTest[on]("on") {
       case _ => cancel("This should not be reached")
     }
 
-    assert(on.percentFloat.isSupplied)
-    assertResult(0.12f)(on.percentFloat())
+    assertResult(0.12f)(on.percent)
   }
 
   test("Test percent float (long)") {
@@ -58,8 +57,7 @@ class onTest extends subcommandWithIdTest[on]("on") {
       case _ => cancel("This should not be reached")
     }
 
-    assert(on.percentFloat.isSupplied)
-    assertResult(0.22f)(on.percentFloat())
+    assertResult(0.22f)(on.percent)
   }
 
   test("Test percentage (short)") {
@@ -69,8 +67,7 @@ class onTest extends subcommandWithIdTest[on]("on") {
       case _ => cancel("This should not be reached")
     }
 
-    assert(on.percentage.isSupplied)
-    assertResult(22)(on.percentage())
+    assertResult(0.22f)(on.percent)
   }
 
   test("Test percentage (long)") {
@@ -80,8 +77,7 @@ class onTest extends subcommandWithIdTest[on]("on") {
       case _ => cancel("This should not be reached")
     }
 
-    assert(on.percentage.isSupplied)
-    assertResult(32)(on.percentage())
+    assertResult(0.32f)(on.percent)
   }
 }
 

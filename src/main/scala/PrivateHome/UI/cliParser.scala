@@ -43,12 +43,17 @@ class status(interactive: ScallopOption[Boolean]) extends subcommandWithId(inter
 class toggleSwitch(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "toggle")
 
 class on(interactive: ScallopOption[Boolean]) extends subcommandWithId(interactive, "on") {
-  val percentage: ScallopOption[Int] = opt[Int](validate = per => {
+  private val percentage: ScallopOption[Int] = opt[Int](name = "percentage", validate = per => {
     per > 0 && per <= 100
   })
-  val percentFloat: ScallopOption[Float] = opt[Float](short = 'f', validate = float => {
+  private val percentFloat: ScallopOption[Float] = opt[Float](name = "percent-float", short = 'f', validate = float => {
     float > 0 && float <= 1
   })
+
+  def percent: Float = {
+    percentFloat.getOrElse(percentage.getOrElse(100) / 100f)
+  }
+
   mutuallyExclusive(percentage, percentFloat)
 }
 
