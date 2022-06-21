@@ -4,24 +4,33 @@ name := "PrivateHome"
 
 //version := "0.1"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.6"
 
-maintainer := "RaHoni <honi2002suess@gmail.com>"
+maintainer := "RaHoni <honisuess@gmail.com>"
 
 packageSummary := "This is a SmartHome system"
 
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
 debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
-debianPackageRecommends := Seq("wiringpi","pi4j")
+debianPackageRecommends := Seq("wiringpi", "pi4j (<< 2.0.0)")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
-  packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") ->s"/etc/mosquitto/conf.d/privatehome.conf"),
+  packageMapping(file(s"src/debian/etc/mosquitto/conf.d/privatehome.conf") -> s"/etc/mosquitto/conf.d/privatehome.conf"),
   packageTemplateMapping(s"/etc/${normalizedName.value}/data")().withUser(normalizedName.value).withGroup(normalizedName.value),
   packageTemplateMapping(s"/var/log/${normalizedName.value}")().withUser(normalizedName.value).withGroup(normalizedName.value)
 )
 releaseIgnoreUntrackedFiles := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
+
+cleanKeepFiles += target.value / "scala-2.13" / "scoverage-report"
+
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "PrivateHome"
+  )
 
 releaseProcess := Seq[ReleaseStep](
   inquireVersions,
@@ -38,7 +47,7 @@ Debian / maintainerScripts  := maintainerScriptsAppendFromFile((Debian/maintaine
   Postinst ->  sourceDirectory.value / "debian" / "postinst"
 )
 
-lazy val akkaVersion = "2.6.8"
+lazy val akkaVersion = "2.6.17"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
 libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-parent" % "1.2")
@@ -47,7 +56,7 @@ libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
 
 //logback logger used by Akka and scalikejdbc and the whole project
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.6"
 
 //Akka library for Webserver with Websockets Support
 libraryDependencies ++= Seq(
@@ -80,6 +89,10 @@ libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
 libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
+
+//scallop libary for cmdline parsing
+libraryDependencies += "org.rogach" %% "scallop" % "4.0.4"
 
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)

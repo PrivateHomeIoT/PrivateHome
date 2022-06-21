@@ -18,36 +18,36 @@
 
 package PrivateHome.UI
 
+import PrivateHome.Devices.controlType.SLIDER
 import PrivateHome.data
-import PrivateHome.data.chars
 import org.slf4j.LoggerFactory
 
 object stringCommandHandler {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def interpretMessage(msg: String): Any = {
+  def interpretMessage(msg: IPCCommand): IPCResponse = {
     try {
+      /*
       val command: Array[String] = msg.stripSuffix(")").split('(')
       val args = if ((command.length == 2) && (command(1) != null)) command(1).split(',') else null
       logger.debug("command = {}", command(0))
 
       val uiCommand = command(0) match {
         case "commandAddUserBase64" =>
-          commandAddUserBase64(args(0), args(1))
-        case "commandRecreateDatabase" => commandRecreateDatabase()
-        case "commandSafeCreateDatabase" => commandSafeCreateDatabase()
-        case "getRandomId" => commandGetRandomId()
-        case "commandOn" => commandOn(args(0), args(1))
-        case "commandOff" => commandOff(args(0))
-        case "commandAddDevice" => commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8))
-        case "commandAddController" => commandAddController(args(0))
-        case "commandGetController" => commandGetController()
+          uiControl.addUser(args(0), new String(Base64.getDecoder.decode(args(1))))
+        case "commandRecreateDatabase" => uiControl.recreateDatabase()
+        case "commandSafeCreateDatabase" => uiControl.safeCreateDatabase()
+        case "getRandomId" => uiControl.randomNewId
+        case "commandOn" => uiControl.on(args(0), args(1).toFloat)
+        case "commandOff" => uiControl.off(args(0))
+        case "commandAddDevice" => uiControl.addDevice(commandAddDevice(args(0), args(1), args(2), args(3), args(4), args(5), args(6).toBoolean, args(7).toInt, args(8)))
+        case "commandAddController" => uiControl.addController(args(0))
+        case "commandGetController" => uiControl.getController.map(tupel => s"${tupel._1}:${tupel._2}").mkString(",")
         case "getControllerKey" => data.getControllerMasterId(args(0)).keyArray.map(_ & 0xFF).mkString(",")  //"%02x" format _
         case "commandProgramController" =>
-          commandProgramController(args(0), args(1), args(2), args(3))
+          uiControl.programController(args(0), args(1), args(2), args(3))
 
         case _ => logger.warn("Unknown Command")
-          new Command
       }
       uiCommand match {
         case c: Command => uiControl.receiveCommand(c)
@@ -55,9 +55,46 @@ object stringCommandHandler {
         case _ => ""
       }
 
+
+       */
+      logger.debug("Received command: {}", msg)
+      val answer: IPCResponse = msg match {
+        case c: ipcAddControllerCommand => uiControl.addController(c.name)
+          ipcSuccessResponse(c)
+        case c: ipcAddDeviceCommand => uiControl.addDevice(commandAddDevice(c.id, c.switchType, c.name, c.systemCode, c.unitCode, c.controlType, c.keepState, c.pin, c.masterId))
+          ipcSuccessResponse(c)
+        case c: ipcAddUserCommand => uiControl.addUser(c.username, c.passHash)
+          ipcSuccessResponse(c)
+        case _: ipcGetControllerCommand => ipcGetControllerResponse(uiControl.getController)
+        case c: ipcGetControllerKeyCommand => ipcGetControllerKeyResponse(data.getControllerMasterId(c.id).keyArray)
+        case c: ipcGetDeviceCommand =>
+          val switch = uiControl.getDevice(c.id)
+          val switchData = ipcLongSwitchData(switch.id, switch.controlType == SLIDER, switch.name, switch.status, switch.switchtype)
+          ipcGetDeviceResponse(switchData)
+        case _: ipcGetDevicesCommand => val data = ipcGetDevicesResponse(uiControl.getDevices)
+          println("Got list")
+          data
+        case _: ipcGetRandomId => ipcGetRandomIdResponse(uiControl.randomNewId)
+        case c: ipcOffCommand => uiControl.off(c.id)
+          ipcSuccessResponse(c)
+        case c: ipcOnCommand => uiControl.on(c.id, c.percent)
+          ipcSuccessResponse(c)
+        case c: ipcProgramControllerCommand => uiControl.programController(c.masterId, c.path, c.ssid, c.pass)
+          ipcSuccessResponse(c)
+        case c: ipcRecreateDatabase => uiControl.recreateDatabase()
+          ipcSuccessResponse(c)
+        case c: ipcSafeCreateDatabase => uiControl.safeCreateDatabase()
+          ipcSuccessResponse(c)
+        case c: ipcUpdateDeviceCommand => uiControl.updateDevice(commandUpdateDevice(c.oldId, c.newId, c.keepState, c.name, c.controlType, c.switchType, c.systemCode, c.unitCode, c.pin, c.masterId))
+          ipcSuccessResponse(c)
+        case c => logger.error("IPCCommand with class {} not implemented in stringCommandHandler", msg.getClass.toString)
+          ipcSuccessResponse(c, new Exception("Command not Implemented"), success = false)
+      }
+
+      answer
     } catch {
       case e: Throwable => logger.error("Unknown Error while interpreting Console command", e)
-        e + e.getStackTrace.mkString("\n")
+        ipcSuccessResponse(msg, e, success = false)
     }
   }
 }

@@ -65,7 +65,7 @@ object privatehome {
     logger.info("Shutting down Server")
     repl.shutdown()
     gui.shutdown
-    data.shutdown
+    data.shutdown()
     sendMhz.shutdown
     mqttClient.shutdown
     sys.exit(exitCode)

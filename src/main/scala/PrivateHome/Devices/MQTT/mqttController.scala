@@ -38,7 +38,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   val cipher = Cipher.getInstance("AES/CBC/NoPadding")
   private val key = new SecretKeySpec(_key, "AES")
 
-  def keyArray: Array[Byte] = _key
+  private [PrivateHome] def keyArray: Array[Byte] = _key
 
   private val pins: Array[mqttSwitch] = new Array[mqttSwitch](64)
   private var _randomCode: String = ""

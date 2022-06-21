@@ -65,21 +65,22 @@ class dataTest extends AnyFunSuite {
 
   }
    */
-
-//  test("Save State") {
-//    data.create(true)
-//    data.addController(new mqttController("aaaaa",key),key)
-//    data.addDevice(mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa"))
-//    var expected: Map[String, Switch] = Map()
-//    expected = expected + (("abcde", mqttSwitch("abcde", _keepStatus = false, "Device", "button",1,"aaaaa")))
-//    data.fillDevices()
-//  }
-//
-//  test("Test: getDevice") {
-//    data.create(true)
-//    data.addController(new mqttController("aaaaa",key),key)
-//    val switch = mqttSwitch("abcde", _keepStatus = false, "Test", "slider",1,"aaaaa")
-//    data.addDevice(switch)
+  //
+  //  ignore("Save State") {
+  //    data.create(true)
+  //
+  //    data.addController(new mqttController("aaaaa",key),key)
+  //    data.addDevice(mqttSwitch("abcde", _keepStatus = false, "Device", BUTTON,1,"aaaaa"))
+  //    var expected: Map[String, Switch] = Map()
+  //    expected = expected + (("abcde", mqttSwitch("abcde", _keepStatus = false, "Device", BUTTON,1,"aaaaa")))
+  //    data.fillDevices()
+  //  }
+  //
+  //  ignore("Test: getDevice") {
+  //    data.create(true)
+  //    data.addController(new mqttController("aaaaa",key),key)
+  //    val switch = mqttSwitch("abcde", _keepStatus = false, "Test", SLIDER,1,"aaaaa")
+  //    data.addDevice(switch)
 //    assertResult(data.getDevice("abcde"))(switch)
 //  }
 

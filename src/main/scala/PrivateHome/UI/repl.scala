@@ -19,58 +19,71 @@
 package PrivateHome.UI
 
 
+import PrivateHome.BuildInfo
 import org.scalasbt.ipcsocket.UnixDomainServerSocket
 import org.slf4j.LoggerFactory
 
 import java.io._
 
 
-
 object repl {
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  val socketPath = "/tmp/privatehome2.sock"
+  val socketPath = s"/tmp/${BuildInfo.name}.sock"
   val serverSocket = new UnixDomainServerSocket(socketPath)
-
-  class readThread extends Thread {
-    setName("replReadThread")
-    override def run(): Unit = {
-      while (true) {
-        val clientSocket = serverSocket.accept()
-        try {
-          val out = new PrintWriter(clientSocket.getOutputStream, true)
-          val in =
-            new BufferedReader(new InputStreamReader(clientSocket.getInputStream))
-          var line: String = null
-          do {
-            line = in.readLine()
-            if (line != null) {
-              val answer = stringCommandHandler.interpretMessage(line)
-              answer match {
-                case _: Exception => logger.warn("Will drop the exception")
-                case list: List[(String,String)] => out.println(list.map(tupel => s"${tupel._1}:${tupel._2}").mkString(","))
-                case ans => out.println(ans)
-              }
-            }
-          } while (line != null && !line.trim().equals("bye"))
-        } catch {
-          case _: IOException =>
-        }
-      }
-
-    }
-  }
-
   val replReadThread = new readThread
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
-  replReadThread.start()
-  logger.info("Started repl handler thread")
-
-  def shutdown(): Unit ={
+  def shutdown(): Unit = {
     logger.info("Shutting down repl")
     val socketfile = new File(socketPath)
     serverSocket.close()
     socketfile.delete()
     logger.info("REPL shut down")
+  }
+
+  replReadThread.start()
+  logger.info("Started repl handler thread")
+
+  class readThread extends Thread {
+    var out: ObjectOutputStream = _
+    var in: ObjectInputStream = _
+    setName("replReadThread")
+
+    override def run(): Unit = {
+      while (true) {
+        val clientSocket = serverSocket.accept()
+        try {
+          out = new ObjectOutputStream(clientSocket.getOutputStream)
+          in = new ObjectInputStream(clientSocket.getInputStream)
+          var line: IPCCommand = null
+          do {
+            line = in.readObject().asInstanceOf[IPCCommand]
+            if (line != null) {
+              var answer = stringCommandHandler.interpretMessage(line)
+              if (answer == null) {
+                answer = ipcSuccessResponse(line)
+              }
+              out.writeObject(answer)
+              logger.debug("Wrote Answer")
+              //              answer match {
+              //                case _: Exception => logger.warn("Will drop the exception")
+              //                case list: List[(String,String)] => out.writeChars(list.map(tupel => s"${tupel._1}:${tupel._2}").mkString(","))
+              //                case ans:IPCResponse => out.writeObject(ans)
+              //              }
+            }
+          } while (line != null && !line.isInstanceOf[ipcCloseCommand])
+          println("Exit")
+        } catch {
+          case e: ClassNotFoundException => in.readAllBytes()
+            logger.warn("Class send by console not known.", e)
+          case e: InvalidClassException => in.readAllBytes()
+            logger.warn("Error while reading object from console.", e)
+          case e: OptionalDataException => in.readAllBytes()
+            logger.warn("Error while reading Objekt because it was no Object.", e)
+          case e: IOException =>
+        }
+      }
+
+    }
   }
 }
 

@@ -19,12 +19,14 @@
 package PrivateHome.Devices.MQTT
 
 import PrivateHome.Devices.Switch
+import PrivateHome.Devices.controlType.controlType
+import PrivateHome.Devices.switchType.MQTT
 import PrivateHome.data
 import org.slf4j.{LoggerFactory, MarkerFactory}
 
 import scala.xml.Node
 
-class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlType: String, private var _pin: Int, masterID: String = "") extends Switch(_id, _keepStatus, _name, setupControlType) {
+class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlType: controlType, private var _pin: Int, masterID: String = "") extends Switch(_id, _keepStatus, _name, setupControlType) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val commandMarker = MarkerFactory.getMarker("COMMAND")
@@ -49,7 +51,7 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
 
   def masterId: String = if (_controller != null) _controller.masterID else ""
 
-  def pin(): Int = _pin
+  def pin: Int = _pin
 
   def changePinAndController(pPin: Int, masterId: String): Unit = {
     val newController = data.getControllerMasterId(masterId)
@@ -82,8 +84,8 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
    * This method turns on the MQTT-Device.
    */
   def on(percent: Float): Unit = {
-    logger.info(commandMarker, "Turning on Switch {} to {}%", name, percent*100)
-    _controller.sendCommand(_pin,percent)
+    logger.info(commandMarker, "Turning on Switch {} to {}%", name, percent * 100)
+    _controller.sendCommand(_pin, percent)
   }
 
   /**
@@ -109,9 +111,9 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
     </keepStatus>
   </switch>
 
-  def switchtype: String = "mqtt"
+  def switchtype = MQTT
 }
 
 object mqttSwitch {
-  def apply(_id: String, _keepStatus: Boolean, _name: String, setupControlType: String, _pin: Int, masterId: String = ""): mqttSwitch = new mqttSwitch(_id, _keepStatus, _name, setupControlType, _pin, masterId)
+  def apply(_id: String, _keepStatus: Boolean, _name: String, setupControlType: controlType, _pin: Int, masterId: String = ""): mqttSwitch = new mqttSwitch(_id, _keepStatus, _name, setupControlType, _pin, masterId)
 }

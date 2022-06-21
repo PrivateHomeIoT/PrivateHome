@@ -20,6 +20,8 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
+import PrivateHome.Devices.controlType.{BUTTON, controlType}
+import PrivateHome.Devices.switchType.{MHZ, MQTT}
 import PrivateHome.UI.Websocket.websocket
 import PrivateHome.UI.{commandAddDevice, commandUpdateDevice}
 import PrivateHome.data
@@ -37,9 +39,8 @@ import scala.xml._
  * @param keepStatus toggles if the Switch should save State over program restart (failure)
  */
 
-abstract class Switch(private var setupID: String, var keepStatus: Boolean, var name: String, private var _controlType: String) {
+abstract class Switch(private var setupID: String, var keepStatus: Boolean, var name: String, private var _controlType: controlType) {
   idTest(setupID)
-  if (_controlType != "button" && _controlType != "slider") throw new IllegalArgumentException("controlType isn't button/slider")
 
   private var _status: Float = 0
 
@@ -47,13 +48,13 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
 
   def off(): Unit
 
-  def switchtype: String
+  def switchtype: switchType.switchType
 
-  @deprecated("Will be removed with editXML","0.3.1")
+  @deprecated("Will be removed with editXML", "0.3.1")
   def toXml: Node
 
   def serializer: JsonAST.JObject = {
-    ("id" -> id) ~ ("keepState" -> keepStatus) ~ ("name" -> name) ~ ("switchType" -> switchtype) ~ ("controlType" -> controlType) ~ ("status" -> status)
+    ("id" -> id) ~ ("keepState" -> keepStatus) ~ ("name" -> name) ~ ("switchType" -> switchtype.toString) ~ ("controlType" -> controlType.toString) ~ ("status" -> status)
   }
 
   def id: String = setupID
@@ -65,10 +66,9 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
     }
   }
 
-  def controlType: String = _controlType
+  def controlType: controlType = _controlType
 
-  def controlType_=(newType: String): Unit = {
-    if (newType != "button" && newType != "slider") throw new IllegalArgumentException(s"controlType $newType isn't button/slider")
+  def controlType_=(newType: controlType): Unit = {
     _controlType = newType
   }
 
@@ -82,42 +82,23 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
   def status_=(state: Float): Unit = {
     _status = state
     if (keepStatus) data.saveStatus(id, state)
-    websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType))))
+    websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType.toString))))
   }
 
 }
 
 object Switch {
-  @deprecated("Switch constructor only working with XML.","0.3.1")
-  def apply(data: Node): Switch = {
-
-    val switchType = (data \ "type").head.text
-    switchType match {
-      case "433MHz" => val systemCode = (data \ "systemCode").head.text
-        val unitCode = (data \ "unitCode").head.text
-        val name = (data \ "name").head.text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val ID = (data \ "@id").text
-        mhzSwitch(ID, KeepStatus, name, systemCode, unitCode);
-      case "MQTT" => val id = (data \ "@id").text
-        val KeepStatus = (data \ "keepStatus").head.text.toBoolean
-        val name = (data \ "name").head.text
-        mqttSwitch(id, KeepStatus, name, "button",1)
-      case _ => throw new IllegalArgumentException("Wrong Switch Type")
-    }
-  }
-
   def apply(data: commandAddDevice): Switch = {
     data.switchType match {
-      case "433Mhz" => mhzSwitch(data.id, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.id, data.keepState, data.name, data.controlType,data.pin ,data.masterId)
+      case MHZ => mhzSwitch(data.id, data.keepState, data.name, data.systemCode, data.unitCode)
+      case MQTT => mqttSwitch(data.id, data.keepState, data.name, data.controlType, data.pin, data.masterId)
     }
   }
 
   def apply(data: commandUpdateDevice): Switch = {
     data.switchType match {
-      case "433Mhz" => mhzSwitch(data.newId, data.keepState, data.name, data.systemCode, data.unitCode)
-      case "mqtt" => mqttSwitch(data.newId, data.keepState, data.name, data.controlType,data.pin,data.masterId)
+      case MHZ => mhzSwitch(data.newId, data.keepState, data.name, data.systemCode, data.unitCode)
+      case MQTT => mqttSwitch(data.newId, data.keepState, data.name, data.controlType, data.pin, data.masterId)
     }
   }
 
@@ -133,8 +114,18 @@ object Switch {
 }
 
 class switchSerializer extends CustomSerializer[Switch](ser = format => ( {
-  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", "", 0)
+  case jsonObj: JObject => mqttSwitch("", _keepStatus = false, "This Switch should never be used", BUTTON, 0)
 }, {
-  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin()) ~ ("masterId" -> switch.masterId)
+  case switch: mqttSwitch => switch.serializer ~ ("pin" -> switch.pin) ~ ("masterId" -> switch.masterId)
   case switch: mhzSwitch => switch.serializer ~ ("systemCode" -> switch.systemCode) ~ ("unitCode" -> switch.unitCode)
 }))
+
+object switchType extends Enumeration {
+  type switchType = Value
+  val MHZ, MQTT = Value
+}
+
+object controlType extends Enumeration {
+  type controlType = Value
+  val BUTTON, SLIDER = Value
+}
