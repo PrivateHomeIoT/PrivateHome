@@ -39,18 +39,18 @@ object console {
    * This map contains the commands their function and a help description
    */
   private val commands = Map(
-    "help" -> REPLCommand(_ => help(), "Prints all available commands"),
-    "addController" -> REPLCommand(_ => addController(), "Adds a new Controller that is needed for mqttSwitches."),
-    "addUser" -> REPLCommand(_ => addUser(), "Adds a new User for the WebGui"),
-    "addSwitch" -> REPLCommand(_ => addSwitch(false), "Adds a new Switch"),
-    "addDimmer" -> REPLCommand(_ => addSwitch(true), "Adds a new dimmable Switch"),
-    "dim" -> REPLCommand(_ => dim(), "Set the dimming value of a dimmable Switch"),
-    "status" -> REPLCommand(_ => status(), "Show the status of Switches"),
-    "recreateDatabase" -> REPLCommand(_ => recreate(), "Recreates the Database and deletes all data"),
-    "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
-    "getKey" -> REPLCommand(_ => printControllerKey(), "Displays the Key of a given Controller."),
-    "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller"),
-    "exit" → REPLCommand(_ ⇒ exit(), "This will terminate the console")
+    "help" -> REPLCommand(help, "Prints all available commands"),
+    "addController" -> REPLCommand(addController, "Adds a new Controller that is needed for mqttSwitches."),
+    "addUser" -> REPLCommand(addUser, "Adds a new User for the WebGui"),
+    "addSwitch" -> REPLCommand(() => addSwitch(false), "Adds a new Switch"),
+    "addDimmer" -> REPLCommand(() => addSwitch(true), "Adds a new dimmable Switch"),
+    "dim" -> REPLCommand(() => dim(), "Set the dimming value of a dimmable Switch"),
+    "status" -> REPLCommand(() => status(), "Show the status of Switches"),
+    "recreateDatabase" -> REPLCommand(recreate, "Recreates the Database and deletes all data"),
+    "safeCreate" -> REPLCommand(safeCreate, "Adds missing tables to the database"),
+    "getKey" -> REPLCommand(printControllerKey, "Displays the Key of a given Controller."),
+    "programController" -> REPLCommand(programController, "This will transfer the settings for a Controller"),
+    "exit" -> REPLCommand(exit, "This will terminate the console")
   )
   var socket: UnixDomainSocket = _
   var triedConnecting = false
@@ -105,7 +105,7 @@ object console {
         val userInput = readLine("> ")
 
         if (commands.contains(userInput)) {
-          commands(userInput).methodToCall.apply()
+          commands(userInput).methodToCall
         } else {
           println("Unrecognized command. Please try again.")
         }
@@ -439,4 +439,4 @@ object console {
  * @param methodToCall the method to call, when the command is executed
  * @param description  the description to show when the user asks for help
  */
-case class REPLCommand(methodToCall: Unit => Unit, description: String)
+case class REPLCommand(methodToCall: () => Unit, description: String)

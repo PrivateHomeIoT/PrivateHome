@@ -150,7 +150,7 @@ object websocket {
    *
    * @param msg The message that should be send to all connections as a JSON object
    */
-  def broadcastMsg(msg: json4s.JObject) {
+  def broadcastMsg(msg: json4s.JObject): Unit = {
     for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
   }
 
