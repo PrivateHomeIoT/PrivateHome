@@ -82,7 +82,7 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.200",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0")
 
-libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.12"
+libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "4.0.5"
 
 libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.11"
 
