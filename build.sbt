@@ -47,16 +47,16 @@ Debian / maintainerScripts  := maintainerScriptsAppendFromFile((Debian/maintaine
   Postinst ->  sourceDirectory.value / "debian" / "postinst"
 )
 
-lazy val akkaVersion = "2.6.17"
+lazy val akkaVersion = "2.6.19"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
-libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-parent" % "1.2")
+libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.4","com.pi4j" % "pi4j-parent" % "1.4")
 
 //scala Test also used by Akka
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
 
 //logback logger used by Akka and scalikejdbc and the whole project
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.6"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.11"
 
 //Akka library for Webserver with Websockets Support
 libraryDependencies ++= Seq(
@@ -82,11 +82,11 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.200",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0")
 
-libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
+libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.12"
 
-libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
+libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.11"
 
-libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
+libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.5.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
@@ -98,3 +98,6 @@ libraryDependencies += "org.rogach" %% "scallop" % "4.0.4"
 enablePlugins(DebianPlugin)
 enablePlugins(JavaServerAppPackaging)
 enablePlugins(SystemdPlugin)
+
+//show deprecation and feature warnings
+scalacOptions ++= Seq("-deprecation", "-feature")
