@@ -18,7 +18,7 @@
 
 package PrivateHome.UI
 
-import PrivateHome.Devices.switchType.switchType
+import PrivateHome.Devices.switchType
 
 trait IPCResponse extends Serializable {
 

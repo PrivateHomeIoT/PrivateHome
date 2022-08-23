@@ -1,5 +1,6 @@
 import com.typesafe.sbt.packager.debian.DebianPlugin.autoImport.DebianConstants._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
 name := "PrivateHome"
 
 //version := "0.1"
@@ -12,7 +13,7 @@ packageSummary := "This is a SmartHome system"
 
 packageDescription := "This is a SmartHome project focused on design, security and expandability. It is programmed in Scala."
 
-debianPackageDependencies  := Seq("java8-runtime-headless","mosquitto")
+debianPackageDependencies := Seq("java11-runtime-headless", "mosquitto")
 debianPackageRecommends := Seq("wiringpi", "pi4j (<< 2.0.0)")
 linuxPackageMappings ++= Seq(
   packageMapping(file(s"debiansettings.json") -> s"/etc/${normalizedName.value}/settings.json").withUser(normalizedName.value).withGroup(normalizedName.value).withConfig(),
@@ -43,14 +44,14 @@ releaseProcess := Seq[ReleaseStep](
 
 //version in Debian := "0.1-20201211-8"
 
-Debian / maintainerScripts  := maintainerScriptsAppendFromFile((Debian/maintainerScripts ).value)(
-  Postinst ->  sourceDirectory.value / "debian" / "postinst"
+Debian / maintainerScripts := maintainerScriptsAppendFromFile((Debian / maintainerScripts).value)(
+  Postinst -> sourceDirectory.value / "debian" / "postinst"
 )
 
 lazy val akkaVersion = "2.6.17"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
-libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2","com.pi4j" % "pi4j-parent" % "1.2")
+libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2", "com.pi4j" % "pi4j-parent" % "1.2")
 
 //scala Test also used by Akka
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
@@ -82,9 +83,12 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.200",
   "org.scalikejdbc" %% "scalikejdbc-config" % "3.4.0")
 
-libraryDependencies += "org.json4s" % "json4s-jackson_2.13" % "3.6.7"
+libraryDependencies += "org.json4s" % "json4s-native_2.13" % "4.0.5"
 
 libraryDependencies += "de.mkammerer" % "argon2-jvm" % "2.9.1"
+
+//serial Communication for mhz
+libraryDependencies += "com.fazecast" % "jSerialComm" % "[2.0.0,3.0.0)"
 
 libraryDependencies += "org.scala-sbt.ipcsocket" % "ipcsocket" % "1.3.0"
 
@@ -93,6 +97,12 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 //scallop libary for cmdline parsing
 libraryDependencies += "org.rogach" %% "scallop" % "4.0.4"
+
+//Enum for better serialition
+libraryDependencies ++= Seq(
+  "com.beachape" %% "enumeratum" % "1.7.0",
+  "com.beachape" %% "enumeratum-json4s" % "1.7.1"
+)
 
 //sbt-native-packaging Plugins for compiling to deb
 enablePlugins(DebianPlugin)

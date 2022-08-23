@@ -22,7 +22,7 @@ import PrivateHome.Devices.MQTT.mqttClient.{cmd, setup}
 import PrivateHome.{data, settings}
 import org.json4s.JsonDSL._
 import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import org.json4s.native.JsonMethods._
 import org.slf4j.LoggerFactory
 
 import java.io.{File, FileWriter}
@@ -107,7 +107,6 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
   }
 
   def receiveStatuschange(message: Array[Byte]): Unit = {
-    cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(message.slice(0, 16)))
     val messageString = decrypt(message)
     logger.debug("Trying to parse {}", messageString)
     val messageJson = parse(messageString)
@@ -122,7 +121,7 @@ class mqttController(val masterID: String, _key: Array[Byte], val name: String =
     val iv = message.slice(0, 16)
     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv))
     var messageDecrypted = cipher.doFinal(message.slice(16, message.length))
-    println(messageDecrypted.map("%02X" format _).mkString("Message: ",",",""))
+    logger.debug(messageDecrypted.map("%02X" format _).mkString("Message: ",",",""))
     messageDecrypted = messageDecrypted.slice(0,messageDecrypted.length-messageDecrypted.last)
     new String(messageDecrypted, "ASCII")
   }

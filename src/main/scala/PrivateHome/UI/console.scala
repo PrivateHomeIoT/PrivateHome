@@ -19,6 +19,7 @@
 package PrivateHome.UI
 
 import PrivateHome.Devices.controlType._
+import PrivateHome.Devices.{switchType, controlType}
 import PrivateHome.Devices.switchType._
 import PrivateHome.{BuildInfo, UI}
 import de.mkammerer.argon2.Argon2Factory
@@ -50,7 +51,7 @@ object console {
     "safeCreate" -> REPLCommand(_ => safeCreate(), "Adds missing tables to the database"),
     "getKey" -> REPLCommand(_ => printControllerKey(), "Displays the Key of a given Controller."),
     "programController" -> REPLCommand(_ => programController(), "This will transfer the settings for a Controller"),
-    "exit" → REPLCommand(_ ⇒ exit(), "This will terminate the console")
+    "exit" -> (REPLCommand(_ ⇒ exit(), "This will terminate the console"))
   )
   var socket: UnixDomainSocket = _
   var triedConnecting = false

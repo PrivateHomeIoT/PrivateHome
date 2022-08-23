@@ -27,8 +27,8 @@ import PrivateHome.UI.Websocket.websocket
 import PrivateHome.UI.commandUpdateDevice
 import org.h2.jdbc.JdbcSQLNonTransientConnectionException
 import org.json4s.JsonDSL._
-import org.json4s.jackson.Serialization.write
-import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.native.Serialization.write
+import org.json4s.native.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
 import org.slf4j.LoggerFactory
 import scalikejdbc._
@@ -70,7 +70,7 @@ private[PrivateHome] object data {
 
 
   Class.forName("org.h2.Driver")
-  val conn = ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
+  val conn: Unit = ConnectionPool.singleton("jdbc:h2:" + settings.database.path, settings.database.userName, settings.database.passwordString)
 
   implicit val session: AutoSession.type = AutoSession
   var mhzId: mutable.Map[String, String] = mutable.Map()
@@ -114,10 +114,10 @@ private[PrivateHome] object data {
                     CREATE TABLE IF NOT EXISTS `Devices` (
                     `id` varchar(5) NOT NULL,
                     `name` varchar(64) NOT NULL,
-                    `switchtype` int NOT NULL,
+                    `switchtype` varchar(16) NOT NULL,
                     `state` decimal(5,4) NOT NULL,
                     `keepstate` boolean NOT NULL,
-                    `controltype` int NOT NULL,
+                    `controltype` varchar(16) NOT NULL,
                     PRIMARY KEY (`id`))
          """.execute().apply()
 
@@ -267,7 +267,7 @@ private[PrivateHome] object data {
   def addDevice(newDevice: Switch): Unit = {
     val wrongclass = new IllegalArgumentException("""Can not add Switch ID:%s because switch of unknown type %s has no save definition""".format(newDevice.id, newDevice.getClass))
     withSQL {
-      insertInto(device).values(newDevice.id, newDevice.name, newDevice.switchtype.id, if (newDevice.keepStatus) newDevice.status else 0, newDevice.keepStatus, newDevice.controlType.id)
+      insertInto(device).values(newDevice.id, newDevice.name, newDevice.switchtype.entryName, if (newDevice.keepStatus) newDevice.status else 0, newDevice.keepStatus, newDevice.controlType.entryName)
     }.update().apply()
     newDevice match {
       case device: mhzSwitch => withSQL {
@@ -303,8 +303,8 @@ private[PrivateHome] object data {
         device.column.id -> pDevice.newId,
         device.column.name -> pDevice.name,
         device.column.keepstate -> pDevice.keepState,
-        device.column.switchTypeInt -> pDevice.switchType.id,
-        device.column.controlTypeInt -> pDevice.controlType.id
+        device.column.switchtype -> pDevice.switchType.entryName,
+        device.column.controltype -> pDevice.controlType.entryName
       ).where.eq(device.column.id, pDevice.newId)
     }.update().apply()
     if (oldid != pDevice.newId) {
@@ -436,16 +436,12 @@ private[PrivateHome] object data {
    *
    * @param id          ID of the Device in the Format [0-9a-Z] five character long
    * @param name        The name of the Device any String lenght in the Table 64 character
-   * @param switchTypeInt  An Integer identifying the type in the switchTypeEnum
+   * @param switchtype  An Integer identifying the type in the switchTypeEnum
    * @param state       an foatingpoint representation of the State when keepState is true 4 decimalpoints long
    * @param keepstate   Boolean that indicates if the State should be restored at turn on
-   * @param controlTypeInt either slider or button
+   * @param controltype either slider or button
    */
-  case class device(id: String, name: String, private val switchTypeInt: Int, state: Float, keepstate: Boolean, private val controlTypeInt: Int) {
-
-    val switchtype: switchType = switchType.apply(switchTypeInt)
-    val controltype: controlType = controlType.apply(controlTypeInt)
-  }
+  case class device(id: String, name: String, switchtype: switchType, state: Float, keepstate: Boolean, controltype: controlType)
 
   /**
    * Message class for Mhz Table only needed when Switchtype is MQTT
@@ -477,10 +473,10 @@ private[PrivateHome] object data {
     def apply(rs: WrappedResultSet) = new device(
       rs.string("id"),
       rs.string("name"),
-      rs.int("switchtype"),
+      switchType.withName(rs.string("switchtype")),
       rs.float("state"),
       rs.boolean("keepstate"),
-      rs.int("controltype"))
+      controlType.withName(rs.string("controltype")))
   }
 
   /**

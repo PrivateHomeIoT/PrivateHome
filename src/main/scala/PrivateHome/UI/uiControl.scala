@@ -25,8 +25,8 @@ import PrivateHome.data
 import PrivateHome.data.{chars, devices}
 import org.json4s.JsonAST.{JField, JObject, JValue}
 import org.json4s.JsonDSL._
-import org.json4s.jackson.Serialization.write
-import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.native.Serialization.write
+import org.json4s.native.{JsonMethods, Serialization}
 import org.json4s.{Formats, NoTypeHints}
 import org.slf4j.LoggerFactory
 
@@ -213,7 +213,7 @@ object uiControl {
             id = new BigInteger(5 * 5, random).toString(32) //  This generates a random String with length 5
             try {
               data.idTest(id, create = true)
-              logger.debug("Recomended id: \"{}\"", id)
+              logger.debug("Recommended id: \"{}\"", id)
               run = false
             }
             catch {

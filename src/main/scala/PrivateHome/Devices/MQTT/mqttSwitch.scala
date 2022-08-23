@@ -18,8 +18,7 @@
 
 package PrivateHome.Devices.MQTT
 
-import PrivateHome.Devices.Switch
-import PrivateHome.Devices.controlType.controlType
+import PrivateHome.Devices.{Switch, controlType, switchType}
 import PrivateHome.Devices.switchType.MQTT
 import PrivateHome.data
 import org.slf4j.{LoggerFactory, MarkerFactory}
@@ -111,7 +110,7 @@ class mqttSwitch(_id: String, _keepStatus: Boolean, _name: String, setupControlT
     </keepStatus>
   </switch>
 
-  def switchtype = MQTT
+  def switchtype: switchType = MQTT
 }
 
 object mqttSwitch {

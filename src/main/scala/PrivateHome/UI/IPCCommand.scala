@@ -18,7 +18,7 @@
 
 package PrivateHome.UI
 
-import PrivateHome.Devices.controlType.controlType
+import PrivateHome.Devices.{controlType, switchType}
 import PrivateHome.Devices.switchType._
 
 import java.util.Base64

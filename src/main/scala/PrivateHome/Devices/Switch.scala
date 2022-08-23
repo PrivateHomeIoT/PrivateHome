@@ -20,12 +20,13 @@ package PrivateHome.Devices
 
 import PrivateHome.Devices.MHz.mhzSwitch
 import PrivateHome.Devices.MQTT.mqttSwitch
-import PrivateHome.Devices.controlType.{BUTTON, controlType}
+import PrivateHome.Devices.controlType.BUTTON
 import PrivateHome.Devices.switchType.{MHZ, MQTT}
 import PrivateHome.UI.Websocket.websocket
 import PrivateHome.UI.{commandAddDevice, commandUpdateDevice}
 import PrivateHome.data
 import PrivateHome.data.idTest
+import enumeratum._
 import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
 import org.json4s.{CustomSerializer, JsonAST}
@@ -48,13 +49,13 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
 
   def off(): Unit
 
-  def switchtype: switchType.switchType
+  def switchtype: switchType
 
   @deprecated("Will be removed with editXML", "0.3.1")
   def toXml: Node
 
   def serializer: JsonAST.JObject = {
-    ("id" -> id) ~ ("keepState" -> keepStatus) ~ ("name" -> name) ~ ("switchType" -> switchtype.toString) ~ ("controlType" -> controlType.toString) ~ ("status" -> status)
+    ("id" -> id) ~ ("keepState" -> keepStatus) ~ ("name" -> name) ~ ("switchType" -> switchtype.toString) ~ ("controltype" -> controlType.toString) ~ ("status" -> status)
   }
 
   def id: String = setupID
@@ -120,12 +121,22 @@ class switchSerializer extends CustomSerializer[Switch](ser = format => ( {
   case switch: mhzSwitch => switch.serializer ~ ("systemCode" -> switch.systemCode) ~ ("unitCode" -> switch.unitCode)
 }))
 
-object switchType extends Enumeration {
-  type switchType = Value
-  val MHZ, MQTT = Value
+sealed abstract class switchType extends EnumEntry
+
+object switchType extends Enum[switchType] {
+  val values: IndexedSeq[switchType] = findValues
+
+  case object MHZ extends switchType
+
+  case object MQTT extends switchType
 }
 
-object controlType extends Enumeration {
-  type controlType = Value
-  val BUTTON, SLIDER = Value
+sealed abstract class controlType extends EnumEntry
+
+object controlType extends Enum[controlType] {
+  val values: IndexedSeq[controlType] = findValues
+
+  case object BUTTON extends controlType
+
+  case object SLIDER extends controlType
 }

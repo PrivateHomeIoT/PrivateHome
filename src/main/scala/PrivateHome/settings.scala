@@ -23,7 +23,7 @@ import PrivateHome.UI.uiControl.formats
 import PrivateHome.privatehome.portable
 import org.json4s.JsonAST
 import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods._
+import org.json4s.native.JsonMethods._
 import org.slf4j.LoggerFactory
 
 import java.io.{File, FileNotFoundException, PrintWriter}

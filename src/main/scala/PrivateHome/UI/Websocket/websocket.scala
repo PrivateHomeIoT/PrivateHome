@@ -18,22 +18,22 @@
 
 package PrivateHome.UI.Websocket
 
-import PrivateHome.Devices.switchSerializer
+import PrivateHome.Devices.{controlType, switchSerializer, switchType}
 import PrivateHome.UI._
 import PrivateHome.data
 import akka.NotUsed
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source, SourceQueueWithComplete}
-import com.fasterxml.jackson.core.JsonParseException
 import de.mkammerer.argon2.Argon2Factory
 import de.mkammerer.argon2.Argon2Factory.Argon2Types
+import enumeratum.Json4s.serializer
 import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization.write
-import org.json4s.jackson.{JsonMethods, Serialization}
+import org.json4s.native.JsonMethods
+import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization.write
 import org.slf4j.LoggerFactory
 
 import java.math.BigInteger
@@ -43,7 +43,7 @@ import java.util.Calendar
 object websocket {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
+  implicit val formats: Formats = DefaultFormats + new switchSerializer + serializer(controlType) +serializer(switchType)
 
   private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
   private var sessionMap: Map[String, session] = Map()
@@ -73,19 +73,19 @@ object websocket {
               case "getDevices" =>
                 JObject(JField("devices", uiControl.getDevices.map(switch => JsonMethods.parse(write(switch._2)))))
               case "addDevice" => uiControl.addDevice(args.extract[commandAddDevice])
-              case "getDevice" => uiControl.getDevice(args.extract[commandGetDevice].id)
-              case "getRandomId" => JObject(JField("id",uiControl.randomNewId))
+              case "getDevice" => JsonMethods.parse(write(uiControl.getDevice(args.extract[commandGetDevice].id)))
+              case "getRandomId" => JObject(JField("id", uiControl.randomNewId))
               case "updateDevice" => uiControl.updateDevice(args.extract[commandUpdateDevice])
               case "getController" => JArray(uiControl.getController.map(tupel => ("masterId" -> tupel._1) ~ ("name" -> tupel._2)).toList)
               case e => sendMsg(websocketId, ("error" -> "Unknown Command") ~ ("command" -> e) ~ ("msg" -> msgText))
             }
             if (answer == ()) answer = true
             answer match {
-              case jObject: JObject => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jObject))
-              case exception: Exception => sendMsg(websocketId,("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
+              case jValue: JValue => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> jValue))
+              case exception: Exception => sendMsg(websocketId, ("error" -> exception.toString) ~ ("exception" -> exception.getStackTrace.mkString("\n")))
               case false => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Fail"))
               case true => sendMsg(websocketId, ("Command" -> commandType) ~ ("answer" -> "Success")) //This ensures that this flow is completed and the source is cleaned so that new Messages can be handled
-              case c:Any => logger.warn("Unknown answer type from uiControl Class:{} element: {}",c.getClass,c)
+              case c: Any => logger.warn("Unknown answer type from uiControl Class:{} element: {} for Command: {}", c.getClass, c, commandType)
             }
 
 
@@ -120,7 +120,7 @@ object websocket {
 
       }
       catch {
-        case exception: JsonParseException => logger.warn("Can not parse the command send over Websocket", exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
+        case exception: MappingException => logger.warn("Can not parse the command send over Websocket", exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
         case exception: Throwable => logger.error("UnknownError",exception)
           sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
@@ -150,7 +150,7 @@ object websocket {
    *
    * @param msg The message that should be send to all connections as a JSON object
    */
-  def broadcastMsg(msg: json4s.JObject) {
+  def broadcastMsg(msg: json4s.JObject): Unit = {
     for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
   }
 
