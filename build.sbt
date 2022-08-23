@@ -49,6 +49,7 @@ Debian / maintainerScripts := maintainerScriptsAppendFromFile((Debian / maintain
 )
 
 lazy val akkaVersion = "2.6.17"
+lazy val akkaHttpVersion = "10.2.9"
 
 //pi4j java wrapper for WiringPI (deprecated by author may be continued be other)
 libraryDependencies ++= Seq("com.pi4j" % "pi4j-core" % "1.2", "com.pi4j" % "pi4j-parent" % "1.2")
@@ -64,9 +65,13 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-  "com.typesafe.akka" %% "akka-http" % "10.2.0",
+  "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-  "org.scalatest" %% "scalatest" % "3.2.2" % Test
+  "org.scalatest" %% "scalatest" % "3.2.2" % Test,
+  "com.typesafe.akka" %% "akka-http" % "10.2.9" % Test,
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
+  "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
 )
 
 //XML library for scala
