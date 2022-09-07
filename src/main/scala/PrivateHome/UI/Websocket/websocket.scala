@@ -45,7 +45,7 @@ object websocket {
 
   implicit val formats: Formats = DefaultFormats + new switchSerializer + serializer(controlType) +serializer(switchType)
 
-  private var ConnectionMap: Map[String, TextMessage => Unit] = Map()
+  private var ConnectionMap: Map[Int, TextMessage => Unit] = Map()
   private var sessionMap: Map[String, session] = Map()
 
   /**
@@ -54,7 +54,7 @@ object websocket {
    * @param websocketId should be a unique ID for this websocket connection
    * @return A Flow for the akka system based on this logic
    */
-  def listen(websocketId: String): Flow[Message, Message, NotUsed] = {
+  def listen(websocketId: Int): Flow[Message, Message, NotUsed] = {
     var currentSession: session = session("", "", startInvalid = true)
 
     val inbound: Sink[Message, Any] = Sink.foreach(msg => {
@@ -141,7 +141,7 @@ object websocket {
    * @param id  the ID of the websocket connection the one passed to listen
    * @param msg the message that should be send to the Client as a JSON object
    */
-  def sendMsg(id: String, msg: json4s.JObject): Unit = {
+  def sendMsg(id: Int, msg: json4s.JObject): Unit = {
     ConnectionMap(id).apply(TextMessage.Strict(compact(render(msg))))
   }
 

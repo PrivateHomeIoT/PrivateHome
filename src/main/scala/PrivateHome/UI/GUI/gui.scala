@@ -20,6 +20,7 @@ import scala.concurrent.duration._
 
 object gui {
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private var sequence = 0
   implicit val actorSystem: ActorSystem = ActorSystem("system")
   implicit val exceptionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
@@ -55,8 +56,8 @@ object gui {
       }
     },
     path(settings.websocket.path) {
-      extractRequest { request =>
-        handleWebSocketMessages(websocket.listen(request.getHeader("Sec-WebSocket-Key").get().value()))
+      extractRequest { request =>sequence += 1
+        handleWebSocketMessages(websocket.listen(sequence))
       }
     }
     )
