@@ -47,6 +47,7 @@ object websocket {
 
   private var ConnectionMap: Map[Int, TextMessage => Unit] = Map()
   private var sessionMap: Map[String, session] = Map()
+  private var sessionConnections: Map[Int, session] = Map()
 
   /**
    * Main message and connection handler
@@ -131,6 +132,7 @@ object websocket {
     Flow.fromSinkAndSourceMat(inbound, outbound)((_, outboundMat) => {
       //outboundMat.offer is an access to the outbound Source of the Flow (returning to the Client)
       ConnectionMap += websocketId -> outboundMat.offer
+      sessionConnections += websocketId -> currentSession
       NotUsed
     })
   }
@@ -152,6 +154,15 @@ object websocket {
    */
   def broadcastMsg(msg: json4s.JObject): Unit = {
     for (connection <- ConnectionMap.values) connection(TextMessage.Strict(compact(render(msg))))
+  }
+
+  /**
+   * Sends a message to all authenticated connections
+   * @param msg The message that should be send
+   */
+  def broadcastSecure(msg: json4s.JObject): Unit = {
+    for ((websocketId,connection) <- ConnectionMap)
+      if (sessionConnections(websocketId).valid) connection(TextMessage.Strict(compact(render(msg))))
   }
 
   /**

@@ -281,7 +281,7 @@ private[PrivateHome] object data {
     }
     devices = devices.concat(Map((newDevice.id, newDevice)))
     implicit val formats: Formats = Serialization.formats(NoTypeHints) + new switchSerializer
-    websocket.broadcastMsg(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(newDevice))))
+    websocket.broadcastSecure(("Command" -> "newDevice") ~ ("answer" -> JsonMethods.parse(write(newDevice))))
   }
 
 

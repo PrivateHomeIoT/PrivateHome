@@ -83,7 +83,7 @@ abstract class Switch(private var setupID: String, var keepStatus: Boolean, var 
   def status_=(state: Float): Unit = {
     _status = state
     if (keepStatus) data.saveStatus(id, state)
-    websocket.broadcastMsg(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType.toString))))
+    websocket.broadcastSecure(("Command" -> "statusChange") ~ ("answer" -> (("id" -> id) ~ ("status" -> state) ~ ("type" -> _controlType.toString))))
   }
 
 }
