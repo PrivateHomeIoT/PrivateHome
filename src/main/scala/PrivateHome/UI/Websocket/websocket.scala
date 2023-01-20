@@ -43,7 +43,7 @@ import java.util.Calendar
 object websocket {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  implicit val formats: Formats = DefaultFormats + new switchSerializer + serializer(controlType) +serializer(switchType)
+  implicit val formats: Formats = DefaultFormats + new switchSerializer + serializer(controlType) + serializer(switchType)
 
   private var ConnectionMap: Map[Int, TextMessage => Unit] = Map()
   private var sessionMap: Map[String, session] = Map()
@@ -91,29 +91,33 @@ object websocket {
 
 
           } else {
-            val authType = (json \ "auth").extract[String]
-            authType match {
-              case "ID" =>
-                val sessionId = (json \ "sessionID").extract[String]
-                currentSession = sessionMap.getOrElse(sessionId, currentSession) //replaces currentSession only wen a sessionObject exists
-              case "pass" =>
-                val username = (json \ "username").extract[String]
-                val pass = (json \ "pass").extract[String].toCharArray
-                val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
-                val hash = data.getUserHash(username)
-                if (argon2.verify(hash, pass)) {
-                  val random = new SecureRandom()
-                  val sessionID = new BigInteger(32 * 5, random).toString(32) //  This generates a random String with length 32
-                  currentSession = session(sessionID, username)
-                  sessionMap += sessionID -> currentSession
-                }
-                argon2.wipeArray(pass)
+            val auth = json \ "auth"
+            if (auth == JNothing) sendMsg(websocketId, ("auth" -> "unknown") ~ ("authenticated" -> false))
+            else {
+              val authType = auth.extract[String]
+              authType match {
+                case "ID" =>
+                  val sessionId = (json \ "sessionID").extract[String]
+                  currentSession = sessionMap.getOrElse(sessionId, currentSession) //replaces currentSession only wen a sessionObject exists
+                case "pass" =>
+                  val username = (json \ "username").extract[String]
+                  val pass = (json \ "pass").extract[String].toCharArray
+                  val argon2 = Argon2Factory.create(Argon2Types.ARGON2id)
+                  val hash = data.getUserHash(username)
+                  if (argon2.verify(hash, pass)) {
+                    val random = new SecureRandom()
+                    val sessionID = new BigInteger(32 * 5, random).toString(32) //  This generates a random String with length 32
+                    currentSession = session(sessionID, username)
+                    sessionMap += sessionID -> currentSession
+                  }
+                  argon2.wipeArray(pass)
+
+              }
+
+              if (currentSession.valid) sendMsg(websocketId, ("auth" -> authType) ~ ("sessionID" -> currentSession.sessionID) ~ ("authenticated" -> true))
+              else sendMsg(websocketId, ("auth" -> authType) ~ ("authenticated" -> false))
 
             }
-
-            if (currentSession.valid) sendMsg(websocketId, ("auth" -> authType) ~ ("sessionID" -> currentSession.sessionID) ~ ("authenticated" -> true))
-            else sendMsg(websocketId, ("auth" -> authType) ~ ("authenticated" -> false))
-
           }
 
         }
@@ -122,7 +126,7 @@ object websocket {
       }
       catch {
         case exception: MappingException => logger.warn("Can not parse the command send over Websocket", exception); sendMsg(websocketId, ("error" -> "JsonParseException") ~ ("exception" -> exception.toString))
-        case exception: Throwable => logger.error("UnknownError",exception)
+        case exception: Throwable => logger.error("UnknownError", exception)
           sendMsg(websocketId, ("error" -> exception.getCause.toString) ~ ("exception" -> exception.toString))
       }
     })
